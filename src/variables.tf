@@ -1,0 +1,52 @@
+variable "CLOUD_FOUNDRY_USERNAME" {}
+variable "CLOUD_FOUNDRY_PASSWORD" {}
+variable "CLOUD_FOUNDRY_ORG" {}
+variable "CLOUD_FOUNDRY_SPACE" {}
+
+variable "CLOUD_FOUNDRY_INTERNAL_DOMAIN" {
+  type    = string
+  default = "apps.internal"
+}
+
+variable "CLOUD_FOUNDRY_SPACE_USERS" {
+  type = list
+
+  default = [
+    "8b3ca926-d4cf-4d55-8dbd-4f8ede964e6b"
+  ]
+}
+
+variable "CLOUD_FOUNDRY_EXTERNAL_DOMAIN" {
+  type    = string
+  default = "us-east.philips-healthsuite.com"
+}
+
+variable "memory" {
+  default = "512"
+}
+
+variable "disk_quota" {
+  default = "1024"
+}
+
+variable "postgres_service_plan" {}
+variable "rabbitmq_service_plan" {}
+variable "redis_service_plan" {}
+
+
+variable "DOCKER_REGISTRY_NAMESPACE" {
+  type    = string
+  default = "docker.na1.hsdp.io/client-ngcap_dev-deploy"
+}
+variable "DOCKER_REGISTRY_USERNAME" {}
+variable "DOCKER_REGISTRY_PASSWORD" {}
+
+variable "ngcap_cs_tag" {}
+variable "ngcap_js_tag" {}
+
+variable "ngcap_fhir_version" { 
+	type = string
+	default = "STU3"
+}
+
+
