@@ -12,4 +12,8 @@ node('docker') {
             sh 'node --version'
         }
     }
+    
+    stage('artifacts') {
+        copyArtifacts filter: 'version.txt', fingerprintArtifacts: false, projectName: 'Philips-Platform/microservice.template/master'
+    }
 }
