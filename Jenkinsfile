@@ -28,7 +28,7 @@ node('docker') {
             configFileProvider([configFile(fileId: 'terraform-input', variable: 'TERRAFORM_SETTINGS')]) {
                 dir("${env.WORKSPACE}/src"){
                     sh 'pwd'
-                    sh 'terraform init --plugin-dir ../plugins/windows_amd64 -var-file="./variables/default.tfvars"'
+                    sh 'terraform init -var-file="./variables/default.tfvars"'
                     // terraform validation
                     sh 'terraform validate'
                     // apply the terraform configuration
