@@ -1,6 +1,8 @@
 node('docker') {
     /* Requires the Docker Pipeline plugin to be installed */
-
+    stage('checkout'){
+        checkout scm
+    }
     stage('Deploy sample app') {
         docker.image('hashicorp/terraform:latest').inside('--entrypoint=""') {
             sh 'cd ./src/'
