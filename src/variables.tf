@@ -44,9 +44,13 @@ variable "DOCKER_REGISTRY_PASSWORD" {}
 variable "ngcap_cs_tag" {}
 variable "ngcap_js_tag" {}
 
-variable "ngcap_fhir_version" { 
-	type = string
-	default = "STU3"
+variable "ngcap_fhir_version" {
+  type    = string
+  default = "STU3"
 }
 
+variable "global_stopped" {
+  type    = bool
+  default = true
+}
 
