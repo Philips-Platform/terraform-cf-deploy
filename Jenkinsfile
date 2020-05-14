@@ -1,36 +1,36 @@
-library identifier: 'jenkins.shared@master', retriever: modernSCM(
-  [$class: 'GitHubSCMSource',
-    configuredByUrl: true,
-    credentialsId: "3f615097-f7bf-4cc9-bc7c-7c79e11a97e1",
-    repoOwner: "Philips-Platform",
-    repository: "jenkins.shared",
-    repositoryUrl: "https://github.com/Philips-Platform/jenkins.shared.git"])
-
-
 node('docker') {
     /* Requires the Docker Pipeline plugin to be installed */
 
     stage('Deploy sample app') {
-        withEnv(["DOCKER_REGISTRY_USERNAME=${DOCKER_REGISTRY_USERNAME}", 
-        "DOCKER_REGISTRY_PASSWORD=${DOCKER_REGISTRY_PASSWORD}", 
-        "CLOUD_FOUNDRY_USERNAME=${CLOUD_FOUNDRY_USERNAME}",
-        "CLOUD_FOUNDRY_PASSWORD=${CLOUD_FOUNDRY_PASSWORD}",
-        "CLOUD_FOUNDRY_ORG=${CLOUD_FOUNDRY_ORG}",
-        "CLOUD_FOUNDRY_SPACE=${CLOUD_FOUNDRY_SPACE}",
-        "DOCKER_REGISTRY_NAMESPACE=${DOCKER_REGISTRY_NAMESPACE}",
-        "TARGET=module.gradle-sample-app"
-        ])
-        def data = {
-            "DOCKER_REGISTRY_USERNAME": "$DOCKER_REGISTRY_USERNAME",
-            "DOCKER_REGISTRY_PASSWORD": "$DOCKER_REGISTRY_PASSWORD",
-            "CLOUD_FOUNDRY_USERNAME": "$CLOUD_FOUNDRY_USERNAME",
-            "CLOUD_FOUNDRY_PASSWORD": "$CLOUD_FOUNDRY_PASSWORD",
-            "CLOUD_FOUNDRY_ORG": "$CLOUD_FOUNDRY_ORG",
-            "CLOUD_FOUNDRY_SPACE": "$CLOUD_FOUNDRY_SPACE",
-            "DOCKER_REGISTRY_NAMESPACE": "$DOCKER_REGISTRY_NAMESPACE"
+        docker.image('hashicorp/terraform:latest').inside('--entrypoint=""') {
+            sh 'cd ./src/'
+            // withEnv(["DOCKER_REGISTRY_USERNAME=${DOCKER_REGISTRY_USERNAME}", 
+            // "DOCKER_REGISTRY_PASSWORD=${DOCKER_REGISTRY_PASSWORD}", 
+            // "CLOUD_FOUNDRY_USERNAME=${CLOUD_FOUNDRY_USERNAME}",
+            // "CLOUD_FOUNDRY_PASSWORD=${CLOUD_FOUNDRY_PASSWORD}",
+            // "CLOUD_FOUNDRY_ORG=${CLOUD_FOUNDRY_ORG}",
+            // "CLOUD_FOUNDRY_SPACE=${CLOUD_FOUNDRY_SPACE}",
+            // "DOCKER_REGISTRY_NAMESPACE=${DOCKER_REGISTRY_NAMESPACE}"
+            // ]){
+            //     def data = {
+            //         "DOCKER_REGISTRY_USERNAME": "$DOCKER_REGISTRY_USERNAME",
+            //         "DOCKER_REGISTRY_PASSWORD": "$DOCKER_REGISTRY_PASSWORD",
+            //         "CLOUD_FOUNDRY_USERNAME": "$CLOUD_FOUNDRY_USERNAME",
+            //         "CLOUD_FOUNDRY_PASSWORD": "$CLOUD_FOUNDRY_PASSWORD",
+            //         "CLOUD_FOUNDRY_ORG": "$CLOUD_FOUNDRY_ORG",
+            //         "CLOUD_FOUNDRY_SPACE": "$CLOUD_FOUNDRY_SPACE",
+            //         "DOCKER_REGISTRY_NAMESPACE": "$DOCKER_REGISTRY_NAMESPACE"
+            //     }
+            // }
+            configFileProvider([configFile(fileId: 'terraform-input', variable: 'TERRAFORM_SETTINGS')]) {
+                writeFile file: ".tfvars.json", text: data
+                sh 'terraform init --plugin-dir ../plugins/windows_amd64 -var-file=variables/default.tfvars'
+                // terraform validation
+                sh 'terraform validate'
+                // apply the terraform configuration
+                sh 'terraform apply -var-file="TERRAFORM_SETTINGS" -var-file=variables/default.tfvars -auto-approve -target=module.gradle-sample-app'        
+            }
         }
-        writeFile file: ".tfvars.json", text: data
-        terraformExec()
     }
 
     stage('Front-end') {
