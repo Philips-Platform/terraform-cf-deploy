@@ -28,7 +28,7 @@ node('docker') {
                 // terraform validation
                 sh 'terraform validate'
                 // apply the terraform configuration
-                sh 'terraform apply -var-file="TERRAFORM_SETTINGS" -var-file=variables/default.tfvars -auto-approve -target=module.gradle-sample-app'        
+                sh 'terraform apply -var-file="$TERRAFORM_SETTINGS" -var-file=variables/default.tfvars -auto-approve -target=module.gradle-sample-app'        
             }
         }
     }
