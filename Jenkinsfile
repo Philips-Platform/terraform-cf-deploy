@@ -23,8 +23,10 @@ node('docker') {
             //         "CLOUD_FOUNDRY_SPACE": "$CLOUD_FOUNDRY_SPACE",
             //         "DOCKER_REGISTRY_NAMESPACE": "$DOCKER_REGISTRY_NAMESPACE"
             //     }
+            //     writeFile file: ".tfvars.json", text: data
             // }
             configFileProvider([configFile(fileId: 'terraform-input', variable: 'TERRAFORM_SETTINGS')]) {
+                sh 'pwd'
                 sh 'terraform init --plugin-dir ../plugins/windows_amd64 -var-file=variables/default.tfvars'
                 // terraform validation
                 sh 'terraform validate'
