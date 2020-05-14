@@ -26,6 +26,7 @@ node('docker') {
             //     writeFile file: ".tfvars.json", text: data
             // }
             configFileProvider([configFile(fileId: 'terraform-input', variable: 'TERRAFORM_SETTINGS')]) {
+                sh 'cd ./src'
                 sh 'pwd'
                 sh 'terraform init --plugin-dir ../plugins/windows_amd64 -var-file=variables/default.tfvars'
                 // terraform validation
