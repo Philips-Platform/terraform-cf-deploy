@@ -26,13 +26,14 @@ node('docker') {
             //     writeFile file: ".tfvars.json", text: data
             // }
             configFileProvider([configFile(fileId: 'terraform-input', variable: 'TERRAFORM_SETTINGS')]) {
-                sh 'cd ./src'
-                sh 'pwd'
-                sh 'terraform init --plugin-dir ../plugins/windows_amd64 -var-file=variables/default.tfvars'
-                // terraform validation
-                sh 'terraform validate'
-                // apply the terraform configuration
-                sh 'terraform apply -var-file="$TERRAFORM_SETTINGS" -var-file=variables/default.tfvars -auto-approve -target=module.gradle-sample-app'        
+                dir("${env.WORKSPACE}/src"){
+                    sh 'pwd'
+                    sh 'terraform init --plugin-dir ../plugins/windows_amd64 -var-file="./variables/default.tfvars"'
+                    // terraform validation
+                    sh 'terraform validate'
+                    // apply the terraform configuration
+                    sh 'terraform apply -var-file="$TERRAFORM_SETTINGS" -var-file="./variables/default.tfvars" -auto-approve -target=module.gradle-sample-app'        
+                }
             }
         }
     }
