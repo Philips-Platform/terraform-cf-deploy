@@ -7,7 +7,7 @@ node('docker') {
         docker.image('ubuntu:18.04').inside("--user=root") {
             sh 'apt-get update'
             sh 'apt-get -y upgrade'
-            sh 'apt-get install unzip wget'
+            sh 'apt-get install -y unzip wget'
             sh 'wget https://releases.hashicorp.com/terraform/0.12.25/terraform_0.12.25_linux_amd64.zip -O terraform.zip'
             sh 'unzip terraform.zip'
             sh 'mv terraform /usr/local/bin'
