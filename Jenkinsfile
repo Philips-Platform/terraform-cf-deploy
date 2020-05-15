@@ -4,7 +4,7 @@ node('docker') {
         checkout scm
     }
     stage('Deploy sample app') {
-        docker.image('ubuntu:18.04').inside {
+        docker.image('ubuntu:18.04').inside("--user=root") {
             sh 'apt-get update'
             sh 'apt-get -y upgrade'
             sh 'apt-get install unzip'
