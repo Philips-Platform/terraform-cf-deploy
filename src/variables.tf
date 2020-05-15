@@ -49,4 +49,9 @@ variable "ngcap_fhir_version" {
 	default = "STU3"
 }
 
+variable "stop_apps" {
+	type = bool
+	default = true
+}
+
 
