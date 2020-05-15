@@ -3,7 +3,7 @@ node('docker') {
     stage('checkout'){
         checkout scm
     }
-    stage('Deploy sample app') {
+    stage('CF deployment') {
         docker.image('hashicorp/terraform:latest').inside('--entrypoint=""') {
             // withEnv(["DOCKER_REGISTRY_USERNAME=${DOCKER_REGISTRY_USERNAME}", 
             // "DOCKER_REGISTRY_PASSWORD=${DOCKER_REGISTRY_PASSWORD}", 
@@ -29,13 +29,15 @@ node('docker') {
                     sh 'pwd'
                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                     sh 'chmod +x -R ../plugins/linux_amd64/*'
-                    
                     sh 'cp $TERRAFORM_SETTINGS terraform-input.json'
-                    sh 'terraform init -plugin-dir=../plugins/linux_amd64 -var-file=./variables/default.tfvars -get-plugins=true'
+                    sh 'terraform init -plugin-dir=../plugins/linux_amd64 
+                    -var-file=./variables/default.tfvars -get-plugins=true'
                     // terraform validation
                     sh 'terraform validate'
                     // apply the terraform configuration
-                    sh 'terraform apply -var-file="./variables/default.tfvars" -var-file="terraform-input.json"  -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
+                    sh 'terraform apply -var-file="./variables/default.tfvars" -var-file="terraform-input.json" 
+                    -target=module.gradle-sample-app 
+                    -var="global_stopped=false" -auto-approve'
                 }
             }
         }
