@@ -1,6 +1,5 @@
 data "cloudfoundry_domain" "ngcap_domain" {
-  for_each = var.app_domain
-  name     = each.value
+  name = var.app_domain
 }
 
 
