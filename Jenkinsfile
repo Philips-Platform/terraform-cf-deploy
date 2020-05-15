@@ -4,7 +4,6 @@ node('docker') {
         checkout scm
     }
     stage('Deploy sample app') {
-        try{
         docker.image('hashicorp/terraform:latest').inside('--entrypoint=""') {
             // withEnv(["DOCKER_REGISTRY_USERNAME=${DOCKER_REGISTRY_USERNAME}", 
             // "DOCKER_REGISTRY_PASSWORD=${DOCKER_REGISTRY_PASSWORD}", 
@@ -37,10 +36,6 @@ node('docker') {
                     sh 'terraform apply -var-file="./variables/default.tfvars" -var-file="terraform-input.json"  -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
                 }
             }
-        }
-        }
-        finally{
-            sh 'sudo chown $USER -R ./.terraform'
         }
     }
 
