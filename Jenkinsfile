@@ -4,6 +4,7 @@ node('docker') {
         checkout scm
     }
     stage('Deploy sample app') {
+        try{
         docker.image('ubuntu:18.04').inside("--user=root") {
             sh 'apt-get update'
             sh 'apt-get -y upgrade'
@@ -42,6 +43,10 @@ node('docker') {
                     sh 'terraform apply -var-file="$TERRAFORM_SETTINGS" -var-file="./variables/default.tfvars" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
                 }
             }
+        }
+        }
+        finally{
+            sh 'sudo chown $USER -R ./.terraform'
         }
     }
 
