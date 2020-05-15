@@ -14,7 +14,7 @@ node('docker') {
                         sh 'terraform validate'
                         // apply the terraform configuration
                         withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {    
-                            sh 'terraform apply -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
+                            sh 'terraform apply -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve -var="build_tag=$build_tag"'
                         }
                     }
                 }
