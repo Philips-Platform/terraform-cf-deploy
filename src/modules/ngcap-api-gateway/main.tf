@@ -25,20 +25,20 @@ http {
 
 
   server {
-      set $system_config "http://sys-config-${var.app_hostbase}.${var.app_external_domain}";
-      set $api_admin "http://sys-config-${var.app_hostbase}.${var.app_external_domain}";
-      set $fhir "http://fhir-gw-${var.app_hostbase}.${var.app_external_domain}";
-      set $generic "http://generic-gw-${var.app_hostbase}.${var.app_external_domain}";
-      set $genericsupport "http://generic-support-gw-${var.app_hostbase}.${var.app_external_domain}";
-      set $calc_trace "http://calc-trace-${var.app_hostbase}.${var.app_external_domain}";
-      set $calc_config "http://calc-config-${var.app_hostbase}.${var.app_external_domain}";
-      set $dispatcher "http://dispatcher-${var.app_hostbase}.${var.app_external_domain}";
-      set $execution "http://execution-${var.app_hostbase}.${var.app_external_domain}";
-      set $outbound_config "http://outbound_config-${var.app_hostbase}.${var.app_external_domain}";
-      set $outbound "http://outbound-${var.app_hostbase}.${var.app_external_domain}";
-      set $scheduler "http://scheduler-${var.app_hostbase}.${var.app_external_domain}";
-      set $auth "http://authenticationsvc-${var.app_hostbase}.${var.app_external_domain}";
-	    set $tenant_config "http://tenant-config-${var.app_hostbase}.${var.app_external_domain}";
+      set $system_config "http://sys-config-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $api_admin "http://sys-config-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $fhir "http://fhir-gw-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $generic "http://generic-gw-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $genericsupport "http://generic-support-gw-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $calc_trace "http://calc-trace-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $calc_config "http://calc-config-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $dispatcher "http://dispatcher-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $execution "http://execution-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $outbound_config "http://outbound-config-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $outbound "http://outbound-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $scheduler "http://scheduler-${var.app_hostbase}.${var.app_internal_domain}:5000";
+      set $auth "http://authenticationsvc-${var.app_hostbase}.${var.app_internal_domain}:5000";
+	    set $tenant_config "http://tenant-config-${var.app_hostbase}.${var.app_internal_domain}:5000";
 
       listen {{port}}; # This will be replaced by CF magic. Just leave it here.
       index index.html index.htm Default.htm;
@@ -172,6 +172,14 @@ EOF
 
 }
 
+data "archive_file" "fixture" {
+  type = "zip"
+  source_dir = "${path.module}/api-gateway-nginx"
+  output_path = "${path.module}/api-gateway-nginx.zip"
+  depends_on = [local_file.nginx_conf]
+}
+
+
 data "cloudfoundry_domain" "ngcap_internal_domain" {
 	name = var.app_internal_domain
 }
@@ -201,9 +209,8 @@ resource "cloudfoundry_app" "ngcap_api_instance" {
   space        = var.space_id
   memory       = var.app_memory
   disk_quota   = var.app_disk_quota
-
+  path = "${path.module}/api-gateway-nginx.zip"
   buildpack = "https://github.com/cloudfoundry/nginx-buildpack.git"
-  path = "${path.module}/api-gateway-nginx/"
 
 
   routes {
@@ -215,8 +222,8 @@ resource "cloudfoundry_app" "ngcap_api_instance" {
   }
   
   timeout = 180
-  stopped = true
+  stopped = var.app_stopped
 
-  depends_on = [ local_file.nginx_conf]
+  depends_on = [data.archive_file.fixture]
 
 }
