@@ -1,7 +1,15 @@
-variable "CLOUD_FOUNDRY_USERNAME" {}
-variable "CLOUD_FOUNDRY_PASSWORD" {}
-variable "CLOUD_FOUNDRY_ORG" {}
-variable "CLOUD_FOUNDRY_SPACE" {}
+variable "CLOUD_FOUNDRY_USERNAME" {
+  type = string
+}
+variable "CLOUD_FOUNDRY_PASSWORD" {
+  type = string
+}
+variable "CLOUD_FOUNDRY_ORG" {
+  type = string
+}
+variable "CLOUD_FOUNDRY_SPACE" {
+  type = string
+}
 
 variable "CLOUD_FOUNDRY_INTERNAL_DOMAIN" {
   type    = string
@@ -29,20 +37,34 @@ variable "disk_quota" {
   default = "1024"
 }
 
-variable "postgres_service_plan" {}
-variable "rabbitmq_service_plan" {}
-variable "redis_service_plan" {}
+variable "postgres_service_plan" {
+  type = string
+}
+variable "rabbitmq_service_plan" {
+  type = string
+}
+variable "redis_service_plan" {
+  type = string
+}
 
 
 variable "DOCKER_REGISTRY_NAMESPACE" {
   type    = string
   default = "docker.na1.hsdp.io/client-ngcap_dev-deploy"
 }
-variable "DOCKER_REGISTRY_USERNAME" {}
-variable "DOCKER_REGISTRY_PASSWORD" {}
+variable "DOCKER_REGISTRY_USERNAME" {
+  type = string
+}
+variable "DOCKER_REGISTRY_PASSWORD" {
+  type = string
+}
 
-variable "ngcap_cs_tag" {}
-variable "ngcap_js_tag" {}
+variable "ngcap_cs_tag" {
+  type = string
+}
+variable "ngcap_js_tag" {
+  type = string
+}
 
 variable "ngcap_fhir_version" {
   type    = string
