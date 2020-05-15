@@ -29,7 +29,7 @@ node('docker') {
                     sh 'pwd'
                     sh 'chmod +x -R ../plugins/linux_amd64/*'
                     sh 'cp $TERRAFORM_SETTINGS terraform-input.json'
-                    sh 'terraform init -plugin-dir=../plugins/linux_amd64 -var-file=./variables/default.tfvars'
+                    sh 'terraform init -plugin-dir=../plugins/linux_amd64 -var-file=./variables/default.tfvars -get-plugins=true'
                     // terraform validation
                     sh 'terraform validate'
                     // apply the terraform configuration
