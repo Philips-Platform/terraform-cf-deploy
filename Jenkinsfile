@@ -28,7 +28,7 @@ node('docker') {
             withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
                 dir("${env.WORKSPACE}/src"){
                     // copy terraform input token
-                    sh 'cp $TERRAFORMRC %APPDATA%/terraform.rc'
+                    sh 'cp $TERRAFORMRC $HOME/.terraformrc'
                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                     
                     //sh 'cp $TERRAFORM_SETTINGS terraform-input.json'
