@@ -1,1 +1,4 @@
 terraform.tfstate*
+plugin_path
+modules.json
+lock.json

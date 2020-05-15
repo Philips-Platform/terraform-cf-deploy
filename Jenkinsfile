@@ -27,23 +27,23 @@ node('docker') {
             //configFileProvider([configFile(fileId: 'terraform-input', variable: 'TERRAFORM_SETTINGS')]) {
             withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORM-RC')]) {
                 dir("${env.WORKSPACE}/src"){
+                    // copy terraform input token
                     sh 'cp $TERRAFORM-RC %APPDATA%/terraform.rc'
-                    //withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform_token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'TOKEN']]) {
                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                     
                     //sh 'cp $TERRAFORM_SETTINGS terraform-input.json'
-                    sh 'terraform init 
-                    -plugin-dir=../plugins/linux_amd64 
-                    -var-file=./variables/default.auto.tfvars'
+                    sh 'terraform init' \ 
+                    '-plugin-dir=../plugins/linux_amd64' \
+                    '-var-file=./variables/default.auto.tfvars'
                     // terraform validation
                     sh 'terraform validate'
                     // apply the terraform configuration
                     withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORM-INPUT')]) {    
-                        sh 'terraform apply 
-                        -var-file="./variables/default.auto.tfvars" 
-                        -var-file="$TERRAFORM-INPUT" 
-                        -target=module.gradle-sample-app 
-                        -var="global_stopped=false" -auto-approve'
+                        sh 'terraform apply' \ 
+                        '-var-file="./variables/default.auto.tfvars"' \
+                        '-var-file="$TERRAFORM-INPUT"' \
+                        '-target=module.gradle-sample-app' \
+                        '-var="global_stopped=false" -auto-approve'
                     }
                 }
             }
