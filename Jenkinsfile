@@ -4,7 +4,7 @@ node('docker') {
         checkout scm
     }
     stage('Deploy sample app') {
-        docker.image('hashicorp/terraform:1.12.25').inside('--entrypoint=""') {
+        docker.image('hashicorp/terraform:latest').inside('--entrypoint=""') {
             sh 'cd ./src/'
             // withEnv(["DOCKER_REGISTRY_USERNAME=${DOCKER_REGISTRY_USERNAME}", 
             // "DOCKER_REGISTRY_PASSWORD=${DOCKER_REGISTRY_PASSWORD}", 
