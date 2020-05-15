@@ -393,7 +393,7 @@ module "gradle-sample-app" {
   app_memory               = "${var.memory}"
   app_disk_quota           = "${var.disk_quota}"
   space_id                 = "${data.cloudfoundry_space.space.id}"
-  app_hostname             = "gradle-sample-svc-${local.org_name}-${local.space_name}"
+  app_hostname             = "gradle-sample-app-${local.org_name}-${local.space_name}"
   app_domain               = toset(["${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}"])
   app_services             = []
   app_environment          = {}
