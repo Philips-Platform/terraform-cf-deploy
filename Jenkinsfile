@@ -5,15 +5,7 @@ node('docker') {
     }
     stage('Deploy sample app') {
         try{
-        docker.image('ubuntu:18.04').inside("--user=root") {
-            sh 'apt-get update'
-            sh 'apt-get -y upgrade'
-            sh 'apt-get install -y unzip wget'
-            sh 'wget https://releases.hashicorp.com/terraform/0.12.25/terraform_0.12.25_linux_amd64.zip -O terraform.zip'
-            sh 'unzip terraform.zip'
-            sh 'mv terraform /usr/local/bin'
-            sh 'rm terraform.zip'
-            sh 'terraform -v'
+        docker.image('hashicorp/terraform:latest').inside('--entrypoint=""') {
             // withEnv(["DOCKER_REGISTRY_USERNAME=${DOCKER_REGISTRY_USERNAME}", 
             // "DOCKER_REGISTRY_PASSWORD=${DOCKER_REGISTRY_PASSWORD}", 
             // "CLOUD_FOUNDRY_USERNAME=${CLOUD_FOUNDRY_USERNAME}",
@@ -36,6 +28,7 @@ node('docker') {
             configFileProvider([configFile(fileId: 'terraform-input', variable: 'TERRAFORM_SETTINGS')]) {
                 dir("${env.WORKSPACE}/src"){
                     sh 'pwd'
+                    sh 'chmod +x -R ../plugins/linux_amd64/*'
                     sh 'terraform init -plugin-dir=../plugins/linux_amd64 -var-file=./variables/default.tfvars'
                     // terraform validation
                     sh 'terraform validate'
