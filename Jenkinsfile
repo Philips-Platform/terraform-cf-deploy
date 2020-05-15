@@ -29,11 +29,12 @@ node('docker') {
                 dir("${env.WORKSPACE}/src"){
                     sh 'pwd'
                     sh 'chmod +x -R ../plugins/linux_amd64/*'
+                    sh 'mv $TERRAFORM_SETTINGS terraform-input.json'
                     sh 'terraform init -plugin-dir=../plugins/linux_amd64 -var-file=./variables/default.tfvars'
                     // terraform validation
                     sh 'terraform validate'
                     // apply the terraform configuration
-                    sh 'terraform apply -var-file="$TERRAFORM_SETTINGS" -var-file="./variables/default.tfvars" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
+                    sh 'terraform apply -var-file="terraform-input.json" -var-file="./variables/default.tfvars" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
                 }
             }
         }
