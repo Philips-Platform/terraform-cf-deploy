@@ -4,8 +4,15 @@ node('docker') {
         checkout scm
     }
     stage('Deploy sample app') {
-        docker.image('hashicorp/terraform:0.12.24').inside('--entrypoint=""') {
-            sh 'cd ./src/'
+        docker.image('ubuntu:18.04').inside {
+            sh 'sudo apt-get update'
+            sh 'sudo apt-get -y upgrade'
+            sh 'sudo apt-get install unzip'
+            sh 'wget https://releases.hashicorp.com/terraform/0.12.25/terraform_0.12.25_linux_amd64.zip -O terraform.zip'
+            sh 'unzip terraform.zip'
+            sh 'sudo mv terraform /usr/local/bin'
+            sh 'rm terraform.zip'
+            sh 'terraform -v'
             // withEnv(["DOCKER_REGISTRY_USERNAME=${DOCKER_REGISTRY_USERNAME}", 
             // "DOCKER_REGISTRY_PASSWORD=${DOCKER_REGISTRY_PASSWORD}", 
             // "CLOUD_FOUNDRY_USERNAME=${CLOUD_FOUNDRY_USERNAME}",
