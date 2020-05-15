@@ -1,6 +1,6 @@
 
 module "postgres-service" {
-  source                = "./modules/services_With_keys"
+  source                = "./modules/services-with-keys"
   service_name          = "hsdp-rds"
   service_instance_name = "postgres"
   service_instance_key  = "postgreskey"
@@ -27,7 +27,7 @@ module "logdrainer-service" {
 }
 
 module "rabbitmq-service" {
-  source                = "./modules/services_with_keys"
+  source                = "./modules/services-with-keys"
   service_name          = "hsdp-rabbitmq"
   service_instance_name = "rabbitmq"
   service_instance_key  = "rabbitmqkey"
@@ -37,7 +37,7 @@ module "rabbitmq-service" {
 }
 
 module "redis-service" {
-  source                = "./modules/services_with_keys"
+  source                = "./modules/services-with-keys"
   service_name          = "hsdp-redis-sentinel"
   service_instance_name = "redis"
   service_instance_key  = "rediskey"
@@ -399,12 +399,6 @@ module "gradle-sample-app" {
   app_environment          = {}
   stopped                  = var.global_stopped
 }
-
-
-
-
-
-
 
 
 
