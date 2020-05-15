@@ -387,7 +387,7 @@ module "ngcap-api-gateway" {
 module "gradle-sample-app" {
   source                   = "./modules/ngcap-app"
   app_name                 = "gradle-sample-svc"
-  app_docker_image         = "${var.DOCKER_REGISTRY_NAMESPACE}/gradle-output:latest"
+  app_docker_image         = "${var.DOCKER_REGISTRY_NAMESPACE}/gradle-output:${var.build_tag}"
   docker_registry_username = "${var.DOCKER_REGISTRY_USERNAME}"
   docker_registry_password = "${var.DOCKER_REGISTRY_PASSWORD}"
   app_memory               = "${var.memory}"

@@ -76,3 +76,7 @@ variable "global_stopped" {
   default = true
 }
 
+variable "build_tag" {
+  type    = string
+  default = "latest"
+}
