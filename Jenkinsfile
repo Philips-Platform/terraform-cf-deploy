@@ -5,7 +5,7 @@ node('docker') {
     }
     properties([
             parameters([string(
-                defaultValue: '', 
+                defaultValue: 'latest', 
                 description: '', 
                 name: 'build_tag', 
                 trim: false)
