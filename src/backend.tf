@@ -4,7 +4,7 @@ terraform {
     organization = "Philips-platform"
 
     workspaces {
-      name = "var.workspace_name"
+      name = "${var.workspace_name}"
     }
   }
 }
