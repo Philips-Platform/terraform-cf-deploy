@@ -4,7 +4,7 @@ terraform {
     organization = "Philips-platform"
 
     workspaces {
-      name = "terraform-cf-deploy"
+      name = "var.workspace_name"
     }
   }
 }

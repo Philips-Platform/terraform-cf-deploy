@@ -72,12 +72,16 @@ variable "ngcap_fhir_version" {
 }
 
 variable "stop_apps" {
-	type = bool
-	default = true
+  type    = bool
+  default = true
 }
 
 
 variable "build_tag" {
   type    = string
   default = "latest"
+}
+
+variable "workspace_name" {
+  type = string
 }
