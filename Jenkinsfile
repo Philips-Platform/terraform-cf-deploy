@@ -1,5 +1,8 @@
 node('docker') {
     /* Requires the Docker Pipeline plugin to be installed */
+    def upstream = currentBuild.rawBuild.getCause(hudson.model.Cause$UpstreamCause)
+    echo upstream?.upstreamBuild
+    echo "${build_tag}"
     stage('checkout'){
         checkout scm
     }
