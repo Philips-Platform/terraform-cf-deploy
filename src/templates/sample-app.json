@@ -1,0 +1,21 @@
+{
+    "module": {
+        "gradle-sample-app": {
+            "source": "./modules/ngcap-app",
+            "app_name": "#{APP-NAME}#",
+            "app_docker_image": "${var.DOCKER_REGISTRY_NAMESPACE}/#{IMAGE-NAME}#:#{IMAGE-TAG}#",
+            "docker_registry_username": "${var.DOCKER_REGISTRY_USERNAME}",
+            "docker_registry_password": "${var.DOCKER_REGISTRY_PASSWORD}",
+            "app_memory": "${var.memory}",
+            "app_disk_quota": "${var.disk_quota}",
+            "space_id": "${data.cloudfoundry_space.space.id}",
+            "app_hostname": "#{APP-NAME}#-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
+            "app_domain": [
+                "${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}"
+            ],
+            "app_services": [],
+            "app_environment": {},
+            "stopped": "${var.global_stopped}"
+        }
+    }
+}

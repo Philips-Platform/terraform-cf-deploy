@@ -4,7 +4,9 @@ variable "app_memory" {}
 variable "app_disk_quota" {}
 variable "app_docker_image" {}
 variable "app_services" {}
-variable "app_domain" {}
+variable "app_domain" {
+  type = list(string)
+}
 variable "app_hostname" {}
 variable "app_environment" {}
 variable "docker_registry_username" {}
