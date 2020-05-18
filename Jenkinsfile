@@ -3,6 +3,15 @@ node('docker') {
     stage('checkout'){
         checkout scm
     }
+    properties([
+            parameters([string(
+                defaultValue: '', 
+                description: '', 
+                name: 'build_tag', 
+                trim: false)
+            ])
+        ])
+    echo "build_tag: $build_tag"
     stage('CF deployment') {
         docker.image('hashicorp/terraform:latest').inside('--entrypoint=""') {
             withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
@@ -14,7 +23,7 @@ node('docker') {
                         sh 'terraform validate'
                         // apply the terraform configuration
                         withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {    
-                            sh 'terraform apply -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve -var=build_tag=${build_tag}'
+                            sh 'terraform apply -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve -var=build_tag=$build_tag'
                         }
                     }
                 }
