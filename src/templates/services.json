@@ -6,8 +6,8 @@
       "service_instance_name": "postgres",
       "service_instance_key": "postgreskey",
       "enable_service_key": true,
-      "service_plan": "var.postgres_service_plan",
-      "space_id": "data.cloudfoundry_space.space.id",
+      "service_plan": "${var.postgres_service_plan}",
+      "space_id": "${data.cloudfoundry_space.space.id}",
       "service_params": "{ \"DBName\": \"hsdp_pg\", \"EngineVersion\": \"11.1\" }"
     },
     "metrics-service": {
@@ -16,13 +16,13 @@
       "service_instance_name": "metrics",
       "service_plan": "metrics",
       "enable_service_key": false,
-      "space_id": "data.cloudfoundry_space.space.id"
+      "space_id": "${data.cloudfoundry_space.space.id}"
     },
     "logdrainer-service": {
       "source": "./modules/cups",
       "cups_instance_name": "ngcap_log_drainer",
       "syslog_drain_url": "https://logdrainer-client-test.us-east.philips-healthsuite.com/core/log/Product/8af07a0e696d7ac48962c28f88ea94ff0dd70ef3571ef3c2ce3ecfa6e21704366b87f7bd43bde10def63020356481708",
-      "space_id": "data.cloudfoundry_space.space.id"
+      "space_id": "${data.cloudfoundry_space.space.id}"
     },
     "rabbitmq-service": {
       "source": "./modules/services-with-keys",
@@ -30,8 +30,8 @@
       "service_instance_name": "rabbitmq",
       "service_instance_key": "rabbitmqkey",
       "enable_service_key": true,
-      "service_plan": "var.rabbitmq_service_plan",
-      "space_id": "data.cloudfoundry_space.space.id"
+      "service_plan": "${var.rabbitmq_service_plan}",
+      "space_id": "${data.cloudfoundry_space.space.id}"
     },
     "redis-service": {
       "source": "./modules/services-with-keys",
@@ -39,8 +39,8 @@
       "service_instance_name": "redis",
       "service_instance_key": "rediskey",
       "enable_service_key": true,
-      "service_plan": "var.redis_service_plan",
-      "space_id": "data.cloudfoundry_space.space.id"
+      "service_plan": "${var.redis_service_plan}",
+      "space_id": "${data.cloudfoundry_space.space.id}"
     }
   }
 }
