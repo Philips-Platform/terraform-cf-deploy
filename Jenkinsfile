@@ -17,7 +17,11 @@ node('docker') {
                 dir("${env.WORKSPACE}/src"){
                     withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                         sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                        sh 'terraform init -plugin-dir=../plugins/linux_amd64 -var-file=./default.auto.tfvars'
+
+                        // Deploy - Services
+
+
+                        sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-services.hcl'
                         // terraform validation
                         sh 'terraform validate'
                         sh 'cp ./templates/services.json ./main.tf.json'
@@ -25,11 +29,30 @@ node('docker') {
                         withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                             //sh 'terraform destroy -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
                             //sh 'terraform apply -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve -var=build_tag=$upstreamJobBuildNumber'
-                            sh 'terraform destroy -var-file="./default.auto.tfvars" -var-file="$TERRAFORMINPUT" -auto-approve -var=workspace_name=terraform-cf-deploy-services'
-                            sh 'terraform apply -var-file="./default.auto.tfvars" -var-file="$TERRAFORMINPUT" -auto-approve -var=workspace_name=terraform-cf-deploy-services'
+                            sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve'
+                            sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve'
+                        }
+
+                        // Deploy - App
+                        sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-app.hcl'
+                        // terraform validation
+                        sh 'terraform validate'
+                        sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
+                        def file = new File("./main.tf.json")
+                        def parsedtext = file.text.replaceAll('#APP-NAME#', "gradle-sample-app")
+                        parsedtext = parsedtext.replaceAll('#IMAGE-NAME#', "gradle-output")
+                        parsedtext = parsedtext.replaceAll('#IMAGE-TAG#', $upstreamJobBuildNumber)
+                        file.text = parsedtext
+                        
+                        // apply the terraform configuration
+                        withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
+                            //sh 'terraform destroy -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
+                            //sh 'terraform apply -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve -var=build_tag=$upstreamJobBuildNumber'
+                            sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve'
+                            sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve'
                         }
                     }
-                }
+                }   
             }
         }
     }
@@ -45,3 +68,4 @@ node('docker') {
         sh 'cat version.txt'
     }
 }
+def 
