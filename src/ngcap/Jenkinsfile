@@ -1,12 +1,17 @@
 pipeline {
 	agent { node { label 'DEPLOY-TEST' } }
+	parameters {
+		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
+	}
 	stages{
                 stage('Secure Agent') {
                         agent { node ( "${env.NODE_NAME}-work" ) }
                         stages {
-				stage('HELLO WORLD') {
+				stage('Call terraform init') {
 					steps {
-						echo 'HELLO WORLD'
+						dir('src') {
+					 		bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=backends\\backend-ngcap.hcl'
+						}
 					}
 				}
 			}
