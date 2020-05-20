@@ -20,11 +20,11 @@ node('docker') {
 
                         // Deploy - Services
 
-
+                        sh 'cp ./templates/services.json ./main.tf.json'
                         sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-services.hcl'
                         // terraform validation
                         sh 'terraform validate'
-                        sh 'cp ./templates/services.json ./main.tf.json'
+                        
                         // apply the terraform configuration
                         withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                             //sh 'terraform destroy -var-file="./variables/default.auto.tfvars" -var-file="$TERRAFORMINPUT" -target=module.gradle-sample-app -var="global_stopped=false" -auto-approve'
@@ -34,10 +34,11 @@ node('docker') {
                         }
 
                         // Deploy - App
+                        sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
                         sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-app.hcl'
                         // terraform validation
                         sh 'terraform validate'
-                        sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
+                        
                         sh "sed -i 's/#APP-NAME#/gradle-sample-app/g' ./main.tf.json"
                         sh "sed -i 's/#IMAGE-NAME#/gradle-output/g' ./main.tf.json"
                         sh "sed -i 's/#IMAGE-TAG#/$upstreamJobBuildNumber/g' ./main.tf.json"
