@@ -1,5 +1,9 @@
 pipeline {
 	agent { node { label 'DEPLOY-TEST' } }
+	environment {
+		HTTPS_PROXY="http://amec.zscaler.philips.com:9480/"
+		HTTP_PROXY="http://amec.zscaler.philips.com:9480/"
+	}
 	parameters {
 		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
 	}
