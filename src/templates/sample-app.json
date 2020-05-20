@@ -14,7 +14,7 @@
                 "${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}"
             ],
             "app_ports": [
-                5000
+                8080
             ],
             "app_services": {
                 "postgres": "postgreskey",
