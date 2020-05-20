@@ -1,5 +1,5 @@
 pipeline {
-	agent { node { label 'NGCAP' } }
+	agent { node { label 'DEPLOY-TEST' } }
 	stages{
                 stage('Secure Agent') {
                         agent { node ( "${env.NODE_NAME}-work" ) }
