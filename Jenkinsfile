@@ -66,4 +66,3 @@ node('docker') {
         sh 'cat version.txt'
     }
 }
-def 
