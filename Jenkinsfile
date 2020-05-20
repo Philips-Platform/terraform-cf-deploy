@@ -38,11 +38,9 @@ node('docker') {
                         // terraform validation
                         sh 'terraform validate'
                         sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
-                        def file = new File("./main.tf.json")
-                        def parsedtext = file.text.replaceAll('#APP-NAME#', "gradle-sample-app")
-                        parsedtext = parsedtext.replaceAll('#IMAGE-NAME#', "gradle-output")
-                        parsedtext = parsedtext.replaceAll('#IMAGE-TAG#', $upstreamJobBuildNumber)
-                        file.text = parsedtext
+                        sh "sed -i 's/#APP-NAME#/gradle-sample-app/g' ./main.tf.json"
+                        sh "sed -i 's/#IMAGE-NAME#/gradle-output/g' ./main.tf.json"
+                        sh "sed -i 's/#IMAGE-TAG#/$upstreamJobBuildNumber/g' ./main.tf.json"
                         
                         // apply the terraform configuration
                         withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
