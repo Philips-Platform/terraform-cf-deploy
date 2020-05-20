@@ -7,14 +7,13 @@ pipeline {
 	parameters {
 		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
 	}
-	stages{
+	stages {
                 stage('Secure Agent') {
                         agent { node ( "${env.NODE_NAME}-work" ) }
 			withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                         	stages {
 					stage('Call terraform init') {
 						steps {
-							
 							dir('src') {
 								withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=backends\\backend-ngcap.hcl'
