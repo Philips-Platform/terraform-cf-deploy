@@ -5,7 +5,9 @@ pipeline {
                         agent { node ( "${env.NODE_NAME}-work" ) }
                         stages {
 				stage('HELLO WORLD') {
-					echo "HELLO WORLD"
+					steps {
+						echo 'ELLO WORLD'
+					}
 				}
 			}
 		}
