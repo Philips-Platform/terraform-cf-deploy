@@ -81,7 +81,3 @@ variable "build_tag" {
   type    = string
   default = "latest"
 }
-
-variable "workspace_name" {
-  type = string
-}
