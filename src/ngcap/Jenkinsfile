@@ -1,0 +1,14 @@
+pipeline {
+	agent { node { label 'NGCAP' } }
+	stages{
+                stage('Secure Agent') {
+                        agent { node ( "${env.NODE_NAME}-work" ) }
+                        stages {
+				stage('HELLO WORLD') {
+					echo "HELLO WORLD"
+				}
+			}
+		}
+	}
+
+}
