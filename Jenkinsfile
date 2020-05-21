@@ -5,7 +5,7 @@ def deployServices(TERRAFORMINPUT){
     // terraform validation
     sh 'terraform validate'
     sh 'terraform fmt -check -diff'
-    sh 'terraform refresh'
+    sh 'terraform refresh -var-file="$TERRAFORMINPUT"'
     // apply the terraform configuration
     // dont destroy services everytime
     //sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve'
@@ -24,7 +24,7 @@ def deployApp(TERRAFORMINPUT){
     // terraform validation
     sh 'terraform validate'
     sh 'terraform fmt -check -diff'                 
-    sh 'terraform refresh'       
+    sh 'terraform refresh -var-file="$TERRAFORMINPUT"'       
     // apply the terraform configuration    
     sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
     sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
