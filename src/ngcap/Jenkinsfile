@@ -58,9 +58,9 @@ pipeline {
 
 									bat "terraform apply -auto-approve  -var-file=variables\\default.tfvars -target=module.postgres-service"
 									bat "terraform apply -auto-approve  -var-file=variables\\default.tfvars -target=module.metrics-service"
-									bat "terraform apply -auto-approve  -var-file=variables\default.tfvars -target=module.logdrainer-service"
-								 	bat "terraform apply -auto-approve  -var-file=variables\default.tfvars -target=module.rabbitmq-service"
-									bat "terraform apply -auto-approve  -var-file=variables\default.tfvars -target=module.redis-service"
+									bat "terraform apply -auto-approve  -var-file=variables\\default.tfvars -target=module.logdrainer-service"
+								 	bat "terraform apply -auto-approve  -var-file=variables\\default.tfvars -target=module.rabbitmq-service"
+									bat "terraform apply -auto-approve  -var-file=variables\\default.tfvars -target=module.redis-service"
 
 
 
