@@ -81,8 +81,8 @@ node('docker') {
                     withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
                             withCredentials([file(credentialsId: 'workspace.json', variable: 'WORKSPACEJSON')]) {
-                                createInfraBackendWorkspaceWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN')
-                                createAppBackendWorkspaceWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN', '$MicroserviceName')
+                                createInfraBackendWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN')
+                                createAppBackendWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN', '$MicroserviceName')
                                 updateInfraBackendWorkspace('$CFSpaceName')
                                 updateAppBackendWorkspace('$CFSpaceName','$MicroserviceName')
                             }
