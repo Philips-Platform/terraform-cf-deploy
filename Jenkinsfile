@@ -1,3 +1,38 @@
+def deployServices(){
+    // update the services to be deployed
+    sh 'cp ./templates/services.json ./main.tf.json'
+    sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-services.hcl'
+    // terraform validation
+    sh 'terraform validate'
+    sh 'terraform fmt -check -diff'
+    sh 'terraform refresh'
+    // apply the terraform configuration
+    withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
+        // dont destroy services everytime
+        //sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve'
+        sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve'
+    }
+}
+def deployApp(){
+    // update the modules to be deployed 
+    sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
+    // update the service name in the template
+    sh "sed -i 's/#APP-NAME#/$MicroserviceName/g' ./main.tf.json"
+    sh "sed -i 's/#IMAGE-NAME#/$DockerImageRepoName/g' ./main.tf.json"
+    sh "sed -i 's/#IMAGE-TAG#/$upstreamJobBuildNumber/g' ./main.tf.json"
+
+    sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-app.hcl'
+    
+    // terraform validation
+    sh 'terraform validate'
+    sh 'terraform fmt -check -diff'                 
+    sh 'terraform refresh'       
+    // apply the terraform configuration
+    withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
+        sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
+        sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
+    }
+}
 node('docker') {
     /* Requires the Docker Pipeline plugin to be installed */
     stage('checkout'){
@@ -27,36 +62,8 @@ node('docker') {
                 dir("${env.WORKSPACE}/src"){
                     withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                         sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-
-                        // Deploy - Services
-
-                        sh 'cp ./templates/services.json ./main.tf.json'
-                        sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-services.hcl'
-                        // terraform validation
-                        sh 'terraform validate'
-                        
-                        // apply the terraform configuration
-                        withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-                            // dont destroy services everytime
-                            //sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve'
-                            sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve'
-                        }
-
-                        // Deploy - App
-                        sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
-                        sh "sed -i 's/#APP-NAME#/$MicroserviceName/g' ./main.tf.json"
-                        sh "sed -i 's/#IMAGE-NAME#/$DockerImageRepoName/g' ./main.tf.json"
-                        sh "sed -i 's/#IMAGE-TAG#/$upstreamJobBuildNumber/g' ./main.tf.json"
-
-                        sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-app.hcl'
-                        // terraform validation
-                        sh 'terraform validate'
-                                                
-                        // apply the terraform configuration
-                        withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-                            sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
-                            sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
-                        }
+                        deployServices()
+                        deployApp()
                     }
                 }   
             }
