@@ -32,11 +32,20 @@ pipeline {
 							dir('src') {
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_SPACE      = \"\"','CLOUD_FOUNDRY_SPACE      = \"${params.CLOUD_FOUNDRY_SPACE}\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = \"\"','CLOUD_FOUNDRY_USERNAME   = \"\$Env:USERNAME\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = \"\"','CLOUD_FOUNDRY_PASSWORD   = \"\$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = \"\"','DOCKER_REGISTRY_USERNAME = \"\$Env:USERNAME\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = \"\"','DOCKER_REGISTRY_PASSWORD = \"\$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
+	
+								bat "echo %USERNAME% > CF_USERNAME"
+								bat "echo %PASSWORD% > CF_PASSWORD"
 
+                                                        powershell '''
+Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
+Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""','CLOUD_FOUNDRY_USERNAME   = "$Env:USERNAME"' | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""','CLOUD_FOUNDRY_PASSWORD   = "$Env:PASSWORD"' | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""','DOCKER_REGISTRY_USERNAME = "$Env:USERNAME"' | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""','DOCKER_REGISTRY_PASSWORD = "$Env:PASSWORD"' | Set-Content -Path .\\default.auto.tfvars
+'''
+								bat "del CF_USERNAME"
+								bat "del CF_PASSWORD"
 							}
 						}
 		
