@@ -1,14 +1,12 @@
 def createInfraBackendWorkspace(workspaceJsonFile, apiToken){
-    sh "sed -i 's/#spacename#/$CFSpaceName/g' $workspaceJsonFile"
-    sh "sed -i 's/#subname#/infra/g' $workspaceJsonFile"
-    sh "cat $workspaceJsonFile"
-    sh "curl --header 'Authorization: Bearer $apiToken' --header 'Content-Type: application/vnd.api+json' --request POST --data @'$workspaceJsonFile' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
+    sh "sed 's/#spacename#/$CFSpaceName/g' $workspaceJsonFile > infra-workspace.json"
+    sh "sed -i 's/#subname#/infra/g' infra-workspace.json"
+    sh "curl --header 'Authorization: Bearer $apiToken' --header 'Content-Type: application/vnd.api+json' --request POST --data @'infra-workspace.json' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
 }
 def createAppBackendWorkspace(workspaceJsonFile, apiToken){
-    sh "sed -i 's/#spacename#/$CFSpaceName/g' $workspaceJsonFile"
-    sh "sed -i 's/#subname#/$MicroserviceName/g' $workspaceJsonFile"
-    sh "cat $workspaceJsonFile"
-    sh "curl --header 'Authorization: Bearer $apiToken' --header 'Content-Type: application/vnd.api+json' --request POST --data @'$workspaceJsonFile' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
+    sh "sed 's/#spacename#/$CFSpaceName/g' $workspaceJsonFile > app-workspace.json"
+    sh "sed -i 's/#subname#/$MicroserviceName/g' app-workspace.json"
+    sh "curl --header 'Authorization: Bearer $apiToken' --header 'Content-Type: application/vnd.api+json' --request POST --data @'app-workspace.json' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
 }
 def updateInfraBackendWorkspace(){
     sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backends/backend-services.hcl"
