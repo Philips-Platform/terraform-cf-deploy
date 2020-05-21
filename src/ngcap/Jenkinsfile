@@ -28,15 +28,14 @@ pipeline {
 				stage('Init Variables File') {
 
 					steps {
-						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 							dir('src') {
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_SPACE      = \"\"','CLOUD_FOUNDRY_SPACE      = \"${params.CLOUD_FOUDNRY_SPACE}\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_SPACE      = \"\"','CLOUD_FOUNDRY_SPACE      = \"${params.CLOUD_FOUNDRY_SPACE}\"' | Set-Content -Path .\\default.auto.tfvars"	
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = \"\"','CLOUD_FOUNDRY_USERNAME   = \"$Env:USERNAME\"' | Set-Content -Path .\\default.auto.tfvars"	
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = \"\"','CLOUD_FOUNDRY_PASSWORD   = \"$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = \"\"','CLOUD_FOUNDRY_USERNAME   = \"$Env:USERNAME\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = \"\"','DOCKER_REGISTRY_USERNAME = \"$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = \"\"','DOCKER_REGISTRY_PASSWORD  = \"$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = \"\"','DOCKER_REGISTRY_USERNAME = \"$Env:USERNAME\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = \"\"','DOCKER_REGISTRY_PASSWORD = \"$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
 
 							}
 						}
