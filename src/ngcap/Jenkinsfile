@@ -6,6 +6,8 @@ pipeline {
 	}
 	parameters {
 		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
+ 		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "", description: 'CF ORG')
+ 		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "", description: 'CF SPACE')
 	}
 	stages {
                 stage('Secure Agent') {
@@ -21,6 +23,55 @@ pipeline {
 							}
 						}
 					}
+				}
+
+				stage('Init Variables File') {
+
+					steps {
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+							dir('src') {
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_SPACE      = \"\"','CLOUD_FOUNDRY_SPACE      = \"${params.CLOUD_FOUDNRY_SPACE}\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = \"\"','CLOUD_FOUNDRY_USERNAME   = \"$Env:USERNAME\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = \"\"','CLOUD_FOUNDRY_PASSWORD   = \"$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = \"\"','CLOUD_FOUNDRY_USERNAME   = \"$Env:USERNAME\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = \"\"','DOCKER_REGISTRY_USERNAME = \"$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = \"\"','DOCKER_REGISTRY_PASSWORD  = \"$Env:PASSWORD\"' | Set-Content -Path .\\default.auto.tfvars"	
+
+							}
+						}
+		
+					}
+					
+				}
+
+				stage('Create Services') {
+					when {
+						 expression { "${params.INIT_SERVICES}" == "true" }
+					}
+					steps {
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+									
+
+									bat "terraform apply -auto-approve  -var-file=variables\\default.tfvars -target=module.postgres-service"
+									bat "terraform apply -auto-approve  -var-file=variables\\default.tfvars -target=module.metrics-service"
+									bat "terraform apply -auto-approve  -var-file=variables\default.tfvars -target=module.logdrainer-service"
+								 	bat "terraform apply -auto-approve  -var-file=variables\default.tfvars -target=module.rabbitmq-service"
+									bat "terraform apply -auto-approve  -var-file=variables\default.tfvars -target=module.redis-service"
+
+
+
+									
+								 }
+
+							}
+						}
+
+					}
+				
 				}
 
 			}	
