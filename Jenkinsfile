@@ -82,16 +82,16 @@ node('docker') {
                     withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
                             withCredentials([file(credentialsId: 'workspace.json', variable: 'WORKSPACEJSON')]) {
-                                createInfraBackendWorkspace('$WORKSPACEJSON', $CFSpaceName, '$TOKEN')
-                                createAppBackendWorkspace('$WORKSPACEJSON', $CFSpaceName, '$TOKEN', $MicroserviceName)
-                                updateInfraBackendWorkspace($CFSpaceName)
-                                updateAppBackendWorkspace($CFSpaceName,$MicroserviceName)
+                                createInfraBackendWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN')
+                                createAppBackendWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN', '$MicroserviceName')
+                                updateInfraBackendWorkspace('$CFSpaceName')
+                                updateAppBackendWorkspace('$CFSpaceName','$MicroserviceName')
                             }
                         }
                         withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                             sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                            deployServices('$TERRAFORMINPUT', $CFSpaceName)
-                            deployApp('$TERRAFORMINPUT', $CFSpaceName)
+                            deployServices('$TERRAFORMINPUT', '$CFSpaceName')
+                            deployApp('$TERRAFORMINPUT', '$CFSpaceName')
                         }
                     }
                 }   
