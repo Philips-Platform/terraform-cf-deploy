@@ -40,13 +40,13 @@ pipeline {
 Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
 Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
 Get-ChildItem Env:CF_USERNAME
-(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = $Env:CF_USERNAME" | Set-Content -Path .\\default.auto.tfvars
-(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = $Env:CF_PASSWORD" | Set-Content -Path .\\default.auto.tfvars
-(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = $Env:CF_USERNAME" | Set-Content -Path .\\default.auto.tfvars
-(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = $Env:CF_PASSWORD" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
 '''
-								bat "REM del CF_USERNAME"
-								bat "REM del CF_PASSWORD"
+								bat "del CF_USERNAME"
+								bat "del CF_PASSWORD"
 							}
 						}
 		
