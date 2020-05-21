@@ -1,4 +1,4 @@
-def deployServices(){
+def deployServices(TERRAFORMINPUT){
     // update the services to be deployed
     sh 'cp ./templates/services.json ./main.tf.json'
     sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-services.hcl'
@@ -7,13 +7,11 @@ def deployServices(){
     sh 'terraform fmt -check -diff'
     sh 'terraform refresh'
     // apply the terraform configuration
-    withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-        // dont destroy services everytime
-        //sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve'
-        sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve'
-    }
+    // dont destroy services everytime
+    //sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve'
+    sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve'
 }
-def deployApp(){
+def deployApp(TERRAFORMINPUT){
     // update the modules to be deployed 
     sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
     // update the service name in the template
@@ -27,11 +25,9 @@ def deployApp(){
     sh 'terraform validate'
     sh 'terraform fmt -check -diff'                 
     sh 'terraform refresh'       
-    // apply the terraform configuration
-    withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-        sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
-        sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
-    }
+    // apply the terraform configuration    
+    sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
+    sh 'terraform apply -var-file="$TERRAFORMINPUT" -auto-approve -var=stop_apps=false'
 }
 node('docker') {
     /* Requires the Docker Pipeline plugin to be installed */
@@ -61,9 +57,11 @@ node('docker') {
             withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
                 dir("${env.WORKSPACE}/src"){
                     withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
-                        sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                        deployServices()
-                        deployApp()
+                        withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
+                            sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                            deployServices(TERRAFORMINPUT)
+                            deployApp(TERRAFORMINPUT)
+                        }
                     }
                 }   
             }
