@@ -2,13 +2,11 @@ def createInfraBackendWorkspace(workspaceJsonFile, cfSpaceName, apiToken){
     sh "sed -i 's/#spacename#/$cfSpaceName/g' $workspaceJsonFile"
     sh "sed -i 's/#subname#/infra/g' $workspaceJsonFile"
     sh "curl --header 'Authorization: Bearer $apiToken' --header 'Content-Type: application/vnd.api+json' --request PATCH --data '$workspaceJsonFile' https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces"
-    return "platform-$cfSpaceName-infra"
 }
 def createAppBackendWorkspace(workspaceJsonFile, cfSpaceName, apiToken, appName){
     sh "sed -i 's/#spacename#/$cfSpaceName/g' $workspaceJsonFile"
     sh "sed -i 's/#subname#/$appName/g' $workspaceJsonFile"
     sh "curl --header 'Authorization: Bearer $apiToken' --header 'Content-Type: application/vnd.api+json' --request PATCH --data '$workspaceJsonFile' https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces"
-    return "platform-$cfSpaceName-$appName" 
 }
 def updateInfraBackendWorkspace(cfSpaceName){
     sh "sed -i 's/#spacename#/$cfSpaceName/g' ./backends/backend-services.hcl"
@@ -83,8 +81,8 @@ node('docker') {
                     withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
                             withCredentials([file(credentialsId: 'workspace.json', variable: 'WORKSPACEJSON')]) {
-                                def newInfraWorkspaceName = createInfraBackendWorkspaceWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN')
-                                def newAppWorkspaceName = createAppBackendWorkspaceWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN', '$MicroserviceName')
+                                createInfraBackendWorkspaceWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN')
+                                createAppBackendWorkspaceWorkspace('$WORKSPACEJSON', '$CFSpaceName', '$TOKEN', '$MicroserviceName')
                                 updateInfraBackendWorkspace('$CFSpaceName')
                                 updateAppBackendWorkspace('$CFSpaceName','$MicroserviceName')
                             }
