@@ -75,7 +75,7 @@ node('docker') {
             ])
         ])
     stage('CF deployment') {
-        docker.image('hashicorp/terraform:latest').inside('--entrypoint=""') {
+        docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
             withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
                 dir("${env.WORKSPACE}/src"){
                     sh 'apk add --update curl'
