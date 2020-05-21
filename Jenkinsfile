@@ -75,27 +75,32 @@ node('docker') {
             ])
         ])
     stage('CF deployment') {
-        docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
-            withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
-                dir("${env.WORKSPACE}/src"){
-                    sh 'apk add --update curl'
-                    withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
-                        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
-                            withCredentials([file(credentialsId: 'workspace.json', variable: 'WORKSPACEJSON')]) {
-                                createInfraBackendWorkspace("${WORKSPACEJSON}", "${TOKEN}")
-                                createAppBackendWorkspace("${WORKSPACEJSON}", "${TOKEN}")
-                                updateInfraBackendWorkspace()
-                                updateAppBackendWorkspace()
+        try{
+            docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
+                withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
+                    dir("${env.WORKSPACE}/src"){
+                        sh 'apk add --update curl'
+                        withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
+                            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
+                                withCredentials([file(credentialsId: 'workspace.json', variable: 'WORKSPACEJSON')]) {
+                                    createInfraBackendWorkspace("${WORKSPACEJSON}", "${TOKEN}")
+                                    createAppBackendWorkspace("${WORKSPACEJSON}", "${TOKEN}")
+                                    updateInfraBackendWorkspace()
+                                    updateAppBackendWorkspace()
+                                }
+                            }
+                            withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
+                                sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                                deployServices("${TERRAFORMINPUT}")
+                                deployApp("${TERRAFORMINPUT}")
                             }
                         }
-                        withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-                            sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                            deployServices("${TERRAFORMINPUT}")
-                            deployApp("${TERRAFORMINPUT}")
-                        }
-                    }
-                }   
+                    }   
+                }
             }
+        }
+        finally{
+            sh 'sudo chown $USER -R ./src/.terraform'
         }
     }
 
