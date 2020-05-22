@@ -119,7 +119,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Pull Docker Containers and Push to docker') {
 					when {
-						 expression { "${params.MOVE_DOCKERS}" == "true" }
+						allOf {
+							expression { "${params.DESTROY_SERVICES}" == "false" }
+							expression { "${params.MOVE_DOCKERS}" == "true" }
+						}
 					}
 
 					steps {
@@ -192,6 +195,13 @@ Get-ChildItem Env:CF_USERNAME
 
 
 				stage('Deploy SysConfig') {
+
+					when {
+						allOf {
+							expression { "${params.DESTROY_SERVICES}" == "false" }
+						}
+					}
+
 
 					steps {
 					
