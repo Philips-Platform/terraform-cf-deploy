@@ -10,9 +10,9 @@ pipeline {
 		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
-		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.522")
-		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.750")
-		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.713")
+		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.528")
+		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.746")
+		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.719")
 	}
 	stages {
                 stage('Secure Agent') {
