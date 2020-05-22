@@ -13,18 +13,6 @@ pipeline {
                 stage('Secure Agent') {
                         agent { node ( "${env.NODE_NAME}-work" ) }
                        	stages {
-				stage('Call terraform init') {
-					steps {
-						withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-							dir('src') {
-								withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=backends\\backend-ngcap.hcl'
-								}
-							}
-						}
-					}
-				}
-
 				stage('Init Variables File') {
 
 					steps {
@@ -63,6 +51,7 @@ Get-ChildItem Env:CF_USERNAME
                                                         dir('src') {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        bat "copy /Y templates\\services.json main.tf.json"	
+					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=backends\\backend-ngcap.hcl'
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.postgres-service"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.metrics-service"
