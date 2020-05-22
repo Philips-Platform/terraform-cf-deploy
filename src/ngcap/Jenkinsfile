@@ -7,7 +7,11 @@ pipeline {
                 SPACE_LOWER = params.CLOUD_FOUNDRY_SPACE.toLowerCase()
 	}
 	parameters {
-		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
+		booleanParam(name: 'DEPLOY_SERVICES', defaultValue: false, description: 'Initialize services')
+		booleanParam(name: 'DESTROY_SERVICES', defaultValue: false, description: 'Initialize services')
+		booleanParam(name: 'DEPLOY_APPS', defaultValue: false, description: 'Initialize services')
+		booleanParam(name: 'DESTROY_APPS', defaultValue: false, description: 'Initialize services')
+		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Initialize services')
 		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Initialize services')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
@@ -51,7 +55,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Create Services') {
 					when {
-						 expression { "${params.INIT_SERVICES}" == "true" }
+						allOf {
+							expression { "${params.DEPLOY_SERVICES}" == "true" }
+							expression { "${params.DESTROY_SERVICES}" == "false" }
+						}
 					}
 					steps {
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
@@ -75,6 +82,40 @@ Get-ChildItem Env:CF_USERNAME
 					}
 				
 				}
+
+
+				stage('Create Services') {
+					when {
+						allOf {
+							expression { "${params.DEPLOY_SERVICES}" == "false" }
+							expression { "${params.DESTROY_SERVICES}" == "true" }
+						}
+					}
+					steps {
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        bat "copy /Y templates\\services.json main.tf.json"	
+					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=backends\\backend-ngcap.hcl'
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.postgres-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.metrics-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.logdrainer-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.rabbitmq-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.redis-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.cloud-space"
+
+								 }
+
+							}
+						}
+
+					}
+				
+				}
+
+
 
 
 				stage('Pull Docker Containers and Push to docker') {
