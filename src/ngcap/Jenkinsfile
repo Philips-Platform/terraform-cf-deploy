@@ -3,18 +3,22 @@ pipeline {
 	environment {
 		HTTPS_PROXY="http://amec.zscaler.philips.com:9480/"
 		HTTP_PROXY="http://amec.zscaler.philips.com:9480/"
+                ORG_LOWER = params.CLOUD_FOUNDRY_ORG.toLowerCase()
+                SPACE_LOWER = params.CLOUD_FOUNDRY_SPACE.toLowerCase()
 	}
 	parameters {
 		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
+		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.522")
+		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.750")
+		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.713")
 	}
 	stages {
                 stage('Secure Agent') {
                         agent { node ( "${env.NODE_NAME}-work" ) }
                        	stages {
 				stage('Init Variables File') {
-
 					steps {
 						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 							dir('src') {
@@ -36,7 +40,7 @@ Get-ChildItem Env:CF_USERNAME
 								bat "del CF_USERNAME"
 								bat "del CF_PASSWORD"
 
-								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = \"docker.na1.hsdp.io/client-ngcap_dev-deploy\""
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = \"docker.na1.hsdp.io/\"+$Env:ORG_LOWER+\"_\"+$Env:SPACE_LOWER"
 							}
 						}
 		
@@ -70,6 +74,122 @@ Get-ChildItem Env:CF_USERNAME
 					}
 				
 				}
+
+
+				stage('Pull Docker Containers and Push to docker') {
+					steps {
+
+						bat "docker login devops-nexus.dev.local:18079 -u ngcap -p ngcap"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/sysconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/fhirgw:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/genericgw:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/calcconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/dispatcher:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/execution:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/outboundconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/outbound:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/scheduler:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/calctrace:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/location:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/locationconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/tenantconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/sysconfigui:${params.NGCAP_JS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/notificationsvc:${params.NGCAP_JS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/authenticationsvc:${params.NGCAP_JS_VERSION}"
+						bat "docker pull devops-nexus.dev.local:18079/ngcap/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
+
+
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/sysconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/fhirgw:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/fhirgw:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/genericgw:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/genericgw:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/calcconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calcconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/dispatcher:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/dispatcher:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/execution:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/execution:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/outboundconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outboundconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/outbound:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outbound:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/scheduler:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/scheduler:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/calctrace:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calctrace:${params.NGCAP_CS_VERSION}
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/location:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/location:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/locationconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/locationconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/tenantconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/tenantconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/sysconfigui:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfigui:${params.NGCAP_JS_VERSION"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/notificationsvc:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/notificationsvc:${params.NGCAP_JS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/authenticationsvc:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/authenticationsvc:${params.NGCAP_JS_VERSION}"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/ngcap-starter:${params.NGCAP_STARTER_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
+					
+						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+							bat "docker login docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER% -u %USERNAME% -p %PASSWORD%"
+						}
+
+						
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/fhirgw:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/genericgw:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calcconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/dispatcher:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/execution:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outboundconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outbound:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/scheduler:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calctrace:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/location:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/locationconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/tenantconfig:${params.NGCAP_CS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfigui:${params.NGCAP_JS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/notificationsvc:${params.NGCAP_JS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/authenticationsvc:${params.NGCAP_JS_VERSION}"
+						bat "docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
+
+					}
+
+
+				}
+
+
+				stage('Deploy SysConfig') {
+
+					steps {
+					
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        bat "copy /Y templates\\sample-app.json main.tf.json"
+								 	powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",'"
+                       							powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Password\": \"${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.VirtualHost\": \"vhost\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Port\": \"${module.#APP-NAME#.service_key_credentials.rabbitmqkey.port}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.DbHost\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Username\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Password\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Port\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                       					 		powershell "Add-Content -Path env.txt -Value '                \"supportDB.DbHost\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Username\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Password\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Port\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.DbHost\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Username\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Password\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Port\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.DbHost\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Username\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Password\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Port\": \"${module.#APP-NAME#.service_key_credentials.postgreskey.port}\"'"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt) | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_NAME#','sys-config' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+								}
+							}
+						}
+					
+					
+					}	
+
+
+				}
+
 
 			}
 

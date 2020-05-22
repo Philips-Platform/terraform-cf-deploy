@@ -14,7 +14,7 @@
                 "${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}"
             ],
             "app_ports": [
-                8080
+                #APP_PORTS#
             ],
             "app_services": {
                 "postgres": "postgreskey",
@@ -24,27 +24,7 @@
                 "ngcap_log_drainer"
             ],
             "app_environment": {
-                "rabbitmq.Hostname": "${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}",
-                "rabbitmq.Username": "${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}",
-                "rabbitmq.Password": "${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}",
-                "rabbitmq.VirtualHost": "vhost",
-                "rabbitmq.Port": "${module.#APP-NAME#.service_key_credentials.rabbitmqkey.port}",
-                "postgres.DbHost": "${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}",
-                "postgres.Username": "${module.#APP-NAME#.service_key_credentials.postgreskey.username}",
-                "postgres.Password": "${module.#APP-NAME#.service_key_credentials.postgreskey.password}",
-                "postgres.Port": "${module.#APP-NAME#.service_key_credentials.postgreskey.port}",
-                "supportDB.DbHost": "${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}",
-                "supportDB.Username": "${module.#APP-NAME#.service_key_credentials.postgreskey.username}",
-                "supportDB.Password": "${module.#APP-NAME#.service_key_credentials.postgreskey.password}",
-                "supportDB.Port": "${module.#APP-NAME#.service_key_credentials.postgreskey.port}",
-                "supportArchiveDB.DbHost": "${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}",
-                "supportArchiveDB.Username": "${module.#APP-NAME#.service_key_credentials.postgreskey.username}",
-                "supportArchiveDB.Password": "${module.#APP-NAME#.service_key_credentials.postgreskey.password}",
-                "supportArchiveDB.Port": "${module.#APP-NAME#.service_key_credentials.postgreskey.port}",
-                "archiveDB.DbHost": "${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}",
-                "archiveDB.Username": "${module.#APP-NAME#.service_key_credentials.postgreskey.username}",
-                "archiveDB.Password": "${module.#APP-NAME#.service_key_credentials.postgreskey.password}",
-                "archiveDB.Port": "${module.#APP-NAME#.service_key_credentials.postgreskey.port}"
+                #APP_ENV#
             },
             "app_stopped": "${var.stop_apps}"
         }
