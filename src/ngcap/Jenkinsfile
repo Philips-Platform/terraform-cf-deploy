@@ -160,7 +160,7 @@ Get-ChildItem Env:CF_USERNAME
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        bat "copy /Y templates\\sample-app.json main.tf.json"
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-								 	powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
+								 	powershell "Add-Content -Path env.txt -Value '\"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",'"
                        							powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Password\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.VirtualHost\": \"vhost\",'"
@@ -187,6 +187,10 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=backends\\backend-ngcap.hcl'
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+
 								}
 							}
 						}
