@@ -55,6 +55,7 @@ Get-ChildItem Env:CF_USERNAME
 								        bat "copy /Y templates\\services.json main.tf.json"	
 					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=backends\\backend-ngcap.hcl'
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.cloud-space"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.postgres-service"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.metrics-service"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.logdrainer-service"
@@ -76,7 +77,7 @@ Get-ChildItem Env:CF_USERNAME
 			post {
 				always {
 					dir('src') {
-						bat 'if exist default.auto.tfvars ( del /q default.tfvars ) else ( echo no default.auto.tfvars )'
+						bat 'if exist default.auto.tfvars ( del /q default.auto.tfvars ) else ( echo no default.auto.tfvars )'
 					}
 			
 				}

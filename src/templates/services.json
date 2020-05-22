@@ -3,7 +3,8 @@
     "cloud-space": {
       "source": "./modules/space",
       "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
-      "org_name": "${var.CLOUD_FOUNDRY_ORG}"
+      "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+      "space_users": "${var.CLOUD_FOUNDRY_SPACE_USERS}"
     },
     "postgres-service": {
       "source": "./modules/services-with-keys",
