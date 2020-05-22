@@ -6,8 +6,8 @@ pipeline {
 	}
 	parameters {
 		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
- 		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "", description: 'CF ORG')
- 		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "", description: 'CF SPACE')
+ 		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
+ 		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
 	}
 	stages {
                 stage('Secure Agent') {
@@ -21,8 +21,8 @@ pipeline {
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_SPACE      = \"\"','CLOUD_FOUNDRY_SPACE      = \"${params.CLOUD_FOUNDRY_SPACE}\"' | Set-Content -Path .\\default.auto.tfvars"	
 	
-								bat "echo %USERNAME% > CF_USERNAME"
-								bat "echo %PASSWORD% > CF_PASSWORD"
+								bat "echo %USERNAME%>CF_USERNAME"
+								bat "echo %PASSWORD%>CF_PASSWORD"
 
                                                        		 powershell '''
 Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
