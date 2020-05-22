@@ -8,6 +8,7 @@ pipeline {
 	}
 	parameters {
 		booleanParam(name: 'INIT_SERVICES', defaultValue: false, description: 'Initialize services')
+		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Initialize services')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
 		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.528")
@@ -77,6 +78,10 @@ Get-ChildItem Env:CF_USERNAME
 
 
 				stage('Pull Docker Containers and Push to docker') {
+					when {
+						 expression { "${params.MOVE_DOCKERS}" == "true" }
+					}
+
 					steps {
 						bat "set"
 						bat "set NO_PROXY=%DockerHost% && docker login devops-nexus.dev.local:18079 -u ngcap -p ngcap"
@@ -154,28 +159,29 @@ Get-ChildItem Env:CF_USERNAME
                                                         dir('src') {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        bat "copy /Y templates\\sample-app.json main.tf.json"
-								 	powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",`n'"
-                       							powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Password\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.VirtualHost\": \"vhost\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Port\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.port}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",`n'"
-                       					 		powershell "Add-Content -Path env.txt -Value '                \"supportDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",`n'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\"`n'"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt) | Set-Content main.tf.json"
+									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+								 	powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",'"
+                       							powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Password\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.VirtualHost\": \"vhost\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Port\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.port}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                       					 		powershell "Add-Content -Path env.txt -Value '                \"supportDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\"'"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
