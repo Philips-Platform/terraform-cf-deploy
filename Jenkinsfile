@@ -22,11 +22,8 @@ def deployServices(TERRAFORMINPUT){
     // terraform validation
     sh 'terraform validate'
     sh 'terraform fmt -check -diff'
-    sh "terraform refresh -var-file=$TERRAFORMINPUT -var=CLOUD_FOUNDRY_SPACE=$CFSpaceName"
-    // apply the terraform configuration
-    // dont destroy services everytime
-    //sh 'terraform destroy -var-file="$TERRAFORMINPUT" -auto-approve'
-    sh "terraform apply -var-file=$TERRAFORMINPUT -var=CLOUD_FOUNDRY_SPACE=$CFSpaceName -auto-approve"
+    sh "terraform refresh"
+    sh "terraform apply -auto-approve"
 }
 def deployApp(TERRAFORMINPUT){
     // update the modules to be deployed 
@@ -41,10 +38,10 @@ def deployApp(TERRAFORMINPUT){
     // terraform validation
     sh 'terraform validate'
     sh 'terraform fmt -check -diff'                 
-    sh "terraform refresh -var-file=$TERRAFORMINPUT -var=CLOUD_FOUNDRY_SPACE=$CFSpaceName"       
+    sh "terraform refresh"        
     // apply the terraform configuration    
-    sh "terraform destroy -var-file=$TERRAFORMINPUT -var=CLOUD_FOUNDRY_SPACE=$CFSpaceName -auto-approve -var=stop_apps=false"
-    sh "terraform apply -var-file=$TERRAFORMINPUT -var=CLOUD_FOUNDRY_SPACE=$CFSpaceName -auto-approve -var=stop_apps=false"
+    sh "terraform destroy -auto-approve"
+    sh "terraform apply -auto-approve"
 }
 node('docker') {
     /* Requires the Docker Pipeline plugin to be installed */
@@ -90,9 +87,11 @@ node('docker') {
                                 }
                             }
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-                                sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                                deployServices("${TERRAFORMINPUT}")
-                                deployApp("${TERRAFORMINPUT}")
+                                withEnv(["TF_CLI_ARGS='-var-file=$TERRAFORMINPUT -var=CLOUD_FOUNDRY_SPACE=$CFSpaceName -var=stop_apps=false'"]) {
+                                    sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                                    deployServices("${TERRAFORMINPUT}")
+                                    deployApp("${TERRAFORMINPUT}")
+                                }
                             }
                         }
                     }   
