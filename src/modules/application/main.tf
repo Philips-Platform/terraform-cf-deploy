@@ -12,7 +12,7 @@ data "cloudfoundry_domain" "domain" {
 data "cloudfoundry_service_instance" "service_instance" {
   for_each   = { for key, value in var.app_services : key => value }
   name_or_id = each.key
-  space      = data.cloundfoundry_space.space.id
+  space      = data.cloudfoundry_space.space.id
 }
 
 data "cloudfoundry_service_key" "service_instance_key" {
@@ -24,20 +24,20 @@ data "cloudfoundry_service_key" "service_instance_key" {
 data "cloudfoundry_user_provided_service" "cups_instance" {
   count = length(var.cups_services)
   name  = var.cups_services[count.index]
-  space = data.cloundfoundry_space.space.id
+  space = data.cloudfoundry_space.space.id
 }
 
 resource "cloudfoundry_route" "route" {
 
   for_each = data.cloudfoundry_domain.domain
   domain   = each.value.id
-  space    = data.cloundfoundry_space.space.id
+  space    = data.cloudfoundry_space.space.id
   hostname = var.app_hostname
 }
 
 resource "cloudfoundry_app" "instance" {
   name         = var.app_name
-  space        = data.cloundfoundry_space.space.id
+  space        = data.cloudfoundry_space.space.id
   memory       = var.app_memory
   disk_quota   = var.app_disk_quota
   docker_image = var.app_docker_image
