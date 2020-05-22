@@ -112,7 +112,7 @@ Get-ChildItem Env:CF_USERNAME
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/location:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/location:${params.NGCAP_CS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/locationconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/locationconfig:${params.NGCAP_CS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/tenantconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/tenantconfig:${params.NGCAP_CS_VERSION}"
-						bat "docker tag devops-nexus.dev.local:18079/ngcap/sysconfigui:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfigui:${params.NGCAP_JS_VERSION"
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/sysconfigui:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfigui:${params.NGCAP_JS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/notificationsvc:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/notificationsvc:${params.NGCAP_JS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/authenticationsvc:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/authenticationsvc:${params.NGCAP_JS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/ngcap-starter:${params.NGCAP_STARTER_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
