@@ -12,7 +12,6 @@ pipeline {
 		booleanParam(name: 'DEPLOY_APPS', defaultValue: false, description: 'Initialize services')
 		booleanParam(name: 'DESTROY_APPS', defaultValue: false, description: 'Initialize services')
 		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Initialize services')
-		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Initialize services')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
 		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.528")
