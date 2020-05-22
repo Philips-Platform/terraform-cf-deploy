@@ -7,11 +7,11 @@ pipeline {
                 SPACE_LOWER = params.CLOUD_FOUNDRY_SPACE.toLowerCase()
 	}
 	parameters {
-		booleanParam(name: 'DEPLOY_SERVICES', defaultValue: false, description: 'Initialize services')
-		booleanParam(name: 'DESTROY_SERVICES', defaultValue: false, description: 'Initialize services')
-		booleanParam(name: 'DEPLOY_APPS', defaultValue: false, description: 'Initialize services')
-		booleanParam(name: 'DESTROY_APPS', defaultValue: false, description: 'Initialize services')
-		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Initialize services')
+		booleanParam(name: 'DEPLOY_SERVICES', defaultValue: false, description: 'Deploy services')
+		booleanParam(name: 'DESTROY_SERVICES', defaultValue: false, description: 'Destroy services')
+		booleanParam(name: 'DEPLOY_APPS', defaultValue: false, description: 'Deploy Apps')
+		booleanParam(name: 'DESTROY_APPS', defaultValue: false, description: 'Destroy Apps')
+		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Pull and Push Dockers')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
 		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.528")
