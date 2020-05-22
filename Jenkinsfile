@@ -21,7 +21,6 @@ def deployServices(TERRAFORMINPUT){
     sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-services.hcl'
     // terraform validation
     sh 'terraform validate'
-    sh 'terraform fmt -check -diff'
     sh "terraform refresh"
     sh "terraform apply -auto-approve"
 }
@@ -36,8 +35,7 @@ def deployApp(TERRAFORMINPUT){
     sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-app.hcl'
     
     // terraform validation
-    sh 'terraform validate'
-    sh 'terraform fmt -check -diff'                 
+    sh 'terraform validate'   
     sh "terraform refresh"        
     // apply the terraform configuration    
     sh "terraform destroy -auto-approve"
