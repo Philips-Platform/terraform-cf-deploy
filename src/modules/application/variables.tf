@@ -18,3 +18,4 @@ variable "app_environment" {}
 variable "docker_registry_username" {}
 variable "docker_registry_password" {}
 variable "cups_services" {}
+variable org_name {}
