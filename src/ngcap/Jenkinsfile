@@ -24,7 +24,7 @@ pipeline {
 								bat "echo %USERNAME% > CF_USERNAME"
 								bat "echo %PASSWORD% > CF_PASSWORD"
 
-                                                        powershell '''
+                                                       		 powershell '''
 Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
 Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
 Get-ChildItem Env:CF_USERNAME
@@ -35,6 +35,8 @@ Get-ChildItem Env:CF_USERNAME
 '''
 								bat "del CF_USERNAME"
 								bat "del CF_PASSWORD"
+
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = \"docker.na1.hsdp.io/client-ngcap_dev-deploy\""
 							}
 						}
 		
@@ -68,7 +70,19 @@ Get-ChildItem Env:CF_USERNAME
 				
 				}
 
-			}	
+			}
+
+
+			post {
+				always {
+					dir('src') {
+						bat 'if exist default.tfvars ( del /q default.tfvars ) else ( echo no default.tfvars )'
+					}
+			
+				}
+			
+			}
+
 		}
 	}
 
