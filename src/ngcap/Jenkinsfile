@@ -1,9 +1,9 @@
 pipeline {
 	agent { node { label 'DEPLOY-TEST' } }
 	environment {
-		HTTPS_PROXY="http://amec.zscaler.philips.com:9480/"
-		HTTP_PROXY="http://amec.zscaler.philips.com:9480/"
-		NO_PROXY="devops-nexus.dev.local"
+		https_proxy="http://amec.zscaler.philips.com:9480/"
+		http_proxy="http://amec.zscaler.philips.com:9480/"
+		no_proxy="devops-nexus.dev.local"
                 ORG_LOWER = params.CLOUD_FOUNDRY_ORG.toLowerCase()
                 SPACE_LOWER = params.CLOUD_FOUNDRY_SPACE.toLowerCase()
 	}
