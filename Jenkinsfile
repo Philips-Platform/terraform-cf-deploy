@@ -86,7 +86,7 @@ node('docker') {
                             }
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                                 withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"]) {
-                                    sh 'echo $TF_CLI_ARGS'
+                                    sh 'echo $TF_CLI_ARGS $TF_VAR_CLOUD_FOUNDRY_SPACE $TF_VAR_stop_apps'
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                                     deployServices()
                                     deployApp()
