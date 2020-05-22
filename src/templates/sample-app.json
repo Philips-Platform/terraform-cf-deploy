@@ -8,7 +8,7 @@
             "docker_registry_password": "${var.DOCKER_REGISTRY_PASSWORD}",
             "app_memory": "${var.memory}",
             "app_disk_quota": "${var.disk_quota}",
-            "space_id": "${data.cloudfoundry_space.space.id}",
+            "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
             "app_hostname": "#APP-NAME#-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
             "app_domain": [
                 "${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}"
