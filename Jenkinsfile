@@ -15,7 +15,7 @@ def updateAppBackendWorkspace(){
     sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backends/backend-app.hcl"
     sh "sed -i 's/#appname#/$MicroserviceName/g' ./backends/backend-app.hcl"
 }
-def deployServices(TERRAFORMINPUT){
+def deployServices(){
     // update the services to be deployed
     sh 'cp ./templates/services.json ./main.tf.json'
     sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-services.hcl'
@@ -24,7 +24,7 @@ def deployServices(TERRAFORMINPUT){
     sh "terraform refresh"
     sh "terraform apply -auto-approve"
 }
-def deployApp(TERRAFORMINPUT){
+def deployApp(){
     // update the modules to be deployed 
     sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
     // update the service name in the template
@@ -87,8 +87,8 @@ node('docker') {
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                                 withEnv(["TF_CLI_ARGS='-var-file=${TERRAFORMINPUT} -var=CLOUD_FOUNDRY_SPACE=$CFSpaceName -var=stop_apps=false'"]) {
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                                    deployServices("${TERRAFORMINPUT}")
-                                    deployApp("${TERRAFORMINPUT}")
+                                    deployServices()
+                                    deployApp()
                                 }
                             }
                         }
