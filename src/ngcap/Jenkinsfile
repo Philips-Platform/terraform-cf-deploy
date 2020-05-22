@@ -1,9 +1,9 @@
 pipeline {
 	agent { node { label 'DEPLOY-TEST' } }
 	environment {
-		https_proxy="http://amec.zscaler.philips.com:9480/"
-		http_proxy="http://amec.zscaler.philips.com:9480/"
-		no_proxy="devops-nexus.dev.local"
+		HTTPS_PROXY="http://amec.zscaler.philips.com:9480/"
+		HTTP_PROXY="http://amec.zscaler.philips.com:9480/"
+		NO_PROXY="%DockerHost%,devops-nexus.dev.local"
                 ORG_LOWER = params.CLOUD_FOUNDRY_ORG.toLowerCase()
                 SPACE_LOWER = params.CLOUD_FOUNDRY_SPACE.toLowerCase()
 	}
@@ -79,7 +79,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Pull Docker Containers and Push to docker') {
 					steps {
-
+						bat "set"
 						bat "docker login devops-nexus.dev.local:18079 -u ngcap -p ngcap"
 						bat "docker pull devops-nexus.dev.local:18079/ngcap/sysconfig:${params.NGCAP_CS_VERSION}"
 						bat "docker pull devops-nexus.dev.local:18079/ngcap/fhirgw:${params.NGCAP_CS_VERSION}"
