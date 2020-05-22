@@ -108,7 +108,7 @@ Get-ChildItem Env:CF_USERNAME
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/outboundconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outboundconfig:${params.NGCAP_CS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/outbound:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outbound:${params.NGCAP_CS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/scheduler:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/scheduler:${params.NGCAP_CS_VERSION}"
-						bat "docker tag devops-nexus.dev.local:18079/ngcap/calctrace:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calctrace:${params.NGCAP_CS_VERSION}
+						bat "docker tag devops-nexus.dev.local:18079/ngcap/calctrace:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calctrace:${params.NGCAP_CS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/location:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/location:${params.NGCAP_CS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/locationconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/locationconfig:${params.NGCAP_CS_VERSION}"
 						bat "docker tag devops-nexus.dev.local:18079/ngcap/tenantconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/tenantconfig:${params.NGCAP_CS_VERSION}"
