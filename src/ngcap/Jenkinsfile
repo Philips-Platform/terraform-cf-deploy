@@ -98,7 +98,7 @@ Get-ChildItem Env:CF_USERNAME
 					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=backends\\backend-ngcap.hcl'
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
 
-									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.postgres-service, returnStatus: true)
+									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.postgres-service", returnStatus: true)
 									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.metrics-service", returnStatus: true)
 									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.logdrainer-service", returnStatus: true)
 									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.rabbitmq-service", returnStatus: true)
