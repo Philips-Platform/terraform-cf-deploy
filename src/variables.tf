@@ -20,8 +20,7 @@ variable "CLOUD_FOUNDRY_SPACE_USERS" {
   type = list
 
   default = [
-    "8b3ca926-d4cf-4d55-8dbd-4f8ede964e6b",
-    "a6ca0dc6-8606-40ca-8f50-7b8f7380a741"
+    "8b3ca926-d4cf-4d55-8dbd-4f8ede964e6b"
   ]
 }
 
