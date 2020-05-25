@@ -26,14 +26,8 @@ def deployServices(){
 }
 def deployApp(){
     // update the modules to be deployed 
-    sh 'cp -rf ./templates/sample-app.json ./main.tf.json'
-    // update the service name in the template
-    sh "sed -i 's/#APP-NAME#/$MicroserviceName/g' ./main.tf.json"
-    sh "sed -i 's/#IMAGE-NAME#/$DockerImageRepoName/g' ./main.tf.json"
-    sh "sed -i 's/#IMAGE-TAG#/$upstreamJobBuildNumber/g' ./main.tf.json"
-
+    sh 'cp -rf ./terraform-cf-manifest.json ./main.tf.json'
     sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-app.hcl'
-    
     // terraform validation
     sh 'terraform validate'   
     sh "terraform refresh"        
@@ -42,10 +36,6 @@ def deployApp(){
     sh "terraform apply -auto-approve"
 }
 node('docker') {
-    /* Requires the Docker Pipeline plugin to be installed */
-    stage('checkout'){
-        checkout scm
-    }
     properties([
             parameters([string(
                 defaultValue: 'latest', 
@@ -66,14 +56,28 @@ node('docker') {
                 defaultValue: 'sandbox', 
                 description: 'CF Space name', 
                 name: 'CFSpaceName', 
+                trim: true),
+                string(
+                defaultValue: 'sandbox', 
+                description: 'Comma separated CF Space user list', 
+                name: 'CFSpaceUsers', 
                 trim: true)
             ])
         ])
+    /* Requires the Docker Pipeline plugin to be installed */
+    stage('checkout'){
+        checkout scm
+    }
+    stage('download artifacts'){
+        copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "${MicroserviceName}", selector: specific("${UpstreamJobBuildNumber}")
+        unzip zipFile: './terraform-cf-manifest.zip'
+    }
     stage('CF deployment') {
         try{
             docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
                 withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
                     dir("${env.WORKSPACE}/src"){
+                        // add curl
                         sh 'apk add --update curl'
                         withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
@@ -86,7 +90,6 @@ node('docker') {
                             }
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                                 withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"]) {
-                                    sh 'echo $TF_CLI_ARGS $TF_VAR_CLOUD_FOUNDRY_SPACE $TF_VAR_stop_apps'
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                                     deployServices()
                                     deployApp()
