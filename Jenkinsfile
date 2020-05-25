@@ -70,7 +70,7 @@ node('docker') {
     }
     stage('download artifacts'){
         copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "Philips-Platform/${MicroserviceName}/master", selector: specific("${UpstreamJobBuildNumber}")
-        unzip zipFile: './terraform-cf-manifest.zip'
+        unzip zipFile: './terraform-cf-manifest.zip' dir: 'src'
     }
     stage('CF deployment') {
         try{
