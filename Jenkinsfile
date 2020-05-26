@@ -90,9 +90,8 @@ node('docker') {
                             }
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                                 def pwds = readJSON file: "${TERRAFORMINPUT}"
-                                withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"],
-                                "CLOUD_FOUNDRY_API=https://api.cloud.pcftest.com", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
-                                "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}") {
+                                withEnv(["CLOUD_FOUNDRY_API=https://api.cloud.pcftest.com", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
+                                "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]) {
                                     sh './scripts/install-cf-cli.sh'
                                     sh './scripts/cf-login.sh'
                                     sh './scripts/get-cf-users.sh > user-details.txt'
