@@ -78,7 +78,7 @@ node('docker') {
                 withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
                     dir("${env.WORKSPACE}/src"){
                         // add curl
-                        sh 'apk add --update curl jq'
+                        sh 'apk add --update curl jq bash'
                         withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
                                 withCredentials([file(credentialsId: 'workspace.json', variable: 'WORKSPACEJSON')]) {
@@ -98,7 +98,7 @@ node('docker') {
                                 }
 
                                 withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"],
-                                "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}") {
+                                "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}") {
                                     echo "$TF_VAR_CLOUD_FOUNDRY_SPACE_USERS"
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                                     deployServices()

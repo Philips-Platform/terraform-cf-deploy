@@ -1,3 +1,5 @@
+#!/bin/bash
+
 users=$CFSpaceUsers
 IFS=', ' read -r -a usersArray <<< "$users"
 userguids=()
