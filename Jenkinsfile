@@ -89,7 +89,7 @@ node('docker') {
                                 }
                             }
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-                                def pwds = readJson file: "${TERRAFORMINPUT}"
+                                def pwds = readJSON file: "${TERRAFORMINPUT}"
                                 withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"],
                                 "CLOUD_FOUNDRY_API=https://api.cloud.pcftest.com", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
                                 "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}") {
