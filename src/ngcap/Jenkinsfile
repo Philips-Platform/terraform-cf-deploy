@@ -314,9 +314,10 @@ Get-ChildItem Env:CF_USERNAME
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 
 
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",`\""
+									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
+									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\"\""
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
