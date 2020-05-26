@@ -43,22 +43,22 @@ node('docker') {
                 name: 'UpstreamJobBuildNumber', 
                 trim: true),
                 string(
-                defaultValue: '', 
+                defaultValue: 'patient-registration', 
                 description: 'Deployment candidate microservice', 
                 name: 'MicroserviceName', 
                 trim: true),
                 string(
-                defaultValue: '', 
+                defaultValue: 'patient-registration', 
                 description: 'Docker Repo name', 
                 name: 'DockerImageRepoName', 
                 trim: true),
                 string(
-                defaultValue: 'sandbox', 
+                defaultValue: 'sandbox5', 
                 description: 'CF Space name', 
                 name: 'CFSpaceName', 
                 trim: true),
                 string(
-                defaultValue: 'pca-acs-cicd-svc', 
+                defaultValue: 'ascarlat,gsankaran,pthelusma,ngupta', 
                 description: 'Comma separated CF Space user list', 
                 name: 'CFSpaceUsers', 
                 trim: true)
@@ -98,7 +98,7 @@ node('docker') {
                                 }
 
                                 withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"],
-                                "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: './scripts/get-cf-user-guids.sh')}") {
+                                "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: '${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh')}") {
                                     echo "$TF_VAR_CLOUD_FOUNDRY_SPACE_USERS"
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                                     deployServices()
