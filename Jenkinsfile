@@ -58,7 +58,7 @@ node('docker') {
                 name: 'CFSpaceName', 
                 trim: true),
                 string(
-                defaultValue: 'sandbox', 
+                defaultValue: 'pca-acs-cicd-svc', 
                 description: 'Comma separated CF Space user list', 
                 name: 'CFSpaceUsers', 
                 trim: true)
@@ -89,7 +89,17 @@ node('docker') {
                                 }
                             }
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-                                withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"]) {
+                                def pwds = readJson file: "${TERRAFORMINPUT}"
+                                withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"],
+                                "CLOUD_FOUNDRY_API=https://api.cloud.pcftest.com", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
+                                "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}") {
+                                    sh './scripts/install-cf-cli.sh'
+                                    sh './scripts/cf-login.sh'
+                                    sh './scripts/get-cf-users.sh > user-details.txt'
+                                }
+
+                                withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"],
+                                "TF_VAR_CLOUD_FOUNDRY_USERS=${sh(returnStdout: true, script: './scripts/get-cf-user-guids.sh user-details.txt')}") {
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                                     deployServices()
                                     deployApp()
