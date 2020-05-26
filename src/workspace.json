@@ -1,0 +1,10 @@
+{
+    "data": {
+        "attributes": {
+            "name": "platform-#spacename#-#subname#",
+            "terraform_version": "0.12.1",
+            "operations": false
+        },
+        "type": "workspaces"
+    }
+}
