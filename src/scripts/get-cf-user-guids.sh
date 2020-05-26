@@ -7,7 +7,7 @@ while IFS= read -r line; do
 	username=`echo $line | cut -d'.' -f 1`
     if [[ " ${usersArray[@]} " =~ " ${username} " ]]; then
 		userguid=`echo $line | cut -d'.' -f 2`
-		userguids+=( "${userguid}" )
+		userguids+=( "\"${userguid}\"" )
 	fi
 done < "user-details.txt"
 guids_string="${userguids[*]}"
