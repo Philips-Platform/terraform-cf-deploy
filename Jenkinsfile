@@ -78,7 +78,7 @@ node('docker') {
                 withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
                     dir("${env.WORKSPACE}/src"){
                         // add curl
-                        sh 'apk add --update curl'
+                        sh 'apk add --update curl jq'
                         withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
                                 withCredentials([file(credentialsId: 'workspace.json', variable: 'WORKSPACEJSON')]) {
