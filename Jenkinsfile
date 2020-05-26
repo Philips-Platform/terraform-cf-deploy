@@ -98,7 +98,8 @@ node('docker') {
                                 }
 
                                 withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false"],
-                                "TF_VAR_CLOUD_FOUNDRY_USERS=${sh(returnStdout: true, script: './scripts/get-cf-user-guids.sh user-details.txt')}") {
+                                "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: './scripts/get-cf-user-guids.sh')}") {
+                                    echo "$TF_VAR_CLOUD_FOUNDRY_SPACE_USERS"
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                                     deployServices()
                                     deployApp()

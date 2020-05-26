@@ -9,7 +9,7 @@ while IFS= read -r line; do
 		userguid=`echo $line | cut -d'.' -f 2`
 		userguids+=( "${userguid}" )
 	fi
-done < "$1"
+done < "user-details.txt"
 guids_string="${userguids[*]}"
 echo "[$guids_string]" | sed 's/ /,/g'
 
