@@ -241,7 +241,7 @@ Get-ChildItem Env:CF_USERNAME
                         						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.password},connectTimeout=60000,syncTimeout=60000\"'"
+                        						powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000\"'"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
