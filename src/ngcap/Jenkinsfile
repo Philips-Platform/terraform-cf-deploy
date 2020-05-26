@@ -213,13 +213,13 @@ Get-ChildItem Env:CF_USERNAME
 								        bat "copy /Y templates\\sample-app.json main.tf.json"
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 
-									powershell "Add-Content -Path env.txt -Value '\"Calcconfig\" = \"http://calc-config-'+\$Env:ORG_LOWER+'-'+\$Env:SPACE_LOWER+'.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
-									powershell "Add-Content -Path env.txt -Value '                \"Fhir\" = \"http://fhir-gw-'+\$Env:ORG_LOWER+'-'+\$Env:SPACE_LOWER+'.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
-         								powershell "Add-Content -Path env.txt -Value '                \"Generic\" = \"http://generic-gw-'+\$Env:ORG_LOWER+'-'+\$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'" 
-         								powershell "Add-Content -Path env.txt -Value '                \"GenericSupport\" = \"http://generic-support-gw-'+\$Env:ORG_LOWER+'-'+\$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
-         								powershell "Add-Content -Path env.txt -Value '                \"OutboundConfig\" = \"http://outbound-config-'+\$Env:ORG_LOWER+'-'+\$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
-         								powershell "Add-Content -Path env.txt -Value '                \"TenantConfig\" = \"http://tenant-config-'+\$Env:ORG_LOWER+'-'+\$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
-         								powershell "Add-Content -Path env.txt -Value '                \"Authentication\" = \"http://authenticationsvc-'+\$Env:ORG_LOWER+'-'+\$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
+									powershell "Add-Content -Path env.txt -Value \"`\"Calcconfig`\" = `\"http://calc-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+									powershell "Add-Content -Path env.txt -Value \"                `\"Fhir`\" = `\"http://fhir-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         								powershell "Add-Content -Path env.txt -Value \"                `\"Generic`\" = `\"http://generic-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\"" 
+         								powershell "Add-Content -Path env.txt -Value \"                `\"GenericSupport`\" = `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         								powershell "Add-Content -Path env.txt -Value \"		       `\"OutboundConfig\" = `\"http://outbound-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         								powershell "Add-Content -Path env.txt -Value \"                `\"TenantConfig`\" = `\"http://tenant-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" = `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 								 	powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",'"
                        							powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Password\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}\",'"
@@ -314,9 +314,9 @@ Get-ChildItem Env:CF_USERNAME
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 
 
-									powershell "Add-Content -Path env.txt -Value '\"SystemConfigBaseUrl\" = \"http://sys-config-'+\$Env:ORG_LOWER+'-'+\$Env:SPACE_LOWER+'.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
-									powershell "Add-Content -Path env.txt -Value '                \"METRICS_PROMETHEUS\" = \"true\",'"
-									powershell "Add-Content -Path env.txt -Value '                \"USE_MONGO\" = \"false\",'"
+									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" = `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",`\""
+									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" = `\"true`\",\""
+									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" = `\"false`\",\""
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
