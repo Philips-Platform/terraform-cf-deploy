@@ -90,7 +90,7 @@ node('docker') {
                             }
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                                 def pwds = readJSON file: "${TERRAFORMINPUT}"
-                                withEnv(["CLOUD_FOUNDRY_API=https://api.cloud.pcftest.com", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
+                                withEnv(["CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
                                 "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]) {
                                     sh './scripts/install-cf-cli.sh'
                                     sh './scripts/cf-login.sh'
@@ -100,6 +100,7 @@ node('docker') {
                                 withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false",
                                 "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]) {
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                                    echo "$TF_VAR_CLOUD_FOUNDRY_SPACE_USERS"
                                     deployServices()
                                     deployApp()
                                 }
