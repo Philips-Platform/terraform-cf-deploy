@@ -199,6 +199,8 @@ Get-ChildItem Env:CF_USERNAME
 					when {
 						allOf {
 							expression { "${params.DESTROY_SERVICES}" == "false" }
+							expression { "${params.DESTROY_APPS}" == "false" }
+							expression { "${params.DEPLOY_APPS}" == "true" }
 						}
 					}
 
@@ -210,7 +212,15 @@ Get-ChildItem Env:CF_USERNAME
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        bat "copy /Y templates\\sample-app.json main.tf.json"
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-								 	powershell "Add-Content -Path env.txt -Value '\"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
+
+									powershell "Add-Content -Path env.txt -Value '\"Calcconfig\" = \"http://calc-config-'+$Env:ORG_LOWER+'-'+$Env:SPACE_LOWER+'.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
+									powershell "Add-Content -Path env.txt -Value '                \"Fhir\" = \"http://fhir-gw-'+$Env:ORG_LOWER+'-'+$Env:SPACE_LOWER+'.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
+         								powershell "Add-Content -Path env.txt -Value '                \"Generic\" = \"http://generic-gw-'+$Env:ORG_LOWER+'-'+$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'" 
+         								powershell "Add-Content -Path env.txt -Value '                \"GenericSupport\" = \"http://generic-support-gw-'+$Env:ORG_LOWER+'-'+$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
+         								powershell "Add-Content -Path env.txt -Value '                \"OutboundConfig\" = \"http://outbound-config-'+$Env:ORG_LOWER+'-'+$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
+         								powershell "Add-Content -Path env.txt -Value '                \"TenantConfig\" = \"http://tenant-config-'+$Env:ORG_LOWER+'-'+$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
+         								powershell "Add-Content -Path env.txt -Value '                \"Authentication\" = \"http://authenticationsvc-'+$Env:ORG_LOWER+'-'+$Env:SPACE_LOWER+'.${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'
+								 	powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",'"
                        							powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Password\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.VirtualHost\": \"vhost\",'"
@@ -245,12 +255,35 @@ Get-ChildItem Env:CF_USERNAME
 							}
 						}
 					
-					
 					}	
-
 
 				}
 
+			  	stage('Destroy SysConfig') {
+
+                                        when {
+                                                allOf {
+                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
+                                                        expression { "${params.DESTROY_APPS}" == "true" }
+                                                        expression { "${params.DEPLOY_APPS}" == "false" }
+                                                }
+                                        }
+
+					steps {
+
+						bat "copy /Y templates\\sample-app.json main.tf.json"
+						powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
+						powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+						powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
+						powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
+						powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+						bat "type main.tf.json"
+						bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-sysconfig.hcl'
+						bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+						bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+					}
+
+				}
 
 			}
 
