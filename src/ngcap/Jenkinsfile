@@ -292,6 +292,88 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
+
+
+				stage('Deploy Fhir Gateway') {
+
+					when {
+						allOf {
+							expression { "${params.DESTROY_SERVICES}" == "false" }
+							expression { "${params.DESTROY_APPS}" == "false" }
+							expression { "${params.DEPLOY_APPS}" == "true" }
+						}
+					}
+
+
+					steps {
+					
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        bat "copy /Y templates\\sample-app.json main.tf.json"
+									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+
+
+									powershell "Add-Content -Path env.txt -Value '\"SystemConfigBaseUrl\" = \"http://sys-config-'+$Env:ORG_LOWER+'-'+$Env:SPACE_LOWER+'.\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000\",'"
+									powershell "Add-Content -Path env.txt -Value '                \"METRICS_PROMETHEUS\" = \"true\",'"
+									powershell "Add-Content -Path env.txt -Value '                \"USE_MONGO\" = \"false\",'"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','fhirgw' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									bat "type main.tf.json"
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-fhirgw.hcl'
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+
+								}
+							}
+						}
+					
+					}	
+
+				}
+
+			  	stage('Destroy Fhir Gateway') {
+
+                                        when {
+                                                allOf {
+                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
+                                                        expression { "${params.DESTROY_APPS}" == "true" }
+                                                        expression { "${params.DEPLOY_APPS}" == "false" }
+                                                }
+                                        }
+
+					steps {
+
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+
+									bat "copy /Y templates\\sample-app.json main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','fhirgw' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									bat "type main.tf.json"
+									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-fhirgw.hcl'
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
+								}
+							}
+						}
+					}
+
+				}
+
+
+
+
+
+
+
 			}
 
 
