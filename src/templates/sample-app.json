@@ -19,7 +19,8 @@
             ],
             "app_services": {
                 "postgres": "postgreskey",
-                "rabbitmq": "rabbitmqkey"
+                "rabbitmq": "rabbitmqkey",
+                "redis": "rediskey"
             },
             "cups_services": [
                 "ngcap_log_drainer"
