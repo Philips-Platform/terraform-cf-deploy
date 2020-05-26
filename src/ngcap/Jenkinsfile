@@ -271,16 +271,23 @@ Get-ChildItem Env:CF_USERNAME
 
 					steps {
 
-						bat "copy /Y templates\\sample-app.json main.tf.json"
-						powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-						powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-						powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
-						powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
-						powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-						bat "type main.tf.json"
-						bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-sysconfig.hcl'
-						bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-						bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+
+									bat "copy /Y templates\\sample-app.json main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									bat "type main.tf.json"
+									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-sysconfig.hcl'
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+								}
+							}
+						}
 					}
 
 				}
