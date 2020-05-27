@@ -740,7 +740,6 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-/*
 
 				stage('Deploy Execution') {
 
@@ -882,7 +881,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-
+/*
 
 				stage('Deploy Outbound Config') {
 
