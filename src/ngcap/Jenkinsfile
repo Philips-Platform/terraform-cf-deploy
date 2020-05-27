@@ -16,7 +16,7 @@ pipeline {
 		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.806")
 		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
 		string(name:'STOP_APPS',defaultValue: "true")
-		string(name:'TERRAFORM_OP",defaultValue: "destroy")
+		string(name:'TERRAFORM_OP',defaultValue: "destroy")
 	}
 	stages {
                 stage('Secure Agent') {
