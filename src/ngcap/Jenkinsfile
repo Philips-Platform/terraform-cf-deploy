@@ -303,7 +303,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"DbInfo`\" : `\"supportDB`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"DbInfoArchive`\" : `\"supportArchiveDB`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"pathReplace`\" : `\"api/generic.api/genericsupport`\"\""
+									powershell "Add-Content -Path env.txt -Value \"                `\"pathReplace`\" : `\"api/generic,api/genericsupport`\"\""
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json"
@@ -749,16 +749,9 @@ Get-ChildItem Env:CF_USERNAME
 				       		withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 
 
-   								bat "echo %USERNAME%>CF_USERNAME"
-                                                                bat "echo %PASSWORD%>CF_PASSWORD"
-                                                                 powershell '''
-Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
-Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
-Get-ChildItem Env:CF_USERNAME
-docker login docker.na1.hsdp.io/$Env:ORG_LOWER_$Env:SPACE_LOWER% -u $Env:CF_USERNAME% -p $Env:CF_PASSWORD
-'''
+							bat "set NO_PROXY=%DockerHost% && docker login docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER% -u %USERNAME% -p %PASSWORD%"
 
-                                                	bat "docker run -e host=ngcap-api-${params.CLOUD_FOUNDRY_ORG}-${params.CLOUD_FOUNDRY_SPACE}.us-east.philips-healthsuite.com -e port=80 -e force=true   docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${NGCAP_STARTER_VERSION}"
+                                                	bat "set NO_PROXY=%DockerHost% && docker run -e host=ngcap-api-${params.CLOUD_FOUNDRY_ORG}-${params.CLOUD_FOUNDRY_SPACE}.us-east.philips-healthsuite.com -e port=80 -e force=true   docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${NGCAP_STARTER_VERSION}"
 
 						}
 
