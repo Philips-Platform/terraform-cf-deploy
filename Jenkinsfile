@@ -37,7 +37,11 @@ def deployApp(){
 }
 node('docker') {
     properties([
-            parameters([
+            parameters([string(
+                defaultValue: 'latest', 
+                description: 'Upstream Job Build Number', 
+                name: 'UpstreamJobBuildNumber', 
+                trim: true),
                 string(
                 defaultValue: 'patient-registration', 
                 description: 'Deployment candidate microservice', 
@@ -65,7 +69,7 @@ node('docker') {
         checkout scm
     }
     stage('download artifacts'){
-        copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "Philips-Platform/${MicroserviceName}/master"
+        copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "Philips-Platform/${MicroserviceName}/master", selector: specific("${UpstreamJobBuildNumber}")
         unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
     }
     stage('CF deployment') {
