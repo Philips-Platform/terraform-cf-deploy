@@ -740,7 +740,14 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-/*				
+			}
+
+		}
+
+		stage('Secure Agent') {
+                	agent { node ( "${env.NODE_NAME}-work" ) }
+                        stages {
+
 
 				stage('Deploy Execution') {
 
@@ -810,7 +817,7 @@ Get-ChildItem Env:CF_USERNAME
 					}
 
 				}
-
+/*
 				stage('Deploy Outbound') {
 
 					when {
