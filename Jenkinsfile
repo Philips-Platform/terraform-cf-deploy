@@ -15,24 +15,16 @@ def updateAppBackendWorkspace(){
     sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backends/backend-app.hcl"
     sh "sed -i 's/#appname#/$MicroserviceName/g' ./backends/backend-app.hcl"
 }
-def deployServices(){
+def deploy(manifestJson, backendFile, destroy = true){
     // update the services to be deployed
-    sh 'cp ./templates/services.json ./main.tf.json'
-    sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-services.hcl'
+    sh "cp ${manifestJson} ./main.tf.json"
+    sh "terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=${backendFile}"
     // terraform validation
     sh 'terraform validate'
     sh "terraform refresh"
-    sh "terraform apply -auto-approve"
-}
-def deployApp(){
-    // update the modules to be deployed 
-    sh 'cp -rf ./terraform-cf-manifest.json ./main.tf.json'
-    sh 'terraform init -plugin-dir=../plugins/linux_amd64 -backend-config=./backends/backend-app.hcl'
-    // terraform validation
-    sh 'terraform validate'   
-    sh "terraform refresh"        
-    // apply the terraform configuration    
-    sh "terraform destroy -auto-approve"
+    if(destroy){
+        sh "terraform destroy -auto-approve"
+    }
     sh "terraform apply -auto-approve"
 }
 node('docker') {
@@ -99,8 +91,9 @@ node('docker') {
                                 "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]) {
                                     sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                                     echo "$TF_VAR_CLOUD_FOUNDRY_SPACE_USERS"
-                                    deployServices()
-                                    deployApp()
+                                    deploy("./templates/services.json", "./backends/backend-services.hcl", false)
+                                    deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
+                                    
                                 }
                             }
                         }
