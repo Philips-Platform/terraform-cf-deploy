@@ -8,9 +8,7 @@ pipeline {
 	}
 	parameters {
 		booleanParam(name: 'DEPLOY_SERVICES', defaultValue: false, description: 'Deploy services')
-		booleanParam(name: 'DESTROY_SERVICES', defaultValue: false, description: 'Destroy services')
 		booleanParam(name: 'DEPLOY_APPS', defaultValue: false, description: 'Deploy Apps')
-		booleanParam(name: 'DESTROY_APPS', defaultValue: false, description: 'Destroy Apps')
 		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Pull and Push Dockers')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
@@ -53,12 +51,7 @@ Get-ChildItem Env:CF_USERNAME
 				}
 
 				stage('Create Services') {
-					when {
-						allOf {
-							expression { "${params.DEPLOY_SERVICES}" == "true" }
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-						}
-					}
+					when { expression { "${params.DEPLOY_SERVICES}" == "true" } }
 					steps {
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         dir('src') {
@@ -83,48 +76,8 @@ Get-ChildItem Env:CF_USERNAME
 				}
 
 
-				stage('Destroy Services') {
-					when {
-						allOf {
-							expression { "${params.DEPLOY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_SERVICES}" == "true" }
-						}
-					}
-					steps {
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        bat "copy /Y templates\\services.json main.tf.json"	
-					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-services.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-
-									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.postgres-service", returnStatus: true)
-									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.metrics-service", returnStatus: true)
-									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.logdrainer-service", returnStatus: true)
-									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.rabbitmq-service", returnStatus: true)
-									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.redis-service", returnStatus: true)
-									bat ( script:"E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve -target=module.cloud-space", returnStatus: true)
-
-								 }
-
-							}
-						}
-
-					}
-				
-				}
-
-
-
-
 				stage('Pull Docker Containers and Push to docker') {
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.MOVE_DOCKERS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.MOVE_DOCKERS}" == "true" } }
 					steps {
 						bat "set"
 						bat "set NO_PROXY=%DockerHost% && docker login devops-nexus.dev.local:18079 -u ngcap -p ngcap"
@@ -196,15 +149,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy SysConfig') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 					steps {
 					
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
@@ -260,51 +205,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy SysConfig') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-sysconfig.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
 
 				stage('Deploy Fhir Gateway') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -337,51 +241,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy Fhir Gateway') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','fhirgw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-fhirgw.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
 
 				stage('Deploy Generic Gateway') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -413,51 +276,9 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy Generic Gateway') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-gw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-generic.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
-
 				stage('Deploy Generic Support Gateway') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -490,51 +311,11 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy Generic Support Gateway') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-genericsupport.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
 
 
 				stage('Deploy Calc Trace') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -563,50 +344,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy Calc Trace') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-trace' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calctrace' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-calctrace.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
 
 				stage('Deploy Calc Config') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -634,49 +375,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy Calc Config') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calcconfig' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-calcconfig.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
 
 				stage('Deploy Dispatcher') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -708,57 +410,9 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy Dispatcher') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','dispatcher' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','dispatcher' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-dispatcher.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-			}
-
-		}
-
-		stage('Secure Agent') {
-                	agent { node ( "${env.NODE_NAME}-work" ) }
-                        stages {
-
-
 				stage('Deploy Execution') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -786,48 +440,9 @@ Get-ChildItem Env:CF_USERNAME
 					}	
 				}
 				
-			  	stage('Destroy Execution') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','execution' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','execution' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-execution.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-/*
 				stage('Deploy Outbound') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -856,49 +471,9 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy Outbound') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outbound' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-outbound.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
 				stage('Deploy Outbound Config') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -925,51 +500,11 @@ Get-ChildItem Env:CF_USERNAME
 					}	
 
 				}
-
-			  	stage('Destroy Outbound Config') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outboundconfig' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-outbound-config.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
 
 
 				stage('Deploy Scheduler') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -994,52 +529,13 @@ Get-ChildItem Env:CF_USERNAME
 						}
 					
 					}	
-
-				}
-
-			  	stage('Destroy Scheduler') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','scheduler' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','scheduler' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-outbound-config.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
 
 				}
 
 
 				stage('Deploy Authentication') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -1070,50 +566,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy Authentication') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','authenticationsvc' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','authenticationsvc' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-authentication.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
 
 				stage('Deploy SystemConfigUI') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -1144,50 +600,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy SystemConfigUI') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','systemconfigui' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-system-config-ui.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
 
 				stage('Deploy TenantConfig') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -1215,49 +631,10 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy TenantConfig') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\sample-app.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','tenantconfig' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-tenant-config.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
 
 				stage('Deploy API Gateway') {
 
-					when {
-						allOf {
-							expression { "${params.DESTROY_SERVICES}" == "false" }
-							expression { "${params.DESTROY_APPS}" == "false" }
-							expression { "${params.DEPLOY_APPS}" == "true" }
-						}
-					}
-
+					when { expression { "${params.DEPLOY_APPS}" == "true" } }
 
 					steps {
 					
@@ -1282,39 +659,6 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-			  	stage('Destroy API Gateway') {
-
-                                        when {
-                                                allOf {
-                                                        expression { "${params.DESTROY_SERVICES}" == "false" }
-                                                        expression { "${params.DESTROY_APPS}" == "true" }
-                                                        expression { "${params.DEPLOY_APPS}" == "false" }
-                                                }
-                                        }
-
-					steps {
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
-								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									bat "copy /Y templates\\api-gateway.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','tenantconfig' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
-									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-tenant-config.hcl'
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
-								}
-							}
-						}
-					}
-
-				}
-
-
-
-				*/
 
 			}
 
