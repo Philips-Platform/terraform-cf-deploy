@@ -665,7 +665,6 @@ Get-ChildItem Env:CF_USERNAME
 					}
 
 				}
-/*
 
 
 				stage('Deploy Dispatcher') {
@@ -812,7 +811,7 @@ Get-ChildItem Env:CF_USERNAME
 					}
 
 				}
-
+/*
 
 				stage('Deploy Outbound') {
 
