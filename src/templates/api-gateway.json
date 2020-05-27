@@ -3,14 +3,11 @@
         "#APP-NAME#": {
             "source": "./modules/ngcap-api-gateway",
             "app_name": "#APP-NAME#",
-            "app_docker_image": "${var.DOCKER_REGISTRY_NAMESPACE}/#IMAGE-NAME#:#IMAGE-TAG#",
-            "docker_registry_username": "${var.DOCKER_REGISTRY_USERNAME}",
-            "docker_registry_password": "${var.DOCKER_REGISTRY_PASSWORD}",
             "app_memory": "${var.memory}",
             "app_disk_quota": "${var.disk_quota}",
             "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
             "org_name": "${var.CLOUD_FOUNDRY_ORG}",
-            "app_hostname": "#APP-NAME#-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
+            "app_hostbase": "${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
             "app_internal_domain": "${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}",
             "app_external_domain": "${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}",
             "app_stopped": "${var.stop_apps}"

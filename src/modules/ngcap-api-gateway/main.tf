@@ -5,18 +5,6 @@ data "cloudfoundry_space" "space" {
 data "cloudfoundry_org" "org" {
   name = var.org_name
 }
-data "cloudfoundry_domain" "domain" {
-  for_each = toset(var.app_domain)
-  name     = each.value
-}
-
-resource "cloudfoundry_route" "route" {
-
-  for_each = data.cloudfoundry_domain.domain
-  domain   = each.value.id
-  space    = data.cloudfoundry_space.space.id
-  hostname = var.app_hostname
-}
 
 
 
@@ -227,7 +215,7 @@ resource "cloudfoundry_route" "ngcap_external_route" {
 
 resource "cloudfoundry_app" "ngcap_api_instance" {
   name         = var.app_name
-  space        = var.space_id
+  space        = data.cloudfoundry_space.space.id 
   memory       = var.app_memory
   disk_quota   = var.app_disk_quota
   path = "${path.module}/api-gateway-nginx.zip"

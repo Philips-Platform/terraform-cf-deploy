@@ -1,5 +1,5 @@
 variable "app_name" {}
-variable "space_id" {}
+variable "space_name" {}
 variable "app_memory" {} 
 variable "app_disk_quota" {} 
 variable "app_internal_domain" {} 
