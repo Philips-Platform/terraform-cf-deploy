@@ -1,3 +1,24 @@
+data "cloudfoundry_space" "space" {
+  name = lower(var.space_name)
+  org  = data.cloudfoundry_org.org.id
+}
+data "cloudfoundry_org" "org" {
+  name = var.org_name
+}
+data "cloudfoundry_domain" "domain" {
+  for_each = toset(var.app_domain)
+  name     = each.value
+}
+
+resource "cloudfoundry_route" "route" {
+
+  for_each = data.cloudfoundry_domain.domain
+  domain   = each.value.id
+  space    = data.cloudfoundry_space.space.id
+  hostname = var.app_hostname
+}
+
+
 
 resource "local_file" "nginx_conf" {
   filename = "${path.module}/api-gateway-nginx/nginx.conf"
