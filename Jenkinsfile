@@ -1,12 +1,12 @@
-def createInfraBackendWorkspace(workspaceJsonFile, apiToken){
-    sh "sed 's/#spacename#/$CFSpaceName/g' $workspaceJsonFile > infra-workspace.json"
-    sh "sed -i 's/#subname#/infra/g' infra-workspace.json"
-    sh "curl --header 'Authorization: Bearer $apiToken' --header 'Content-Type: application/vnd.api+json' --request POST --data @'infra-workspace.json' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
+def createInfraBackendWorkspace(){
+    withEnv(["TERRAFORM_WORKSPACE_SUBSECTION=infra"]){
+        sh './scripts/terraform-create-workspace.sh'
+    }
 }
-def createAppBackendWorkspace(workspaceJsonFile, apiToken){
-    sh "sed 's/#spacename#/$CFSpaceName/g' $workspaceJsonFile > app-workspace.json"
-    sh "sed -i 's/#subname#/$MicroserviceName/g' app-workspace.json"
-    sh "curl --header 'Authorization: Bearer $apiToken' --header 'Content-Type: application/vnd.api+json' --request POST --data @'app-workspace.json' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
+def createAppBackendWorkspace(){
+    withEnv(["TERRAFORM_WORKSPACE_SUBSECTION=${MicroserviceName}"]){
+        sh './scripts/terraform-create-workspace.sh'
+    }
 }
 def updateInfraBackendWorkspace(){
     sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backends/backend-services.hcl"
@@ -69,7 +69,7 @@ node('docker') {
         checkout scm
     }
     stage('download artifacts'){
-        copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "Philips-Platform/${MicroserviceName}/master", selector: specific("${UpstreamJobBuildNumber}")
+        copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "Philips-Platform/${MicroserviceName}/master", selector: lastSuccessful
         unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
     }
     stage('CF deployment') {
@@ -77,16 +77,14 @@ node('docker') {
             docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
                 withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
                     dir("${env.WORKSPACE}/src"){
-                        // add curl
+                        // add curl, jq and bash
                         sh 'apk add --update curl jq bash'
                         withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
-                            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TERRAFORM-TOKEN', passwordVariable: 'TOKEN']]) {
-                                withCredentials([file(credentialsId: 'workspace.json', variable: 'WORKSPACEJSON')]) {
-                                    createInfraBackendWorkspace("${WORKSPACEJSON}", "${TOKEN}")
-                                    createAppBackendWorkspace("${WORKSPACEJSON}", "${TOKEN}")
-                                    updateInfraBackendWorkspace()
-                                    updateAppBackendWorkspace()
-                                }
+                            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TOKEN', passwordVariable: 'TERRAFORM_API_TOKEN']]) {
+                                createInfraBackendWorkspace("${TOKEN}")
+                                createAppBackendWorkspace("${TOKEN}")
+                                updateInfraBackendWorkspace()
+                                updateAppBackendWorkspace()
                             }
                             withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
                                 def pwds = readJSON file: "${TERRAFORMINPUT}"
