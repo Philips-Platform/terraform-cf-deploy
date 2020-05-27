@@ -627,7 +627,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\",\"\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','systemconfigui' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfigui' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-system-config-ui.hcl'
