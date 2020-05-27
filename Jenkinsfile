@@ -81,8 +81,8 @@ node('docker') {
                         sh 'apk add --update curl jq bash'
                         withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
                             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TOKEN', passwordVariable: 'TERRAFORM_API_TOKEN']]) {
-                                createInfraBackendWorkspace("${TOKEN}")
-                                createAppBackendWorkspace("${TOKEN}")
+                                createInfraBackendWorkspace()
+                                createAppBackendWorkspace()
                                 updateInfraBackendWorkspace()
                                 updateAppBackendWorkspace()
                             }
