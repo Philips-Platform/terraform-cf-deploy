@@ -12,18 +12,18 @@
             "org_name": "${var.CLOUD_FOUNDRY_ORG}",
             "app_hostname": "#APP-NAME#-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
             "app_domain": [
-                "${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}"
+               #APP_DOMAIN# 
             ],
             "app_ports": [
                 #APP_PORTS#
             ],
             "app_services": {
-                "postgres": "postgreskey",
-                "rabbitmq": "rabbitmqkey",
-                "redis": "rediskey"
+		"postgres": "postgreskey",
+		"rabbitmq": "rabbitmqkey",
+		"redis": "rediskey"
             },
             "cups_services": [
-                "ngcap_log_drainer"
+               #APP_CUPS# 
             ],
             "app_environment": {
                 #APP_ENV#

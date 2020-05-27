@@ -190,6 +190,8 @@ Get-ChildItem Env:CF_USERNAME
                         						powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000\"'"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
@@ -227,6 +229,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','fhirgw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -262,6 +266,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-gw' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -297,6 +303,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -329,6 +337,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"`\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-trace' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calctrace' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
@@ -361,6 +371,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-config' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calcconfig' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -396,6 +408,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','dispatcher' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','dispatcher' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -427,6 +441,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','execution' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '\\\${var.memory}','1024' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','execution' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
@@ -458,6 +474,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outbound' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -488,6 +506,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound-config' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outboundconfig' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -519,6 +539,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','scheduler' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','scheduler' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -553,6 +575,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','authenticationsvc' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','authenticationsvc' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -587,6 +611,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN},\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','systemconfigui' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -618,6 +644,8 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','tenantconfig' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -643,7 +671,7 @@ Get-ChildItem Env:CF_USERNAME
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         dir('src') {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        bat "copy /Y templates\\api-gateway.json main.tf.json"
+								        bat "copy /Y ngcap\\api-gateway.json main.tf.json"
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-api' | Set-Content main.tf.json"
 									bat "type main.tf.json"
@@ -658,6 +686,44 @@ Get-ChildItem Env:CF_USERNAME
 					}	
 
 				}
+
+
+				stage('Deploy Network Routes') {
+					when {	
+						allOf {
+							when { expression { "${params.DEPLOY_APPS}" == "true" } }
+							when { expression { "${params.STOP_APPS}" == "true" } }
+						}
+
+					}
+
+					steps {
+
+						echo "Deploy Network Routes"
+
+					}
+				}
+
+
+
+				stage('Run Starter Container') {
+					when {	
+						allOf {
+							when { expression { "${params.DEPLOY_APPS}" == "true" } }
+							when { expression { "${params.STOP_APPS}" == "false" } }
+						}
+
+					}
+
+					steps {
+
+						echo "RUn Starter Container"
+						
+					}
+				}
+
+
+
 
 
 			}
