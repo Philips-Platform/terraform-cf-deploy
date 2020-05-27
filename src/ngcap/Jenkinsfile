@@ -16,7 +16,7 @@ pipeline {
 		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.806")
 		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
 		string(name:'STOP_APPS',defaultValue: "true")
-		string(name:'TERRAFORM_OP',defaultValue: "destroy")
+		string(name:'TERRAFORM_OP',defaultValue: "apply")
 	}
 	stages {
                 stage('Secure Agent') {
@@ -676,7 +676,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-api' | Set-Content main.tf.json"
 									bat "type main.tf.json"
-								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-tenant-config.hcl'
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-api-gateway.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
