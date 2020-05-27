@@ -732,7 +732,14 @@ Get-ChildItem Env:CF_USERNAME
 				       		withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 
 
-							bat "docker login docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER% -u %USERNAME% -p %PASSWORD%"
+   								bat "echo %USERNAME%>CF_USERNAME"
+                                                                bat "echo %PASSWORD%>CF_PASSWORD"
+                                                                 powershell '''
+Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
+Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
+Get-ChildItem Env:CF_USERNAME
+docker login docker.na1.hsdp.io/$Env:ORG_LOWER_$Env:SPACE_LOWER% -u $Env:CF_USERNAME% -p $Env:CF_PASSWORD
+'''
 
                                                 	bat "docker run -e host=ngcap-api-${params.CLOUD_FOUNDRY_ORG}-${params.CLOUD_FOUNDRY_SPACE}.us-east.philips-healthsuite.com -e port=80 -e force=true   docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${NGCAP_STARTER_VERSION}"
 
