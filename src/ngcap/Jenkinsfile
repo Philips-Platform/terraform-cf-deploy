@@ -691,8 +691,8 @@ Get-ChildItem Env:CF_USERNAME
 				stage('Deploy Network Routes') {
 					when {	
 						allOf {
-							when { expression { "${params.DEPLOY_APPS}" == "true" } }
-							when { expression { "${params.STOP_APPS}" == "true" } }
+							expression { "${params.DEPLOY_APPS}" == "true" } 
+							expression { "${params.STOP_APPS}" == "true" } 
 						}
 
 					}
@@ -709,8 +709,8 @@ Get-ChildItem Env:CF_USERNAME
 				stage('Run Starter Container') {
 					when {	
 						allOf {
-							when { expression { "${params.DEPLOY_APPS}" == "true" } }
-							when { expression { "${params.STOP_APPS}" == "false" } }
+							expression { "${params.DEPLOY_APPS}" == "true" }
+							expression { "${params.STOP_APPS}" == "false" }
 						}
 
 					}
