@@ -478,7 +478,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
-								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-genericsupportgw.hcl'
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-genericsupport.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
 
@@ -512,7 +512,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
-									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-genericsupportgw.hcl'
+									bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-genericsupport.hcl'
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform destroy -auto-approve"
 								}
