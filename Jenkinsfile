@@ -37,11 +37,7 @@ def deployApp(){
 }
 node('docker') {
     properties([
-            parameters([string(
-                defaultValue: 'latest', 
-                description: 'Upstream Job Build Number', 
-                name: 'UpstreamJobBuildNumber', 
-                trim: true),
+            parameters([
                 string(
                 defaultValue: 'patient-registration', 
                 description: 'Deployment candidate microservice', 
