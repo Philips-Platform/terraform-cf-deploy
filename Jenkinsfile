@@ -54,7 +54,7 @@ node('docker') {
                 name: 'CFSpaceName', 
                 trim: true),
                 string(
-                defaultValue: 'ascarlat,gsankaran,pthelusma,ngupta', 
+                defaultValue: 'ngupta', 
                 description: 'Comma separated CF Space user list', 
                 name: 'CFSpaceUsers', 
                 trim: true)
