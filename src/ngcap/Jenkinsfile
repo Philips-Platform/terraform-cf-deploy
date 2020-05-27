@@ -811,6 +811,9 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
+
+				/*
+
 				stage('Deploy Outbound') {
 
 					when {
@@ -881,7 +884,6 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-/*
 
 				stage('Deploy Outbound Config') {
 
