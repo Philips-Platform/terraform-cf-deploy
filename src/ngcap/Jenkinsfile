@@ -775,9 +775,9 @@ Get-ChildItem Env:CF_USERNAME
 						}
 					
 					}	
-
 				}
-
+				
+/*
 			  	stage('Destroy Execution') {
 
                                         when {
@@ -810,7 +810,6 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-/*
 				stage('Deploy Outbound') {
 
 					when {
