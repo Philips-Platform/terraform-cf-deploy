@@ -43,7 +43,7 @@ Get-ChildItem Env:CF_USERNAME
 								bat "del CF_USERNAME"
 								bat "del CF_PASSWORD"
 
-								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = 'docker.na1.hsdp.io/\$Env:ORG_LOWER_\$Env:SPACE_LOWER'\""
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/\${Env:ORG_LOWER}_\${Env:SPACE_LOWER}`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
 							}
 						}
