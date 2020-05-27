@@ -51,7 +51,7 @@
 	"NETWORK_POLICY_7" : {
           "source": "./modules/network-policy",
           "first_app_name" : "sys-config",
-          "second_app_name" : "excecution",
+          "second_app_name" : "execution",
           "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
@@ -83,7 +83,7 @@
 	"NETWORK_POLICY_11" : {
           "source": "./modules/network-policy",
           "first_app_name" : "sys-config",
-          "second_app_name" : "authentication",
+          "second_app_name" : "authenticationsvc",
           "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
@@ -171,7 +171,7 @@
 	"NETWORK_POLICY_22" : {
           "source": "./modules/network-policy",
           "first_app_name" : "ngcap-api",
-          "second_app_name" : "excecution",
+          "second_app_name" : "execution",
           "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
@@ -203,7 +203,7 @@
 	"NETWORK_POLICY_26" : {
           "source": "./modules/network-policy",
           "first_app_name" : "ngcap-api",
-          "second_app_name" : "authentication",
+          "second_app_name" : "authenticationsvc",
           "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
@@ -227,7 +227,7 @@
 	"NETWORK_POLICY_29" : {
           "source": "./modules/network-policy",
           "first_app_name" : "calc-config",
-          "second_app_name" : "excecution",
+          "second_app_name" : "execution",
           "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
@@ -291,7 +291,7 @@
 	"NETWORK_POLICY_37" : {
           "source": "./modules/network-policy",
           "first_app_name" : "tenant-config",
-          "second_app_name" : "excecution",
+          "second_app_name" : "execution",
           "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
@@ -323,7 +323,7 @@
 	"NETWORK_POLICY_41" : {
           "source": "./modules/network-policy",
           "first_app_name" : "tenant-config",
-          "second_app_name" : "authentication",
+          "second_app_name" : "authenticationsvc",
           "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
