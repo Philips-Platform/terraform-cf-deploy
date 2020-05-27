@@ -18,9 +18,9 @@
                 #APP_PORTS#
             ],
             "app_services": {
-		"postgres": "postgreskey",
-		"rabbitmq": "rabbitmqkey",
-		"redis": "rediskey"
+                "postgres": "postgreskey",
+                "rabbitmq": "rabbitmqkey",
+                "redis": "rediskey"
             },
             "cups_services": [
                #APP_CUPS# 
