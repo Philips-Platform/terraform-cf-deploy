@@ -200,14 +200,14 @@ data "cloudfoundry_domain" "ngcap_external_domain" {
 resource "cloudfoundry_route" "ngcap_internal_route" {
 
     domain = data.cloudfoundry_domain.ngcap_internal_domain.id 
-    space = var.space_id
+    space = data.cloudfoundry_space.space.id
     hostname = "ngcap-api-${var.app_hostbase}"
 }
 
 resource "cloudfoundry_route" "ngcap_external_route" {
 
-    domain = data.cloudfoundry_domain.ngcap_external_domain.id 
-    space = var.space_id
+    domain = data.cloudfoundry_domain.ngcap_external_domain.id
+    space = data.cloudfoundry_space.space.id
     hostname = "ngcap-api-${var.app_hostbase}"
 }
 
