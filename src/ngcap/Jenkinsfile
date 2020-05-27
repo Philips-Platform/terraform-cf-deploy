@@ -12,9 +12,10 @@ pipeline {
 		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Pull and Push Dockers')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
-		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.528")
-		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.746")
-		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.719")
+		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.588")
+		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.806")
+		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
+		string(name:'STOP_APPS',defaultValue: "true")
 	}
 	stages {
                 stage('Secure Agent') {
@@ -29,7 +30,6 @@ pipeline {
 	
 								bat "echo %USERNAME%>CF_USERNAME"
 								bat "echo %PASSWORD%>CF_PASSWORD"
-
                                                        		 powershell '''
 Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
 Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
@@ -38,6 +38,7 @@ Get-ChildItem Env:CF_USERNAME
 (Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+Add-Content -Path .\\default.auto.tfvars "stop_apps = ${params.START_APPS}"
 '''
 								bat "del CF_USERNAME"
 								bat "del CF_PASSWORD"
