@@ -13,7 +13,7 @@ if [ -z "$TERRAFORM_WORKSPACE_SUBSECTION" ]; then
     exit 1
 fi
 
-sh "sed 's/#spacename#/$CFSpaceName/g' ../workspace.json > workspace-temp.json"
-sh "sed -i 's/#subname#/$TERRAFORM_WORKSPACE_SUBSECTION/g' workspace-temp.json"
-sh "curl --header 'Authorization: Bearer $TERRAFORM_API_TOKEN' --header 'Content-Type: application/vnd.api+json' --request POST --data @'workspace-temp.json' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
-sh 'rm -rf workspace-temp.json'
+sed 's/#spacename#/$CFSpaceName/g' ../workspace.json > workspace-temp.json
+sed -i 's/#subname#/$TERRAFORM_WORKSPACE_SUBSECTION/g' workspace-temp.json
+curl --header 'Authorization: Bearer $TERRAFORM_API_TOKEN' --header 'Content-Type: application/vnd.api+json' --request POST --data @'workspace-temp.json' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'
+rm -rf workspace-temp.json
