@@ -7,8 +7,8 @@ pipeline {
                 SPACE_LOWER = params.CLOUD_FOUNDRY_SPACE.toLowerCase()
 	}
 	parameters {
-		booleanParam(name: 'DEPLOY_SERVICES', defaultValue: false, description: 'Deploy services')
-		booleanParam(name: 'DEPLOY_APPS', defaultValue: false, description: 'Deploy Apps')
+		booleanParam(name: 'SERVICES', defaultValue: false, description: 'Deploy services')
+		booleanParam(name: 'APPS', defaultValue: false, description: 'Deploy Apps')
 		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Pull and Push Dockers')
  		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
  		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
@@ -16,6 +16,7 @@ pipeline {
 		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.806")
 		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
 		string(name:'STOP_APPS',defaultValue: "true")
+		string(name:'TERRAFORM_OP",defaultValue: "destroy")
 	}
 	stages {
                 stage('Secure Agent') {
@@ -52,7 +53,7 @@ Get-ChildItem Env:CF_USERNAME
 				}
 
 				stage('Create Services') {
-					when { expression { "${params.DEPLOY_SERVICES}" == "true" } }
+					when { expression { "${params.SERVICES}" == "true" } }
 					steps {
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         dir('src') {
@@ -60,12 +61,12 @@ Get-ChildItem Env:CF_USERNAME
 								        bat "copy /Y templates\\services.json main.tf.json"
 					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-services.hcl'
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.cloud-space"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.postgres-service"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.metrics-service"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.logdrainer-service"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.rabbitmq-service"
-									bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve -target=module.redis-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.cloud-space"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.postgres-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.metrics-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.logdrainer-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.rabbitmq-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.redis-service"
 
 								 }
 
@@ -150,7 +151,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy SysConfig') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 					steps {
 					
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
@@ -198,7 +199,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-sysconfig.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -211,7 +212,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Fhir Gateway') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -236,7 +237,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-fhirgw.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -249,7 +250,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Generic Gateway') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -273,7 +274,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-generic.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -285,7 +286,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Generic Support Gateway') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -310,7 +311,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-genericsupport.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -324,7 +325,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Calc Trace') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -345,7 +346,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-calctrace.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -358,7 +359,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Calc Config') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -378,7 +379,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-calcconfig.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -391,7 +392,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Dispatcher') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -415,7 +416,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-dispatcher.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -427,7 +428,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Execution') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -449,7 +450,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-execution.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -460,7 +461,7 @@ Get-ChildItem Env:CF_USERNAME
 				
 				stage('Deploy Outbound') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -481,7 +482,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-outbound.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -493,7 +494,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Outbound Config') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -513,7 +514,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-outbound-config.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -526,7 +527,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Scheduler') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -546,7 +547,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-outbound-config.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -559,7 +560,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Authentication') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -582,7 +583,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-authentication.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -595,7 +596,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy SystemConfigUI') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -611,14 +612,14 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN},\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\",\"\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','systemconfigui' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-system-config-ui.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -631,7 +632,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy TenantConfig') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -651,7 +652,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-tenant-config.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -664,7 +665,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy API Gateway') {
 
-					when { expression { "${params.DEPLOY_APPS}" == "true" } }
+					when { expression { "${params.APPS}" == "true" } }
 
 					steps {
 					
@@ -677,7 +678,7 @@ Get-ChildItem Env:CF_USERNAME
 									bat "type main.tf.json"
 								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-tenant-config.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
-                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform apply -auto-approve"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
 								}
 							}
@@ -691,7 +692,7 @@ Get-ChildItem Env:CF_USERNAME
 				stage('Deploy Network Routes') {
 					when {	
 						allOf {
-							expression { "${params.DEPLOY_APPS}" == "true" } 
+							expression { "${params.APPS}" == "true" } 
 							expression { "${params.STOP_APPS}" == "true" } 
 						}
 
@@ -709,7 +710,7 @@ Get-ChildItem Env:CF_USERNAME
 				stage('Run Starter Container') {
 					when {	
 						allOf {
-							expression { "${params.DEPLOY_APPS}" == "true" }
+							expression { "${params.APPS}" == "true" }
 							expression { "${params.STOP_APPS}" == "false" }
 						}
 
