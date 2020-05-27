@@ -699,10 +699,21 @@ Get-ChildItem Env:CF_USERNAME
 					}
 
 					steps {
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        bat "copy /Y ngcap\\templates\\network-policies.json main.tf.json"
+									bat "type main.tf.json"
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-network.hcl'
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
-						echo "Deploy Network Routes"
+								}
+							}
+						}
+					
+					}	
 
-					}
 				}
 
 
