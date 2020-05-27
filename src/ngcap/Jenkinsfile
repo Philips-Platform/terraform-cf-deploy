@@ -694,6 +694,7 @@ Get-ChildItem Env:CF_USERNAME
 						allOf {
 							expression { "${params.APPS}" == "true" } 
 							expression { "${params.STOP_APPS}" == "true" } 
+							expression { "${params.TERRAFORM_OP}" == "apply" } 
 						}
 
 					}
