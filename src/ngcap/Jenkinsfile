@@ -446,7 +446,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-
+/*
 
 				stage('Deploy Generic Support Gateway') {
 
@@ -814,7 +814,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				}
 
-/*
+
 
 				stage('Deploy Outbound') {
 
