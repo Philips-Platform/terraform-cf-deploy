@@ -774,17 +774,9 @@ Get-ChildItem Env:CF_USERNAME
 
 
 				stage('Run Starter Container') {
-					/*
 					when {	
-						allOf {
-							expression { "${params.APPS}" == "true" }
-							expression { "${params.STOP_APPS}" == "false" }
-							expression { "${params.TERRAFORM_OP}" == "apply" } 
-						}
-
+						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "false" && "${params.TERRAFORM_OP}" == "apply" } 
 					}
-					*/
-
 					steps {
 						echo "asdasd"
 
