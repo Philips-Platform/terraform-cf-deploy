@@ -774,6 +774,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 				stage('Run Starter Container') {
+					/*
 					when {	
 						allOf {
 							expression { "${params.APPS}" == "true" }
@@ -782,6 +783,7 @@ Get-ChildItem Env:CF_USERNAME
 						}
 
 					}
+					*/
 
 					steps {
 						echo "asdasd"
