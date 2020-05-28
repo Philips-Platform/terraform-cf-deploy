@@ -773,7 +773,6 @@ Get-ChildItem Env:CF_USERNAME
 				}
 
 
-/*
 				stage('Run Starter Container') {
 					when {	
 						allOf {
@@ -785,6 +784,9 @@ Get-ChildItem Env:CF_USERNAME
 					}
 
 					steps {
+						echo "asdasd"
+
+					/*
 
 				       		withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 
@@ -798,10 +800,13 @@ E:\\cf.exe stop ngcap-starter
 							bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -e start.sh\" --name run-starter"
 
 						}
+
+					*/
 					}
+
+
 				}
 
-*/
 
 
 
