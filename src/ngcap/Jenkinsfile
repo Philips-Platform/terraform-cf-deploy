@@ -773,7 +773,7 @@ Get-ChildItem Env:CF_USERNAME
 				}
 
 
-
+/*
 				stage('Run Starter Container') {
 					when {	
 						allOf {
@@ -801,7 +801,7 @@ E:\\cf.exe stop ngcap-starter
 					}
 				}
 
-
+*/
 
 
 
