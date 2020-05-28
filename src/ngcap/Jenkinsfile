@@ -733,6 +733,46 @@ Get-ChildItem Env:CF_USERNAME
 				}
 
 
+				stage('Deploy Starter Container') {
+
+					when { 
+						allOf {
+							expression { "${params.APPS}" == "true" }
+							expression { "${params.STOP_APPS}" == "true" }
+						}
+					}
+
+					steps {
+					
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        bat "copy /Y templates\\sample-app.json main.tf.json"
+									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+									powershell "Add-Content -Path env.txt -Value \"`\"httpPort`\" : `\"80`\"\""
+									powershell "Add-Content -Path env.txt -Value \"                `\"force`\" : `\"true`\"\""
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-starter' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-starter-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','ngcap-starter' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_STARTER_VERSION}' | Set-Content main.tf.json"
+									bat "type main.tf.json"
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-tenant-config.hcl'
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+								}
+							}
+						}
+					
+					}	
+
+				}
+
+
 
 				stage('Run Starter Container') {
 					when {	
@@ -748,10 +788,12 @@ Get-ChildItem Env:CF_USERNAME
 
 				       		withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 
-
-							bat "set NO_PROXY=%DockerHost% && docker login docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER% -u %USERNAME% -p %PASSWORD%"
-
-                                                	bat "set NO_PROXY=%DockerHost% && docker run -e host=ngcap-api-${params.CLOUD_FOUNDRY_ORG}-${params.CLOUD_FOUNDRY_SPACE}.us-east.philips-healthsuite.com -e port=80 -e force=true   docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${NGCAP_STARTER_VERSION}"
+						
+							bat "E:\\cf.exe api https://api.cloud.pcftest.com/"
+							bat "E:\\cf.exe login -u %USERNAME% -p %PASSWORD% -o ${params.CLOUD_FOUNDRY_ORG} -s ${params.CLOUD_FOUNDRY_SPACE}"
+							bat (script="E:\\cf.exe start ngcap-starter",returnStatus=true)
+							bat "E:\\cf.exe stop ngcap-starter"
+							bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -e start.sh\" --name run-starter"
 
 						}
 
