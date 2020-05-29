@@ -1,0 +1,12 @@
+{
+    "module": {
+        "#NETWORK_POLICY#": {
+            "source": "./modules/network-policy",
+            "first_app_name": "#FIRST_APPNAME#",
+            "second_app_name": "#SECOND_APPNAME#",
+	    "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+            "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+            "port_range": "#PORT_RANGE#"
+        }
+    }
+}

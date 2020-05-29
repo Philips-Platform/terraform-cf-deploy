@@ -1,3 +1,12 @@
+data "cloudfoundry_space" "space" {
+  name = lower(var.space_name)
+  org  = data.cloudfoundry_org.org.id
+}
+data "cloudfoundry_org" "org" {
+  name = var.org_name
+}
+
+
 
 resource "local_file" "nginx_conf" {
   filename = "${path.module}/api-gateway-nginx/nginx.conf"
@@ -191,14 +200,14 @@ data "cloudfoundry_domain" "ngcap_external_domain" {
 resource "cloudfoundry_route" "ngcap_internal_route" {
 
     domain = data.cloudfoundry_domain.ngcap_internal_domain.id 
-    space = var.space_id
+    space = data.cloudfoundry_space.space.id
     hostname = "ngcap-api-${var.app_hostbase}"
 }
 
 resource "cloudfoundry_route" "ngcap_external_route" {
 
-    domain = data.cloudfoundry_domain.ngcap_external_domain.id 
-    space = var.space_id
+    domain = data.cloudfoundry_domain.ngcap_external_domain.id
+    space = data.cloudfoundry_space.space.id
     hostname = "ngcap-api-${var.app_hostbase}"
 }
 
@@ -206,7 +215,7 @@ resource "cloudfoundry_route" "ngcap_external_route" {
 
 resource "cloudfoundry_app" "ngcap_api_instance" {
   name         = var.app_name
-  space        = var.space_id
+  space        = data.cloudfoundry_space.space.id 
   memory       = var.app_memory
   disk_quota   = var.app_disk_quota
   path = "${path.module}/api-gateway-nginx.zip"

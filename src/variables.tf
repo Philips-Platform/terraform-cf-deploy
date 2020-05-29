@@ -50,25 +50,13 @@ variable "redis_service_plan" {
 
 variable "DOCKER_REGISTRY_NAMESPACE" {
   type    = string
-  default = "docker.na1.hsdp.io/client-ngcap_dev-deploy"
+  default = ""
 }
 variable "DOCKER_REGISTRY_USERNAME" {
   type = string
 }
 variable "DOCKER_REGISTRY_PASSWORD" {
   type = string
-}
-
-variable "ngcap_cs_tag" {
-  type = string
-}
-variable "ngcap_js_tag" {
-  type = string
-}
-
-variable "ngcap_fhir_version" {
-  type    = string
-  default = "STU3"
 }
 
 variable "stop_apps" {

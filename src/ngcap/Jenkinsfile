@@ -1,15 +1,769 @@
 pipeline {
-	agent { node { label 'NGCAP' } }
-	stages{
+	agent { node { label 'DEPLOY-TEST' } }
+	environment {
+		HTTPS_PROXY="http://amec.zscaler.philips.com:9480/"
+		HTTP_PROXY="http://amec.zscaler.philips.com:9480/"
+                ORG_LOWER = params.CLOUD_FOUNDRY_ORG.toLowerCase()
+                SPACE_LOWER = params.CLOUD_FOUNDRY_SPACE.toLowerCase()
+	}
+	parameters {
+		booleanParam(name: 'SERVICES', defaultValue: false, description: 'Deploy services')
+		booleanParam(name: 'APPS', defaultValue: false, description: 'Deploy Apps')
+		booleanParam(name: 'MOVE_DOCKERS', defaultValue: true, description: 'Pull and Push Dockers')
+ 		string(name:"CLOUD_FOUNDRY_ORG", defaultValue: "client-NGCAP", description: 'CF ORG')
+ 		string(name:"CLOUD_FOUNDRY_SPACE", defaultValue: "ngcap-hsdp", description: 'CF SPACE')
+		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.588")
+		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.806")
+		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
+		string(name:'STOP_APPS',defaultValue: "true")
+		string(name:'TERRAFORM_OP',defaultValue: "apply")
+	}
+	stages {
                 stage('Secure Agent') {
                         agent { node ( "${env.NODE_NAME}-work" ) }
-                        stages {
-				stage('HELLO WORLD') {
+                       	stages {
+				stage('Init Variables File') {
 					steps {
-						echo 'ELLO WORLD'
+						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+							dir('src') {
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
+								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_SPACE      = \"\"','CLOUD_FOUNDRY_SPACE      = \"${params.CLOUD_FOUNDRY_SPACE}\"' | Set-Content -Path .\\default.auto.tfvars"	
+	
+								bat "echo %USERNAME%>CF_USERNAME"
+								bat "echo %PASSWORD%>CF_PASSWORD"
+                                                       		 powershell '''
+Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
+Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
+Get-ChildItem Env:CF_USERNAME
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+'''
+								bat "del CF_USERNAME"
+								bat "del CF_PASSWORD"
+
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/\${Env:ORG_LOWER}_\${Env:SPACE_LOWER}`\"\""
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
+							}
+						}
+		
+					}
+					
+				}
+
+				stage('Create Services') {
+					when { expression { "${params.SERVICES}" == "true" } }
+					steps {
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        bat "copy /Y templates\\services.json main.tf.json"
+					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-services.hcl'
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.cloud-space"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.postgres-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.metrics-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.logdrainer-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.rabbitmq-service"
+									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.redis-service"
+
+								 }
+
+							}
+						}
+
+					}
+				
+				}
+
+
+				stage('Pull Docker Containers and Push to docker') {
+					when { expression { "${params.MOVE_DOCKERS}" == "true" } }
+					steps {
+						bat "set"
+						bat "set NO_PROXY=%DockerHost% && docker login devops-nexus.dev.local:18079 -u ngcap -p ngcap"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/sysconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/fhirgw:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/genericgw:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/calcconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/dispatcher:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/execution:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/outboundconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/outbound:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/scheduler:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/calctrace:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/location:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/locationconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/tenantconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/sysconfigui:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/notificationsvc:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/authenticationsvc:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
+
+
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/sysconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/fhirgw:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/fhirgw:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/genericgw:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/genericgw:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/calcconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calcconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/dispatcher:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/dispatcher:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/execution:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/execution:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/outboundconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outboundconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/outbound:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outbound:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/scheduler:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/scheduler:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/calctrace:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calctrace:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/location:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/location:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/locationconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/locationconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/tenantconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/tenantconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/sysconfigui:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfigui:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/notificationsvc:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/notificationsvc:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/authenticationsvc:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/authenticationsvc:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/ngcap-starter:${params.NGCAP_STARTER_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
+					
+						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+							bat "set NO_PROXY=%DockerHost% && docker login docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER% -u %USERNAME% -p %PASSWORD%"
+						}
+
+						
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/fhirgw:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/genericgw:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calcconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/dispatcher:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/execution:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outboundconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outbound:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/scheduler:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calctrace:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/location:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/locationconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/tenantconfig:${params.NGCAP_CS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfigui:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/notificationsvc:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/authenticationsvc:${params.NGCAP_JS_VERSION}"
+						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
+
+					}
+
+
+				}
+
+				stage('Deploy Apps') {
+
+					when { expression { "${params.APPS}" == "true" } }
+
+					stages {
+
+						stage('Deploy SysConfig') {
+							steps {
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                        	                	dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+
+											powershell "Add-Content -Path env.txt -Value \"`\"Calcconfig`\" : `\"http://calc-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"Fhir`\" : `\"http://fhir-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Generic`\" : `\"http://generic-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\"" 
+         										powershell "Add-Content -Path env.txt -Value \"                `\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"		       `\"OutboundConfig`\" : `\"http://outbound-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"TenantConfig`\" : `\"http://tenant-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+									 		powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",'"
+                       									powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Password\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.VirtualHost\": \"vhost\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Port\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.port}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"postgres.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"postgres.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"postgres.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"postgres.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                       					 				powershell "Add-Content -Path env.txt -Value '                \"supportDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"supportDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"supportDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"supportDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"archiveDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000\"'"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"sys-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+								       			 bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-sysconfig.hcl'
+                                                                       	 		bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                        		bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+					
+							}	
+
+						}	
+
+
+						stage('Deploy Fhir Gateway') {
+
+							steps {
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                	                        	dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+
+
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"fhir-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','fhirgw' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+									       		bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-fhirgw.hcl'
+                                                	                        	bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                       	                		bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+					
+							}		
+
+						}	
+
+
+						stage('Deploy Generic Gateway') {
+
+							steps {
+						
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        		dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-gw' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+									       		bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-generic.hcl'
+                       	                                                		bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                        	                                            	 	bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+					
+							}	
+
+						}	
+
+						stage('Deploy Generic Support Gateway') {
+
+							steps {
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                       	        	 	        dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+										        bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"DbInfo`\" : `\"supportDB`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"DbInfoArchive`\" : `\"supportArchiveDB`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"pathReplace`\" : `\"api/generic,api/genericsupport`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-support-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+										        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-genericsupport.hcl'
+                	                	                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                        		                                                bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+	
+										}
+									}
+								}
+					
+							}	
+
+						}
+
+
+
+						stage('Deploy Calc Trace') {
+
+							steps {
+						
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                	                	        dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"`\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-trace' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"calc-trace-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calctrace' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+										        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-calctrace.hcl'
+                        	        	                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                	        	                                bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+							}	
+
+						}
+
+
+						stage('Deploy Calc Config') {
+		
+							steps {
+							
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                        		                dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+										        bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-config' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"calc-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calcconfig' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+										        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-calcconfig.hcl'
+                                       			                                bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                        	                	                                bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+							}	
+	
+						}
+
+
+						stage('Deploy Dispatcher') {
+
+							steps {
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+        	                                                	dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+										        bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','dispatcher' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"dispatcher-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','dispatcher' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+										        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-dispatcher.hcl'
+                                                	                	        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                     		                                   	                bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+	
+										}
+									}
+								}
+							}	
+
+						}	
+
+						stage('Deploy Execution') {
+
+							steps {
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                        	                	dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','execution' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"execution-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '\\\${var.memory}','1024' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','execution' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+										        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-execution.hcl'
+               		                                	                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                        	                                	                bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+							}	
+						}
+				
+						stage('Deploy Outbound') {
+
+							steps {
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                	        	dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+										        bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outbound' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+								       			 bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-outbound.hcl'
+                                                                        		bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                        		bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}	
+							}	
+
+						}
+
+						stage('Deploy Outbound Config') {
+
+							steps {
+						
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                	                	       	 dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+										        bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound-config' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outboundconfig' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+									       		 bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-outbound-config.hcl'
+                                                               	        		 bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                               	        		 bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+					
+							}	
+
+						}
+
+
+						stage('Deploy Scheduler') {
+
+							steps {
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                	                                        	dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','scheduler' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"scheduler-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','scheduler' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+										        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-scheduler.hcl'
+       	                                                		                bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                    	       		         	bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+					
+							}	
+
+						}
+
+
+						stage('Deploy Authentication') {
+
+							steps {
+						
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        		dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"ClientSecret`\" : `\"true`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','authenticationsvc' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"authenticationsvc-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','authenticationsvc' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+								        		bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-authentication.hcl'
+                                                                	       		bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                       			bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+					
+							}	
+
+						}
+
+
+						stage('Deploy SystemConfigUI') {
+
+							steps {
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        		dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"ClientSecret`\" : `\"true`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\",\"\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfigui' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+										        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-system-config-ui.hcl'
+                	                                              		        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                	                                                       		bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+										}
+									}
+								}
+					
+							}	
+
+						}
+		
+
+						stage('Deploy TenantConfig') {
+
+							steps {
+						
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                        		                dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+										        bat "copy /Y templates\\sample-app.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"tenant-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','tenantconfig' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+											bat "type main.tf.json"
+										        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-tenant-config.hcl'
+	                                                	                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                	                                                	        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+	
+										}
+									}
+								}
+							}	
+
+						}
+
+
+						stage('Deploy API Gateway') {
+
+							steps {
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        		dir('src') {
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        		bat "copy /Y ngcap\\templates\\api-gateway.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-api' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HOSTBASE#',\"\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+											bat "type main.tf.json"
+									       		 bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-api-gateway.hcl'
+                                        	                               		 bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                	                       		 bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+	
+										}
+									}
+								}
+							}	
+						}
 					}
 				}
+
+
+				stage('Deploy Network Routes') {
+					when {	
+						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "true"  && "${params.TERRAFORM_OP}" == "apply" } 
+					}
+
+					steps {
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        bat "copy /Y ngcap\\templates\\network-policies.json main.tf.json"
+									bat "type main.tf.json"
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-network.hcl'
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+								}
+							}
+						}
+					
+					}	
+
+				}
+
+
+				stage('Deploy Starter Container') {
+
+					when { 
+						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "true" }
+					}
+
+					steps {
+					
+						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        dir('src') {
+								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        bat "copy /Y templates\\sample-app.json main.tf.json"
+									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+									powershell "Add-Content -Path env.txt -Value \"`\"httpPort`\" : `\"80`\",\""
+									powershell "Add-Content -Path env.txt -Value \"                `\"force`\" : `\"true`\"\""
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-starter' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-starter-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"ngcap_log_drainer\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','ngcap-starter' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_STARTER_VERSION}' | Set-Content main.tf.json"
+									bat "type main.tf.json"
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-starter.hcl'
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                                        bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+
+								}
+							}
+						}
+					
+					}	
+
+				}
+
+
+				stage('Run Starter Container') {
+					when {	
+						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "false" && "${params.TERRAFORM_OP}" == "apply" } 
+					}
+					steps {
+
+				       		withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+
+						
+							bat "E:\\cf.exe api https://api.cloud.pcftest.com/"
+							bat "E:\\cf.exe login -u %USERNAME% -p %PASSWORD% -o ${params.CLOUD_FOUNDRY_ORG} -s ${params.CLOUD_FOUNDRY_SPACE}"
+							bat (returnStatus: true, script: "E:\\cf.exe start ngcap-starter")
+							bat "E:\\cf.exe stop ngcap-starter"
+							bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -e start.sh\" --name run-starter"
+
+						}
+
+					}
+
+
+				}
+
 			}
+
+
+			post {
+				always {
+					dir('src') {
+						bat 'if exist default.auto.tfvars ( del /q default.auto.tfvars ) else ( echo no default.auto.tfvars )'
+					}
+			
+				}
+			
+			}
+
 		}
 	}
 
