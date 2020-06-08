@@ -64,11 +64,14 @@ Get-ChildItem Env:CF_USERNAME
 								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH' | Set-Content services-workspace.json"
 								powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content services-workspace.json"
 								powershell "(Get-Content -Path services-workspace.json) -replace '#subname#','services' | Set-Content services-workspace.json"
+								bat "type services-workspace.json"
 								bat "copy backends/backend-app.hcl services-backend.hcl"
-								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH' | Set-Content services-backend.hcl"
-                                                               	powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content services-backend.hcl"
-                                                                powershell "(Get-Content -Path services-workspace.json) -replace '#appname#','services' | Set-Content services-backend.hcl"
-								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header 'Content-Type: application/vnd.api+json' --request POST --data @'services-workspace.json' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
+								powershell "(Get-Content -Path services-backend.hcl) -replace 'platform','ngcap-\$Env:GIT_BRANCH' | Set-Content services-backend.hcl"
+                                                               	powershell "(Get-Content -Path services-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content services-backend.hcl"
+                                                                powershell "(Get-Content -Path services-backend.hcl) -replace '#appname#','services' | Set-Content services-backend.hcl"
+								bat "type services-backend.hcl"
+
+								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header 'Content-Type: application/vnd.api+json' --request POST --data @'services-workspace.json' \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
 
 							}
 
