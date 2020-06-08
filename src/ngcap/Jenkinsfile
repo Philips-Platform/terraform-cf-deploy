@@ -57,7 +57,8 @@ Get-ChildItem Env:CF_USERNAME
 					steps {
 
 						dir('src') {
-							withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'TERRAFORM-TOKEN', usernameVariable: 'TOKEN', passwordVariable: 'TERRAFORM_API_TOKEN']]) {
+							
+							 withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
 
 								bat "copy workspace.json services-workspace.json"
 								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH'"
@@ -65,17 +66,14 @@ Get-ChildItem Env:CF_USERNAME
 								powershell "(Get-Content -Path services-workspace.json) -replace '#subname#','services'"
 								bat "copy backends/backend-app.hcl services-backend.hcl"
 								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH'"
-                                                                powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}'"
+                                                               	powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}'"
                                                                 powershell "(Get-Content -Path services-workspace.json) -replace '#appname#','services'"
 								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header 'Content-Type: application/vnd.api+json' --request POST --data @'services-workspacejson' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
 
 							}
-						}
 
 
-
-						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
-                                                        dir('src') {
+							 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        bat "copy /Y templates\\services.json main.tf.json"
 					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-services.hcl'
