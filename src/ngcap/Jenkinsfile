@@ -72,7 +72,7 @@ Get-ChildItem Env:CF_USERNAME
                                                                 powershell "(Get-Content -Path services-backend.hcl) -replace '#appname#','services' | Set-Content services-backend.hcl"
 								bat "type services-backend.hcl"
 
-								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @'services-workspace.json' \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
+								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @services-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
 
 							}
 
