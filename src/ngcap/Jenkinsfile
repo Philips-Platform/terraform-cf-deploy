@@ -27,7 +27,6 @@ pipeline {
 						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 							dir('src') {
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
-								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_SPACE      = \"\"','CLOUD_FOUNDRY_SPACE      = \"${params.CLOUD_FOUNDRY_SPACE}\"' | Set-Content -Path .\\default.auto.tfvars"	
 	
 								bat "echo %USERNAME%>CF_USERNAME"
 								bat "echo %PASSWORD%>CF_PASSWORD"
@@ -43,6 +42,7 @@ Get-ChildItem Env:CF_USERNAME
 								bat "del CF_USERNAME"
 								bat "del CF_PASSWORD"
 
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/\${Env:ORG_LOWER}_\${Env:SPACE_LOWER}`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
 							}
@@ -55,6 +55,25 @@ Get-ChildItem Env:CF_USERNAME
 				stage('Create Services') {
 					when { expression { "${params.SERVICES}" == "true" } }
 					steps {
+
+						dir('src') {
+							withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'TERRAFORM-TOKEN', usernameVariable: 'TOKEN', passwordVariable: 'TERRAFORM_API_TOKEN']]) {
+
+								bat "copy workspace.json services-workspace.json"
+								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH'"
+								powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}'"
+								powershell "(Get-Content -Path services-workspace.json) -replace '#subname#','services'"
+								bat "copy backends/backend-app.hcl services-backend.hcl"
+								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH'"
+                                                                powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}'"
+                                                                powershell "(Get-Content -Path services-workspace.json) -replace '#appname#','service
+								bat "curl --header "Authorization: Bearer $TERRAFORM_API_TOKEN" --header 'Content-Type: application/vnd.api+json' --request POST --data @'services-workspacejson' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'
+
+							}
+						}
+
+
+
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         dir('src') {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
