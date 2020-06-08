@@ -61,14 +61,14 @@ Get-ChildItem Env:CF_USERNAME
 							 withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
 
 								bat "copy workspace.json services-workspace.json"
-								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH'"
-								powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}'"
-								powershell "(Get-Content -Path services-workspace.json) -replace '#subname#','services'"
+								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH' | Set-Content services-workspace.json"
+								powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content services-workspace.json"
+								powershell "(Get-Content -Path services-workspace.json) -replace '#subname#','services' | Set-Content services-workspace.json"
 								bat "copy backends/backend-app.hcl services-backend.hcl"
-								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH'"
-                                                               	powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}'"
-                                                                powershell "(Get-Content -Path services-workspace.json) -replace '#appname#','services'"
-								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header 'Content-Type: application/vnd.api+json' --request POST --data @'services-workspacejson' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
+								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH' | Set-Content services-backend.hcl"
+                                                               	powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content services-backend.hcl"
+                                                                powershell "(Get-Content -Path services-workspace.json) -replace '#appname#','services' | Set-Content services-backend.hcl"
+								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header 'Content-Type: application/vnd.api+json' --request POST --data @'services-workspace.json' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
 
 							}
 
@@ -76,7 +76,7 @@ Get-ChildItem Env:CF_USERNAME
 							 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        bat "copy /Y templates\\services.json main.tf.json"
-					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-services.hcl'
+					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=services-backend.hcl'
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.cloud-space"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.postgres-service"
