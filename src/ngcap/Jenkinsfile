@@ -67,7 +67,7 @@ Get-ChildItem Env:CF_USERNAME
 								powershell "(Get-Content -Path services-workspace.json) -replace 'platform','ngcap-\$Env:GIT_BRANCH'"
                                                                 powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}'"
                                                                 powershell "(Get-Content -Path services-workspace.json) -replace '#appname#','services'"
-								bat "curl --header "Authorization: Bearer $TERRAFORM_API_TOKEN" --header 'Content-Type: application/vnd.api+json' --request POST --data @'services-workspacejson' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'
+								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header 'Content-Type: application/vnd.api+json' --request POST --data @'services-workspacejson' 'https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces'"
 
 							}
 						}
