@@ -56,30 +56,14 @@ Get-ChildItem Env:CF_USERNAME
 					when { expression { "${params.SERVICES}" == "true" } }
 					steps {
 
+						prepTerraForm('services')
+
 						dir('src') {
-							
-							 withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-								bat "if exist services-workspace.json del services-workspace.json"
-								powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content services-workspace.json"
-								powershell "(Get-Content -Path services-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content services-workspace.json"
-								powershell "(Get-Content -Path services-workspace.json) -replace '#subname#','services' | Set-Content services-workspace.json"
-								bat "type services-workspace.json"
-								bat "if exist services-backend.hcl del services-backend.hcl"
-								powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content services-backend.hcl"
-                                                               	powershell "(Get-Content -Path services-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content services-backend.hcl"
-                                                                powershell "(Get-Content -Path services-backend.hcl) -replace '#appname#','services' | Set-Content services-backend.hcl"
-								bat "type services-backend.hcl"
-
-								bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @services-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-
-							}
-
 
 							 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        bat "copy /Y templates\\services.json main.tf.json"
-					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=services-backend.hcl'
+					 				bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=app-backend.hcl'
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.cloud-space"
 									bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve -target=module.postgres-service"
@@ -176,27 +160,12 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy SysConfig') {
 							steps {
+
+
+								prepTerraForm('sysconfig') 
+
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                         	                	dir('src') {
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','sysconfig' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','sysconfig' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
@@ -257,31 +226,11 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Fhir Gateway') {
 
 							steps {
+
+								prepTerraForm('fhir') 
 					
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                 	                        	dir('src') {
-
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','fhir' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','fhir' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
-
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 									        	bat "copy /Y templates\\sample-app.json main.tf.json"
@@ -317,29 +266,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Generic Gateway') {
 
 							steps {
+
+
+								prepTerraForm('generic') 
 						
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         		dir('src') {
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','generic' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','generic' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
@@ -372,28 +304,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Generic Support Gateway') {
 
 							steps {
+
+
+								prepTerraForm('gsupport') 
 					
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                        	        	 	        dir('src') {
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','gsupport' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','gsupport' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 										        bat "copy /Y templates\\sample-app.json main.tf.json"
@@ -430,33 +346,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Calc Trace') {
 
 							steps {
+
+								prepTerraForm('calctrace') 
+
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
 
                                 	                	        dir('src') {
-
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','calctrace' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','calctrace' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
-
-
-
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
@@ -488,29 +383,11 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Calc Config') {
 		
 							steps {
+
+								prepTerraForm('calcconfig') 
 							
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                         		                dir('src') {
-
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','calconfig' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','calconfig' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 										        bat "copy /Y templates\\sample-app.json main.tf.json"
@@ -540,32 +417,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Dispatcher') {
 
 							steps {
+
+
+								prepTerraForm('dispatcher') 
 					
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
         	                                                	dir('src') {
-
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','dispatcher' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','dispatcher' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
-
-
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 										        bat "copy /Y templates\\sample-app.json main.tf.json"
@@ -596,31 +453,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Execution') {
 
 							steps {
+
+
+								prepTerraForm('execution') 
 					
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                         	                	dir('src') {
-
-
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','execution' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','execution' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
@@ -651,28 +489,11 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Outbound') {
 
 							steps {
+
+								prepTerraForm('outbound') 
 					
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                 	        	dir('src') {
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','outbound' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','outbound' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
@@ -703,30 +524,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Outbound Config') {
 
 							steps {
+
+
+								prepTerraForm('oconfig') 
 						
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                 	                	       	 dir('src') {
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','oconfig' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','oconfig' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
-
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 										        bat "copy /Y templates\\sample-app.json main.tf.json"
@@ -757,28 +560,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Scheduler') {
 
 							steps {
+
+
+								prepTerraForm('scheduler') 
 					
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                 	                                        	dir('src') {
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','schedule' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','schedule' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 									        	bat "copy /Y templates\\sample-app.json main.tf.json"
@@ -809,29 +596,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy Authentication') {
 
 							steps {
+
+
+								prepTerraForm('authentication') 
 						
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         		dir('src') {
-
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','auth' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','auth' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
@@ -866,28 +636,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy SystemConfigUI') {
 
 							steps {
+
+
+								prepTerraForm('systemconfigui') 
 					
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         		dir('src') {
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','sysconfigui' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','sysconfigui' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
@@ -922,28 +676,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy TenantConfig') {
 
 							steps {
+
+
+								prepTerraForm('tenantconfig') 
 						
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                         		                dir('src') {
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','tenantconfig' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','tenantconfig' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 										        bat "copy /Y templates\\sample-app.json main.tf.json"
@@ -973,28 +711,12 @@ Get-ChildItem Env:CF_USERNAME
 						stage('Deploy API Gateway') {
 
 							steps {
+
+
+								prepTerraForm('apigateway') 
 					
 								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         		dir('src') {
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','apigateway' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','apigateway' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        		bat "copy /Y ngcap\\templates\\api-gateway.json main.tf.json"
@@ -1021,30 +743,12 @@ Get-ChildItem Env:CF_USERNAME
 					}
 
 					steps {
+
+
+						prepTerraForm('network') 
+
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         dir('src') {
-
-
-							 			withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
-
-											bat "if exist app-workspace.json del app-workspace.json"
-											powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
-											powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','networkroutes' | Set-Content app-workspace.json"
-											bat "type app-workspace.json"
-											bat "if exist app-backend.hcl del app-backend.hcl"
-											powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
-                                                               				powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
-                                                                			powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','networkroutes' | Set-Content app-backend.hcl"
-											bat "type app-backend.hcl"
-
-											bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
-										}
-
-
-
-
-
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
 								        bat "copy /Y ngcap\\templates\\network-policies.json main.tf.json"
 									bat "type main.tf.json"
@@ -1137,3 +841,34 @@ Get-ChildItem Env:CF_USERNAME
 	}
 
 }
+
+
+def prepTerraForm(String service) {
+
+	dir('src') {
+
+		withCredentials([string(credentialsId: 'TERRAFORM-TOKEN', variable: 'TERRAFORM_API_TOKEN')]) {
+
+			bat "if exist app-workspace.json del app-workspace.json"
+			powershell "(Get-Content -Path workspace.json) -replace 'platform','ngcap' | Set-Content app-workspace.json"
+			powershell "(Get-Content -Path app-workspace.json) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-workspace.json"
+			powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','${service}' | Set-Content app-workspace.json"
+			bat "type app-workspace.json"
+			bat "if exist app-backend.hcl del app-backend.hcl"
+			powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
+       		        powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
+       	       		powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','${service}' | Set-Content app-backend.hcl"
+			bat "type app-backend.hcl"
+			bat "curl --header \"Authorization: Bearer $TERRAFORM_API_TOKEN\" --header \"Content-Type: application/vnd.api+json\" --request POST --data @app-workspace.json \"https://app.terraform.io/api/v2/organizations/Philips-platform/workspaces\""
+		}
+
+
+	}
+
+
+
+
+
+}
+
+
