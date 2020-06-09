@@ -772,6 +772,9 @@ Get-ChildItem Env:CF_USERNAME
 					}
 
 					steps {
+
+						prepTerraForm('starter')
+
 					
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         dir('src') {
@@ -789,7 +792,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','ngcap-starter' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_STARTER_VERSION}' | Set-Content main.tf.json"
 									bat "type main.tf.json"
-								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=ngcap\\backends\\backend-ngcap-master-starter.hcl'
+								        bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=app-backend.hcl'
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
                                                                         bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
 
