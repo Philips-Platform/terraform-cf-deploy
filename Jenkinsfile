@@ -27,6 +27,14 @@ def deploy(manifestJson, backendFile, destroy = true){
     }
     sh "terraform apply -auto-approve"
 }
+
+def secrets = [
+    [path: 'cf/fb56e376-14c1-42bf-961a-3e716e863933/secret/terraform-secrets', secretValues: [
+            [envVar: 'TERRAFORMRC', vaultKey: 'terraform-rc'],
+            [envVar: 'TERRAFORMINPUT', vaultKey: 'terraform-input-file']]],
+    [path: 'cf/fb56e376-14c1-42bf-961a-3e716e863933/secret/terraform-cloud', secretValues: [
+            [envVar: 'TERRAFORM_API_TOKEN', vaultKey: 'api-token']]]
+]
 node('docker') {
     properties([
             parameters([string(
@@ -65,55 +73,43 @@ node('docker') {
         unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
     }
     stage('CF deployment') {
-        try{
-            docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
-                withCredentials([file(credentialsId: 'terraform.rc', variable: 'TERRAFORMRC')]) {
+        withVault([vaultSecrets: secrets]) {
+            try{
+                docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
                     dir("${env.WORKSPACE}/src"){
                         // add curl, jq and bash
                         sh 'apk add --update curl jq bash'
-                        withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]){
-                            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'terraform-token', usernameVariable: 'TOKEN', passwordVariable: 'TERRAFORM_API_TOKEN']]) {
-                                createInfraBackendWorkspace()
-                                createAppBackendWorkspace()
-                                updateInfraBackendWorkspace()
-                                updateAppBackendWorkspace()
+                        sh "./scripts/store-file.sh ${TERRAFORMRC} terraform-secret.rc"
+                        sh "./scripts/store-file.sh ${TERRAFORMINPUT} terraform-input-secret.json"
+                        withEnv(["TF_CLI_CONFIG_FILE=./terraform.rc"]){
+                            createInfraBackendWorkspace()
+                            createAppBackendWorkspace()
+                            updateInfraBackendWorkspace()
+                            updateAppBackendWorkspace()
+                            
+                            def pwds = readJSON file: "terraform-input-secret.json"
+                            withEnv(["CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
+                            "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]) {
+                                sh './scripts/install-cf-cli.sh'
+                                sh './scripts/cf-login.sh'
+                                sh './scripts/get-cf-users.sh'
                             }
-                            withCredentials([file(credentialsId: 'terraform-input.json', variable: 'TERRAFORMINPUT')]) {
-                                def pwds = readJSON file: "${TERRAFORMINPUT}"
-                                withEnv(["CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
-                                "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]) {
-                                    sh './scripts/install-cf-cli.sh'
-                                    sh './scripts/cf-login.sh'
-                                    sh './scripts/get-cf-users.sh'
-                                }
-
-                                withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false",
-                                "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]) {
-                                    sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                                    echo "$TF_VAR_CLOUD_FOUNDRY_SPACE_USERS"
-                                    deploy("./templates/services.json", "./backends/backend-services.hcl", false)
-                                    deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
-                                    
-                                }
+                            withEnv(["TF_CLI_ARGS=-var-file=${TERRAFORMINPUT}", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false",
+                            "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]) {
+                                sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                                echo "$TF_VAR_CLOUD_FOUNDRY_SPACE_USERS"
+                                deploy("./templates/services.json", "./backends/backend-services.hcl", false)
+                                deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
+                                
                             }
                         }
+                        sh './scripts/clean-up.sh'
                     }   
                 }
             }
+            finally{
+                sh 'sudo chown $USER -R ./src/.terraform'
+            }
         }
-        finally{
-            sh 'sudo chown $USER -R ./src/.terraform'
-        }
-    }
-
-    stage('Front-end') {
-        docker.image('node:7-alpine').inside {
-            sh 'node --version'
-        }
-    }
-    
-    stage('artifacts') {
-        copyArtifacts filter: 'version.txt', fingerprintArtifacts: false, projectName: 'Philips-Platform/microservice.template/master'
-        sh 'cat version.txt'
     }
 }
