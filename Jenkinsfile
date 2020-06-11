@@ -79,8 +79,8 @@ node('docker') {
                     dir("${env.WORKSPACE}/src"){
                         // add curl, jq and bash
                         sh 'apk add --update curl jq bash'
-                        sh "./scripts/store-file.sh ${TERRAFORMRC} terraform-secret.rc"
-                        sh "./scripts/store-file.sh ${TERRAFORMINPUT} terraform-input-secret.json"
+                        sh "./scripts/store-file.sh '${TERRAFORMRC}' terraform-secret.rc"
+                        sh "./scripts/store-file.sh '${TERRAFORMINPUT}' terraform-input-secret.json"
                         withEnv(["TF_CLI_CONFIG_FILE=./terraform.rc"]){
                             createInfraBackendWorkspace()
                             createAppBackendWorkspace()
