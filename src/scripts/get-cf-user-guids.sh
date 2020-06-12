@@ -20,4 +20,3 @@ while IFS= read -r line; do
 done < "user-details.txt"
 guids_string="${userguids[*]}"
 echo "[$guids_string]" | sed 's/ /,/g'
-
