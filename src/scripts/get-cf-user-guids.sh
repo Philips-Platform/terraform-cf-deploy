@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# Always add service user to the list of users with access
-CFSpaceUsers="${CFSpaceUsers},pca-acs-cicd-svc"
+# Always add service user to the list of users with access 
+# if not already present
+if [[ "$CFSpaceUsers" != *"pca-acs-cicd-svc"* ]]; then
+  CFSpaceUsers="${CFSpaceUsers},pca-acs-cicd-svc"
+fi
 users=$CFSpaceUsers
 IFS=', ' read -r -a usersArray <<< "$users"
 userguids=()
