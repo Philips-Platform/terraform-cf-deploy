@@ -102,6 +102,7 @@ node('docker') {
                             withEnv(["SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
                                 TF_VAR_CLOUD_FOUNDRY_SPACE_USERS="${SPACE_USERS}"
                                 echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
+                                echo "${TF_VAR_CLOUD_FOUNDRY_SPACE}"
                                 deploy("./templates/services.json", "./backends/backend-services.hcl", false)
                                 deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
                             }
