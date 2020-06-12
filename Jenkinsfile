@@ -93,13 +93,9 @@ node('docker') {
                             updateInfraBackendWorkspace()
                             updateAppBackendWorkspace()
 
-                            // get the cf users details from cf
-                            sh './scripts/install-cf-cli.sh'
-                            sh './scripts/cf-login.sh'
-                            sh './scripts/get-cf-users.sh'
-
                             // run terraform scripts to start deployment 
                             sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                            echo "$TF_VAR_CLOUD_FOUNDRY_SPACE_USERS"
                             deploy("./templates/services.json", "./backends/backend-services.hcl", false)
                             deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
                         }

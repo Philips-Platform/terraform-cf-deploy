@@ -1,4 +1,8 @@
 #!/bin/bash
+/bin/bash ./scripts/install-cf-cli.sh
+/bin/bash ./scripts/cf-login.sh
+/bin/bash ./scripts/get-cf-users.sh
+
 # Always add service user to the list of users with access
 CFSpaceUsers="${CFSpaceUsers},pca-acs-cicd-svc"
 users=$CFSpaceUsers
