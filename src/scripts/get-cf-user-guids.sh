@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Always add service user to the list of users with access
 CFSpaceUsers="${CFSpaceUsers},pca-acs-cicd-svc"
 users=$CFSpaceUsers
 IFS=', ' read -r -a usersArray <<< "$users"
