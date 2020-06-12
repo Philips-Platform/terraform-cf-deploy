@@ -16,5 +16,5 @@ while IFS= read -r line; do
 	fi
 done < "user-details.txt"
 guids_string="${userguids[*]}"
-echo "[$guids_string]" | sed 's/ /,/g'
+TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=$(echo "[$guids_string]" | sed 's/ /,/g')
 

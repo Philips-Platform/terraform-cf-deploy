@@ -82,21 +82,29 @@ node('docker') {
                         sh "./scripts/store-file.sh '${TERRAFORMRC}' terraform-secret.rc"
                         sh "./scripts/store-file.sh '${TERRAFORMINPUT}' terraform-input-secret.json"
                         def pwds = readJSON file: "terraform-input-secret.json"
-                        withEnv(["CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
-                        "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]) {
-                            sh './scripts/install-cf-cli.sh'
-                            sh './scripts/cf-login.sh'
-                            sh './scripts/get-cf-users.sh'
-                        }
-                        withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc","TF_CLI_ARGS=-var-file=./terraform-input-secret.json", "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", "TF_VAR_stop_apps=false",
-                            "TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
+                        withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
+                            "TF_CLI_ARGS=-var-file=./terraform-input-secret.json", 
+                            "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", 
+                            "TF_VAR_stop_apps=false","CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", 
+                            "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
+                            "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]){
+
+                            // create terraform backend workspaces in terraform cloud
                             createInfraBackendWorkspace()
                             createAppBackendWorkspace()
                             updateInfraBackendWorkspace()
                             updateAppBackendWorkspace()
                                
-                            sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                            // run cf apis to fetch user details
+                            sh './scripts/install-cf-cli.sh'
+                            sh './scripts/cf-login.sh'
+                            sh './scripts/get-cf-users.sh'
+                            sh './scripts/get-cf-user-guids.sh'
+
                             echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
+
+                            // trigger the deployment of terraform scripts 
+                            sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                             deploy("./templates/services.json", "./backends/backend-services.hcl", false)
                             deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
                         }
