@@ -69,7 +69,9 @@ node('docker') {
         checkout scm
     }
     stage('download artifacts'){
-        copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "Philips-Platform/${MicroserviceName}/master", selector: specific("${UpstreamJobBuildNumber}")
+        copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, 
+        projectName: "Philips-Platform/${MicroserviceName}/master", 
+        selector: specific("${UpstreamJobBuildNumber}")
         unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
     }
     stage('CF deployment') {
@@ -95,18 +97,13 @@ node('docker') {
                             updateInfraBackendWorkspace()
                             updateAppBackendWorkspace()
                                
-                            // run cf apis to fetch user details
-                            sh './scripts/install-cf-cli.sh'
-                            sh './scripts/cf-login.sh'
-                            sh './scripts/get-cf-users.sh'
-                            sh 'source ./scripts/get-cf-user-guids.sh'
-                            
-                            echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
-
                             // trigger the deployment of terraform scripts 
                             sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                            deploy("./templates/services.json", "./backends/backend-services.hcl", false)
-                            deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
+                            withEnv(["TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
+                                echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
+                                deploy("./templates/services.json", "./backends/backend-services.hcl", false)
+                                deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
+                            }
                         }
                         sh './scripts/clean-up.sh'
                     }

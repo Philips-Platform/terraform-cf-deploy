@@ -1,4 +1,7 @@
 #!/bin/bash
+/bin/bash ./scripts/install-cf-cli.sh
+/bin/bash ./scripts/cf-login.sh
+/bin/bash ./scripts/get-cf-users.sh
 
 # Always add service user to the list of users with access 
 # if not already present
@@ -16,5 +19,5 @@ while IFS= read -r line; do
 	fi
 done < "user-details.txt"
 guids_string="${userguids[*]}"
-TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=$(echo "[$guids_string]" | sed 's/ /,/g')
+echo "[$guids_string]" | sed 's/ /,/g'
 
