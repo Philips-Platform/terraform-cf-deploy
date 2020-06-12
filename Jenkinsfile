@@ -58,7 +58,7 @@ node('docker') {
                 name: 'CFSpaceName', 
                 trim: true),
                 string(
-                defaultValue: 'ngupta', 
+                defaultValue: 'pca-acs-cicd-svc', 
                 description: 'Comma separated CF Space user list', 
                 name: 'CFSpaceUsers', 
                 trim: true)

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+CFSpaceUsers="${CFSpaceUsers},pca-acs-cicd-svc"
 users=$CFSpaceUsers
 IFS=', ' read -r -a usersArray <<< "$users"
 userguids=()
