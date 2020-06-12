@@ -99,8 +99,8 @@ node('docker') {
                             sh './scripts/install-cf-cli.sh'
                             sh './scripts/cf-login.sh'
                             sh './scripts/get-cf-users.sh'
-                            sh './scripts/get-cf-user-guids.sh'
-
+                            sh 'source ./scripts/get-cf-user-guids.sh'
+                            
                             echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
 
                             // trigger the deployment of terraform scripts 
