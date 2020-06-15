@@ -783,7 +783,7 @@ Get-ChildItem Env:CF_USERNAME
 							bat "E:\\cf.exe login -u %USERNAME% -p %PASSWORD% -o ${params.CLOUD_FOUNDRY_ORG} -s ${params.CLOUD_FOUNDRY_SPACE}"
 							bat (returnStatus: true, script: "E:\\cf.exe start ngcap-starter")
 							bat "E:\\cf.exe stop ngcap-starter"
-							bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -e start.sh\" --name run-starter"
+							bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c start.sh\" --name run-starter"
 
 						}
 
