@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # Always add service user to the list of users with access 
 # if not already present
