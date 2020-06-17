@@ -343,6 +343,131 @@
           "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
+	},
+	"NETWORK_POLICY_44" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "fhir-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_45" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "generic-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_46" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "generic-support-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_47" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "calc-trace",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_48" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "calc-config",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_49" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "dispatcher",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_50" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "execution",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_51" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "outbound",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_52" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "outbound-config",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_53" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "scheduler",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_54" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "teant-config",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_55" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "authenticationsvc",
+          "second_app_name" : "ngcap",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_56" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "calc-config",
+          "second_app_name" : "generic-support-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_57" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "calc-trace",
+          "second_app_name" : "generic-support-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_58" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "calc-config",
+          "second_app_name" : "execution",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
 	}
+
+
+
+
+
     }
 }
