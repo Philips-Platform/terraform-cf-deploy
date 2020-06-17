@@ -4,6 +4,9 @@ variable "CLOUD_FOUNDRY_USERNAME" {
 variable "CLOUD_FOUNDRY_PASSWORD" {
   type = string
 }
+variable "CLOUD_FOUNDRY_API" {
+  type = string 
+}
 variable "CLOUD_FOUNDRY_ORG" {
   type = string
 }
@@ -20,7 +23,7 @@ variable "CLOUD_FOUNDRY_SPACE_USERS" {
   type = list
 
   default = [
-    "8b3ca926-d4cf-4d55-8dbd-4f8ede964e6b"
+    "f0dd6ea7-9c7d-48fa-b179-7771ebf6a8b7"
   ]
 }
 
