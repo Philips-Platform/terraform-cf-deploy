@@ -16,6 +16,8 @@ pipeline {
 		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.806")
 		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
 		string(name:'STOP_APPS',defaultValue: "true")
+		string(name:'TIER_1',defaultValue: "false")
+		string(name:'TIER_2',defaultValue: "false")
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
 	}
 	stages {
@@ -124,6 +126,8 @@ Get-ChildItem Env:CF_USERNAME
 					stages {
 
 						stage('Deploy SysConfig') {
+							
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -191,7 +195,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 						stage('Deploy Fhir Gateway') {
-
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 								prepTerraForm('fhir') 
@@ -233,6 +237,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Generic Gateway') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -272,6 +277,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Generic Support Gateway') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -315,6 +321,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Calc Trace') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 								prepTerraForm('calctrace') 
@@ -353,6 +360,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Calc Config') {
 		
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 								prepTerraForm('calcconfig') 
@@ -388,6 +396,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Dispatcher') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -425,6 +434,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Execution') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -462,6 +472,7 @@ Get-ChildItem Env:CF_USERNAME
 				
 						stage('Deploy Outbound') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 								prepTerraForm('outbound') 
@@ -498,6 +509,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Outbound Config') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -535,6 +547,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Scheduler') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -572,6 +585,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Authentication') {
 
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -612,6 +626,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy SystemConfigUI') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -652,6 +667,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy TenantConfig') {
 
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -688,6 +704,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy API Gateway') {
 
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
