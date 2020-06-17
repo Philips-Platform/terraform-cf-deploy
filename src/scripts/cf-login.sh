@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 if [ -z "$CLOUD_FOUNDRY_API" ]; then
     echo "##vso[task.logissue type=error]Error: Cloud Foundry Api [CLOUD_FOUNDRY_API] environment variable was not provided"
     exit 1

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 if [ -z "$CFSpaceName" ]; then
     echo "##vso[task.logissue type=error]Error: Cloud Foundry Space [CFSpaceName] environment variable was not provided"
     exit 1
