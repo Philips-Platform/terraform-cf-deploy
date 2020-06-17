@@ -81,8 +81,8 @@ node('docker') {
                     dir("${env.WORKSPACE}/src"){
                         // add curl, jq and bash
                         sh 'apk add --update curl jq bash'
-                        sh -e "./scripts/store-file.sh '${TERRAFORMRC}' terraform-secret.rc"
-                        sh -e "./scripts/store-file.sh '${TERRAFORMINPUT}' terraform-input-secret.json"
+                        sh "-e ./scripts/store-file.sh '${TERRAFORMRC}' terraform-secret.rc"
+                        sh "-e ./scripts/store-file.sh '${TERRAFORMINPUT}' terraform-input-secret.json"
                         def pwds = readJSON file: "terraform-input-secret.json"
                         withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
                             "TF_CLI_ARGS=-var-file=./terraform-input-secret.json", 
