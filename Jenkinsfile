@@ -1,22 +1,12 @@
-def createInfraBackendWorkspace(){
-    withEnv(["TERRAFORM_WORKSPACE_SUBSECTION=infra"]){
+def create_backend_workspace(sub_section){
+    withEnv(["TERRAFORM_WORKSPACE_SUBSECTION=${sub_section}"]){
         sh './scripts/terraform-create-workspace.sh'
     }
 }
-def createAppBackendWorkspace(){
-    withEnv(["TERRAFORM_WORKSPACE_SUBSECTION=${MicroserviceName}"]){
-        sh './scripts/terraform-create-workspace.sh'
-    }
-}
-def updateInfraBackendWorkspace(){
-    sh 'cp ./backends/backend.hcl ./backend-services.hcl' 
-    sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backend-services.hcl"
-    sh "sed -i 's/#appname#/infra/g' ./backend-services.hcl"
-}
-def updateAppBackendWorkspace(){
-    sh 'cp ./backends/backend.hcl ./backend-app.hcl'
-    sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backend-app.hcl"
-    sh "sed -i 's/#appname#/$MicroserviceName/g' ./backend-app.hcl"
+def update_backend_workspace(target_file_name, sub_section){
+    sh "cp ./backends/backend.hcl ${target_file_name}"
+    sh "sed -i 's/#spacename#/$CFSpaceName/g' ${target_file_name}"
+    sh "sed -i 's/#appname#/$sub_section/g' ${target_file_name}"
 }
 def deploy(manifestJson, backendFile, destroy = true){
     // update the services to be deployed
@@ -40,31 +30,15 @@ def secrets = [
 ]
 node('docker') {
     properties([
-            parameters([string(
-                defaultValue: 'latest', 
-                description: 'Upstream Job Build Number', 
-                name: 'UpstreamJobBuildNumber', 
-                trim: true),
-                string(
-                defaultValue: 'patient-registration', 
-                description: 'Deployment candidate microservice', 
-                name: 'MicroserviceName', 
-                trim: true),
-                string(
-                defaultValue: 'patient-registration', 
-                description: 'Docker Repo name', 
-                name: 'DockerImageRepoName', 
-                trim: true),
-                string(
-                defaultValue: 'sandbox5', 
-                description: 'CF Space name', 
-                name: 'CFSpaceName', 
-                trim: true),
-                string(
-                defaultValue: 'pca-acs-cicd-svc', 
-                description: 'Comma separated CF Space user list', 
-                name: 'CFSpaceUsers', 
-                trim: true)
+            parameters
+            ([
+                string(defaultValue: 'latest',description: 'Upstream Job Build Number',name: 'UpstreamJobBuildNumber', trim: true),
+                booleanParam(name: 'MONITORING', defaultValue: false, description: 'Deploy monitoring services'),
+                booleanParam(name: 'APPS', defaultValue: false, description: 'Deploy Apps'),
+                string(defaultValue: 'patient-registration', description: 'Deployment candidate microservice', name: 'MicroserviceName', trim: true),
+                string(defaultValue: 'patient-registration', description: 'Docker Repo name', name: 'DockerImageRepoName', trim: true),
+                string(defaultValue: 'sandbox5', description: 'CF Space name', name: 'CFSpaceName', trim: true),
+                string(defaultValue: 'pca-acs-cicd-svc', description: 'Comma separated CF Space user list', name: 'CFSpaceUsers', trim: true)
             ])
         ])
     /* Requires the Docker Pipeline plugin to be installed */
@@ -77,7 +51,8 @@ node('docker') {
         selector: specific("${UpstreamJobBuildNumber}")
         unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
     }
-    stage('CF deployment') {
+    stage('Apps deployment') {
+        when { expression { "${params.APPS}" == "true" } }
         withVault([vaultSecrets: secrets]) {
             try{
                 docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
@@ -94,10 +69,10 @@ node('docker') {
                             "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]){
 
                             // create terraform backend workspaces in terraform cloud
-                            createInfraBackendWorkspace()
-                            createAppBackendWorkspace()
-                            updateInfraBackendWorkspace()
-                            updateAppBackendWorkspace()
+                            create_backend_workspace('infra')
+                            create_backend_workspace("${MicroserviceName}")
+                            update_backend_workspace('backend-services.hcl', 'infra')
+                            update_backend_workspace('backend-app.hcl', "$MicroserviceName")
 
                             sh './scripts/install-cf-cli.sh'
                             sh './scripts/cf-login.sh'
@@ -110,6 +85,39 @@ node('docker') {
                                 deploy("./templates/services.json", "./backend-services.hcl", false)
                                 deploy("./terraform-cf-manifest.json", "./backend-app.hcl")
                             }
+                        }
+                        sh './scripts/clean-up.sh'
+                    }
+                }
+            }
+            finally{
+                sh 'sudo chown $USER -R ./src/.terraform'
+            }
+        }
+    }
+    stage('Monitoring Apps deployment'){
+        when { expression { "${params.MONITORING}" == "true" } }
+        withVault([vaultSecrets: secrets]) {
+            try{
+                docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
+                    dir("${env.WORKSPACE}/src"){
+                        // add curl, jq and bash
+                        sh 'apk add --update curl jq bash'
+                        sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
+                        def pwds = readJSON file: "terraform-input-secret.json"
+                        withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
+                            "TF_CLI_ARGS=-var-file=./terraform-input-secret.json", 
+                            "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", 
+                            "TF_VAR_stop_apps=false","CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", 
+                            "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
+                            "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]){
+
+                            // create terraform backend workspaces in terraform cloud
+                            create_backend_workspace("monitoring")
+                            update_backend_workspace("backend-monitoring.hcl", "monitoring")
+                               
+                            // trigger the deployment of terraform scripts
+                            deploy("./monitoring-templates/prometheus-internal.json", "./backends/backend-monitoring.hcl", true)
                         }
                         sh './scripts/clean-up.sh'
                     }
