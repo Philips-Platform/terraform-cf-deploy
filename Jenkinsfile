@@ -52,79 +52,81 @@ node('docker') {
         unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
     }
     stage('Apps deployment') {
-        when { expression { "${params.APPS}" == "true" } }
-        withVault([vaultSecrets: secrets]) {
-            try{
-                docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
-                    dir("${env.WORKSPACE}/src"){
-                        // add curl, jq and bash
-                        sh 'apk add --update curl jq bash'
-                        sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
-                        def pwds = readJSON file: "terraform-input-secret.json"
-                        withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
-                            "TF_CLI_ARGS=-var-file=./terraform-input-secret.json", 
-                            "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", 
-                            "TF_VAR_stop_apps=false","CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", 
-                            "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
-                            "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]){
+        if ("${APPS}" == "true") {
+            withVault([vaultSecrets: secrets]) {
+                try{
+                    docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
+                        dir("${env.WORKSPACE}/src"){
+                            // add curl, jq and bash
+                            sh 'apk add --update curl jq bash'
+                            sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
+                            def pwds = readJSON file: "terraform-input-secret.json"
+                            withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
+                                "TF_CLI_ARGS=-var-file=./terraform-input-secret.json", 
+                                "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", 
+                                "TF_VAR_stop_apps=false","CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", 
+                                "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
+                                "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]){
 
-                            // create terraform backend workspaces in terraform cloud
-                            create_backend_workspace('infra')
-                            create_backend_workspace("${MicroserviceName}")
-                            update_backend_workspace('backend-services.hcl', 'infra')
-                            update_backend_workspace('backend-app.hcl', "$MicroserviceName")
+                                // create terraform backend workspaces in terraform cloud
+                                create_backend_workspace('infra')
+                                create_backend_workspace("${MicroserviceName}")
+                                update_backend_workspace('backend-services.hcl', 'infra')
+                                update_backend_workspace('backend-app.hcl', "$MicroserviceName")
 
-                            sh './scripts/install-cf-cli.sh'
-                            sh './scripts/cf-login.sh'
-                            sh './scripts/get-cf-users.sh'
-                               
-                            // trigger the deployment of terraform scripts 
-                            sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
-                            withEnv(["TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
-                                echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
-                                deploy("./templates/services.json", "./backend-services.hcl", false)
-                                deploy("./terraform-cf-manifest.json", "./backend-app.hcl")
+                                sh './scripts/install-cf-cli.sh'
+                                sh './scripts/cf-login.sh'
+                                sh './scripts/get-cf-users.sh'
+                                
+                                // trigger the deployment of terraform scripts 
+                                sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                                withEnv(["TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
+                                    echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
+                                    deploy("./templates/services.json", "./backend-services.hcl", false)
+                                    deploy("./terraform-cf-manifest.json", "./backend-app.hcl")
+                                }
                             }
+                            sh './scripts/clean-up.sh'
                         }
-                        sh './scripts/clean-up.sh'
                     }
                 }
-            }
-            finally{
-                sh 'sudo chown $USER -R ./src/.terraform'
+                finally{
+                    sh 'sudo chown $USER -R ./src/.terraform'
+                }
             }
         }
     }
     stage('Monitoring Apps deployment'){
-        when { expression { "${params.MONITORING}" == "true" } }
-        withVault([vaultSecrets: secrets]) {
-            try{
-                docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
-                    dir("${env.WORKSPACE}/src"){
-                        // add curl, jq and bash
-                        sh 'apk add --update curl jq bash'
-                        sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
-                        def pwds = readJSON file: "terraform-input-secret.json"
-                        withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
-                            "TF_CLI_ARGS=-var-file=./terraform-input-secret.json", 
-                            "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", 
-                            "TF_VAR_stop_apps=false","CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", 
-                            "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
-                            "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]){
+        if ("${MONITORING}" == "true") {
+            withVault([vaultSecrets: secrets]) {
+                try{
+                    docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
+                        dir("${env.WORKSPACE}/src"){
+                            // add curl, jq and bash
+                            sh 'apk add --update curl jq bash'
+                            sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
+                            def pwds = readJSON file: "terraform-input-secret.json"
+                            withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
+                                "TF_CLI_ARGS=-var-file=./terraform-input-secret.json", 
+                                "TF_VAR_CLOUD_FOUNDRY_SPACE=$CFSpaceName", 
+                                "TF_VAR_stop_apps=false","CLOUD_FOUNDRY_API=${pwds['CLOUD_FOUNDRY_API']}", 
+                                "CLOUD_FOUNDRY_USERNAME=${pwds['CLOUD_FOUNDRY_USERNAME']}",
+                                "CLOUD_FOUNDRY_PASSWORD=${pwds['CLOUD_FOUNDRY_PASSWORD']}"]){
 
-                            // create terraform backend workspaces in terraform cloud
-                            create_backend_workspace("monitoring")
-                            update_backend_workspace("backend-monitoring.hcl", "monitoring")
-                               
-                            // trigger the deployment of terraform scripts
-                            deploy("./monitoring-templates/prometheus-internal.json", "./backends/backend-monitoring.hcl", true)
+                                // create terraform backend workspaces in terraform cloud
+                                create_backend_workspace("monitoring")
+                                update_backend_workspace("backend-monitoring.hcl", "monitoring")
+                                
+                                // trigger the deployment of terraform scripts
+                                deploy("./monitoring-templates/prometheus-internal.json", "./backends/backend-monitoring.hcl", true)
+                            }
+                            sh './scripts/clean-up.sh'
                         }
-                        sh './scripts/clean-up.sh'
                     }
                 }
-            }
-            finally{
-                sh 'sudo chown $USER -R ./src/.terraform'
+                finally{
+                    sh 'sudo chown $USER -R ./src/.terraform'
+                }
             }
         }
     }
