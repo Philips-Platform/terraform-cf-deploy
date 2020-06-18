@@ -118,7 +118,7 @@ node('docker') {
                                 update_backend_workspace("backend-monitoring.hcl", "monitoring")
                                 
                                 // trigger the deployment of terraform scripts
-                                deploy("./monitoring-templates/prometheus-internal.json", "./backends/backend-monitoring.hcl", true)
+                                deploy("./monitoring-templates/prometheus-internal.json", "./backend-monitoring.hcl", true)
                             }
                             sh './scripts/clean-up.sh'
                         }
