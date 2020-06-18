@@ -802,7 +802,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Run Starter Container') {
 					when {	
-						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "false" && "${params.TERRAFORM_OP}" == "apply" } 
+						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "false" && "${params.TERRAFORM_OP}" == "apply" && "${params.TIER_1}" == "true" } 
 					}
 					steps {
 
