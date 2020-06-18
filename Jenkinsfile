@@ -9,11 +9,14 @@ def createAppBackendWorkspace(){
     }
 }
 def updateInfraBackendWorkspace(){
-    sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backends/backend-services.hcl"
+    sh 'cp ./backends/backend.hcl ./backend-services.hcl' 
+    sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backend-services.hcl"
+    sh "sed -i 's/#appname#/infra/g' ./backend-services.hcl"
 }
 def updateAppBackendWorkspace(){
-    sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backends/backend-app.hcl"
-    sh "sed -i 's/#appname#/$MicroserviceName/g' ./backends/backend-app.hcl"
+    sh 'cp ./backends/backend.hcl ./backend-app.hcl'
+    sh "sed -i 's/#spacename#/$CFSpaceName/g' ./backend-app.hcl"
+    sh "sed -i 's/#appname#/$MicroserviceName/g' ./backend-app.hcl"
 }
 def deploy(manifestJson, backendFile, destroy = true){
     // update the services to be deployed
@@ -104,8 +107,8 @@ node('docker') {
                             sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
                             withEnv(["TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
                                 echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
-                                deploy("./templates/services.json", "./backends/backend-services.hcl", false)
-                                deploy("./terraform-cf-manifest.json", "./backends/backend-app.hcl")
+                                deploy("./templates/services.json", "./backend-services.hcl", false)
+                                deploy("./terraform-cf-manifest.json", "./backend-app.hcl")
                             }
                         }
                         sh './scripts/clean-up.sh'
