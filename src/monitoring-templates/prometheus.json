@@ -3,14 +3,14 @@
         "prometheus": {
             "source": "./modules/application",
             "app_name": "prometheus",
-            "app_docker_image": "${var.DOCKER_REGISTRY_NAMESPACE}/prometheus-internal:latest",
+            "app_docker_image": "${var.DOCKER_REGISTRY_NAMESPACE}/prometheus:latest",
             "docker_registry_username": "${var.DOCKER_REGISTRY_USERNAME}",
             "docker_registry_password": "${var.DOCKER_REGISTRY_PASSWORD}",
             "app_memory": "${var.memory}",
             "app_disk_quota": "${var.disk_quota}",
             "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
             "org_name": "${var.CLOUD_FOUNDRY_ORG}",
-            "app_hostname": "prometheus-internal-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
+            "app_hostname": "prometheus-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
             "app_domain": [
                 "${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"
             ],
@@ -19,12 +19,7 @@
             ],
             "app_services": {},
             "cups_services": [],
-            "app_environment": {
-                "CF_USERNAME": "${var.CLOUD_FOUNDRY_USERNAME}",
-                "CF_PASSWORD": "${var.CLOUD_FOUNDRY_PASSWORD}",
-                "CF_ORG": "${var.CLOUD_FOUNDRY_ORG}",
-                "CF_SPACE": "${var.CLOUD_FOUNDRY_SPACE}"
-            },
+            "app_environment": {},
             "app_stopped": "${var.stop_apps}"
         }
     }

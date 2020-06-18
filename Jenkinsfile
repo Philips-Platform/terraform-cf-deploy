@@ -32,9 +32,11 @@ node('docker') {
     properties([
             parameters
             ([
-                string(defaultValue: 'latest',description: 'Upstream Job Build Number',name: 'UpstreamJobBuildNumber', trim: true),
                 booleanParam(name: 'MONITORING', defaultValue: false, description: 'Deploy monitoring services'),
+                booleanParam(name: 'PROMETHEUSINTENAL', defaultValue: false, description: 'Deploy prometheus internal'),
+                booleanParam(name: 'PROMETHEUSEXTERNAL', defaultValue: false, description: 'Deploy prometheus external'),
                 booleanParam(name: 'APPS', defaultValue: false, description: 'Deploy Apps'),
+                string(defaultValue: 'latest',description: 'Upstream Job Build Number',name: 'UpstreamJobBuildNumber', trim: true),
                 string(defaultValue: 'patient-registration', description: 'Deployment candidate microservice', name: 'MicroserviceName', trim: true),
                 string(defaultValue: 'patient-registration', description: 'Docker Repo name', name: 'DockerImageRepoName', trim: true),
                 string(defaultValue: 'sandbox5', description: 'CF Space name', name: 'CFSpaceName', trim: true),
@@ -54,7 +56,6 @@ node('docker') {
                 unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
             }
             step('Apps deployment') {
-                
                 withVault([vaultSecrets: secrets]) {
                     try{
                         docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
@@ -122,7 +123,18 @@ node('docker') {
                                 update_backend_workspace("backend-monitoring.hcl", "monitoring")
                                 
                                 // trigger the deployment of terraform scripts
-                                deploy("./monitoring-templates/prometheus-internal.json", "./backend-monitoring.hcl", true)
+                                if ("${PROMETHEUSINTENAL}" == "true") {
+                                    def module_prometheus = readJSON file: "./monitoring-templates/prometheus-internal.json"
+                                    def module_grafana = readJSON file: "./monitoring-templates/grafana.json"
+                                    sh "echo '{\"module\":{\"prometheus\":${module_prometheus.module[0]},\"grafana\":${module_grafana.module[0]}}}' > apps.json"
+                                }
+                                else if ("${PROMETHEUSEXTERNAL}" == "true") {
+                                    def module_prometheus = readJSON file: "./monitoring-templates/prometheus.json"
+                                    def module_promregator = readJSON file: "./monitoring-templates/promregator.json"
+                                    def module_grafana = readJSON file: "./monitoring-templates/grafana.json"
+                                    sh "echo '{\"module\":{\"prometheus\":${module_prometheus.module[0]},\"grafana\":${module_grafana.module[0]}, \"promregator\": ${module_promregator.module[0]}}}' > apps.json"
+                                }
+                                deploy("./apps.json", "./backend-monitoring.hcl")
                             }
                             sh './scripts/clean-up.sh'
                         }
