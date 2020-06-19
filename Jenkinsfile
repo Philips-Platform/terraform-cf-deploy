@@ -124,19 +124,10 @@ node('docker') {
                                 
                                 // trigger the deployment of terraform scripts
                                 if ("${PROMETHEUSINTERNAL}" == "true") {
-                                    def module_prometheus = readJSON file: "./monitoring-templates/prometheus-internal.json"
-                                    def module_grafana = readJSON file: "./monitoring-templates/grafana.json"
-                                    String prometheus_json = module_prometheus.module.prometheus
-                                    prometheus_json = prometheus_json.substring(1, prometheus_json.length()-1)
-                                    String grafana_json = module_prometheus.module.grafana
-                                    grafana_json = grafana_json.substring(1, grafana_json.length()-1)
-                                    sh "echo '{\"module\":{\"prometheus\":{${prometheus_json}},\"grafana\":{${grafana_json}}}}' > apps.json"
+                                    sh "./scripts/merge-modules.sh 'prometheus_internal' 'grafana'"
                                 }
                                 else if ("${PROMETHEUSEXTERNAL}" == "true") {
-                                    def module_prometheus = readJSON file: "./monitoring-templates/prometheus.json"
-                                    def module_promregator = readJSON file: "./monitoring-templates/promregator.json"
-                                    def module_grafana = readJSON file: "./monitoring-templates/grafana.json"
-                                    sh "echo '{\"module\":{\"prometheus\":${module_prometheus.module[0]},\"grafana\":${module_grafana.module[0]}, \"promregator\": ${module_promregator.module[0]}}}' > apps.json"
+                                    sh "./scripts/merge-modules.sh 'prometheus' 'promregator' 'grafana'"
                                 }
                                 deploy("./apps.json", "./backend-monitoring.hcl")
                             }
