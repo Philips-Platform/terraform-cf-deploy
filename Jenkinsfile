@@ -33,7 +33,7 @@ node('docker') {
             parameters
             ([
                 booleanParam(name: 'MONITORING', defaultValue: false, description: 'Deploy monitoring services'),
-                booleanParam(name: 'PROMETHEUSINTENAL', defaultValue: false, description: 'Deploy prometheus internal'),
+                booleanParam(name: 'PROMETHEUSINTERNAL', defaultValue: false, description: 'Deploy prometheus internal'),
                 booleanParam(name: 'PROMETHEUSEXTERNAL', defaultValue: false, description: 'Deploy prometheus external'),
                 booleanParam(name: 'APPS', defaultValue: false, description: 'Deploy Apps'),
                 string(defaultValue: 'latest',description: 'Upstream Job Build Number',name: 'UpstreamJobBuildNumber', trim: true),
@@ -123,10 +123,10 @@ node('docker') {
                                 update_backend_workspace("backend-monitoring.hcl", "monitoring")
                                 
                                 // trigger the deployment of terraform scripts
-                                if ("${PROMETHEUSINTENAL}" == "true") {
+                                if ("${PROMETHEUSINTERNAL}" == "true") {
                                     def module_prometheus = readJSON file: "./monitoring-templates/prometheus-internal.json"
                                     def module_grafana = readJSON file: "./monitoring-templates/grafana.json"
-                                    sh "echo '{\"module\":{\"prometheus\":${module_prometheus.module.prometheus},\"grafana\":${module_grafana.module.grafana}}}' > apps.json"
+                                    sh "echo '{\"module\":{\"prometheus\":${module_prometheus.module.prometheus[0]},\"grafana\":${module_grafana.module.grafana[0]}}}' > apps.json"
                                 }
                                 else if ("${PROMETHEUSEXTERNAL}" == "true") {
                                     def module_prometheus = readJSON file: "./monitoring-templates/prometheus.json"
