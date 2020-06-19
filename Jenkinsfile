@@ -126,9 +126,9 @@ node('docker') {
                                 if ("${PROMETHEUSINTERNAL}" == "true") {
                                     def module_prometheus = readJSON file: "./monitoring-templates/prometheus-internal.json"
                                     def module_grafana = readJSON file: "./monitoring-templates/grafana.json"
-                                    def prometheus_json = module_prometheus.module.prometheus
+                                    String prometheus_json = module_prometheus.module.prometheus
                                     prometheus_json = prometheus_json.substring(1, prometheus_json.length()-1)
-                                    def grafana_json = module_prometheus.module.grafana
+                                    String grafana_json = module_prometheus.module.grafana
                                     grafana_json = grafana_json.substring(1, grafana_json.length()-1)
                                     sh "echo '{\"module\":{\"prometheus\":{${prometheus_json}},\"grafana\":{${grafana_json}}}}' > apps.json"
                                 }
