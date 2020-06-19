@@ -129,7 +129,7 @@ node('docker') {
                                 else if ("${PROMETHEUSEXTERNAL}" == "true") {
                                     sh "./scripts/merge-modules.sh 'prometheus' 'promregator' 'grafana'"
                                 }
-                                deploy("./apps.json", "./backend-monitoring.hcl")
+                                deploy("./all_modules.json", "./backend-monitoring.hcl")
                             }
                             sh './scripts/clean-up.sh'
                         }
