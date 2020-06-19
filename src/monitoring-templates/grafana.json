@@ -4,8 +4,8 @@
             "source": "./modules/application",
             "app_name": "grafana",
             "app_docker_image": "grafana/grafana:latest",
-            "docker_registry_username": "${var.DOCKER_REGISTRY_USERNAME}",
-            "docker_registry_password": "${var.DOCKER_REGISTRY_PASSWORD}",
+            "docker_registry_username": "",
+            "docker_registry_password": "",
             "app_memory": "${var.memory}",
             "app_disk_quota": "${var.disk_quota}",
             "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
@@ -15,7 +15,7 @@
                 "${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}"
             ],
             "app_ports": [
-                "8080"
+                "3000"
             ],
             "app_services": {},
             "cups_services": [],
