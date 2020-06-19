@@ -3,7 +3,7 @@
         "grafana": {
             "source": "./modules/application",
             "app_name": "grafana",
-            "app_docker_image": "${var.DOCKER_REGISTRY_NAMESPACE}/grafana:latest",
+            "app_docker_image": "grafana/grafana:latest",
             "docker_registry_username": "${var.DOCKER_REGISTRY_USERNAME}",
             "docker_registry_password": "${var.DOCKER_REGISTRY_PASSWORD}",
             "app_memory": "${var.memory}",
