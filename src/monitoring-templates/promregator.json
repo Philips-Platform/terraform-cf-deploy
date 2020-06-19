@@ -20,7 +20,7 @@
             "app_services": {},
             "cups_services": [],
             "app_environment": {
-                "CF_USERNAME": "${var.CLOUD_FOUNDRY_USERNAME}"
+                "CF_PASSWORD": "${var.CLOUD_FOUNDRY_PASSWORD}"
             },
             "app_stopped": "${var.stop_apps}"
         }
