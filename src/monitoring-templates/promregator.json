@@ -20,6 +20,10 @@
             "app_services": {},
             "cups_services": [],
             "app_environment": {
+                "ORG_NAME": "${var.CLOUD_FOUNDRY_ORG}",
+                "CLOUD_FOUNDRY_API": "${var.CLOUD_FOUNDRY_API}",
+                "CLOUD_FOUNDRY_USERNAME": "${var.CLOUD_FOUNDRY_USERNAME}",
+                "HOST_NAME":"promregator-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
                 "CF_PASSWORD": "${var.CLOUD_FOUNDRY_PASSWORD}"
             },
             "app_stopped": "${var.stop_apps}"
