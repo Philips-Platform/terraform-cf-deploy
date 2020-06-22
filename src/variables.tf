@@ -60,7 +60,7 @@ variable "MONITORING_METRIC_PATH" {
 }
 variable "MONITORING_APP_PORT" {
   type = string
-  default = "80"
+  default = "8080"
 }
 
 
