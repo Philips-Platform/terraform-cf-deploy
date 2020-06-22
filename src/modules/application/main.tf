@@ -74,6 +74,10 @@ resource "cloudfoundry_app" "instance" {
   }
   timeout = 180
   stopped = var.app_stopped
+  health_check_http_endpoint = var.health_check_http_endpoint
+  health_check_type = var.health_check_type
+
+
 
   docker_credentials = {
     username = var.docker_registry_username

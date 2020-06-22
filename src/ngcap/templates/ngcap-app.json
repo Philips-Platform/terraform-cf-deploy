@@ -1,0 +1,36 @@
+{
+    "module": {
+        "#APP-NAME#": {
+            "source": "./modules/application",
+            "app_name": "#APP-NAME#",
+            "app_docker_image": "${var.DOCKER_REGISTRY_NAMESPACE}/#IMAGE-NAME#:#IMAGE-TAG#",
+            "docker_registry_username": "${var.DOCKER_REGISTRY_USERNAME}",
+            "docker_registry_password": "${var.DOCKER_REGISTRY_PASSWORD}",
+            "app_memory": "${var.memory}",
+            "app_disk_quota": "${var.disk_quota}",
+            "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+            "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+            "app_hostname": "#APP-HOSTNAME#",
+	    "health_check_http_endpoint" : "#HEALTH_CHECK_ENDPOINT#",
+	    "health_check_type" : "#HEALTH_CHECK_TYPE#",
+            "app_domain": [
+               #APP_DOMAIN# 
+            ],
+            "app_ports": [
+                #APP_PORTS#
+            ],
+            "app_services": {
+                "postgres": "postgreskey",
+                "rabbitmq": "rabbitmqkey",
+                "redis": "rediskey"
+            },
+            "cups_services": [
+               #APP_CUPS# 
+            ],
+            "app_environment": {
+                #APP_ENV#
+            },
+            "app_stopped": "${var.stop_apps}"
+        }
+    }
+}

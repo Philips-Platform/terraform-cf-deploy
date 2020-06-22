@@ -139,7 +139,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 
 											powershell "Add-Content -Path env.txt -Value \"`\"Calcconfig`\" : `\"http://calc-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
@@ -175,6 +175,8 @@ Get-ChildItem Env:CF_USERNAME
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
@@ -205,7 +207,7 @@ Get-ChildItem Env:CF_USERNAME
                                 	                        	dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 
 
@@ -215,8 +217,11 @@ Get-ChildItem Env:CF_USERNAME
 											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"FHIR_VERSION\": \"R4\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"fhir-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -250,7 +255,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+								        		bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
@@ -259,6 +264,8 @@ Get-ChildItem Env:CF_USERNAME
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-gw' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -290,7 +297,7 @@ Get-ChildItem Env:CF_USERNAME
                                        	        	 	        dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
@@ -302,6 +309,8 @@ Get-ChildItem Env:CF_USERNAME
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-support-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -336,7 +345,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"`\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
@@ -344,6 +353,8 @@ Get-ChildItem Env:CF_USERNAME
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-trace' | Set-Content main.tf.json"
@@ -374,13 +385,15 @@ Get-ChildItem Env:CF_USERNAME
                                         		                dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-config' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"calc-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -412,7 +425,7 @@ Get-ChildItem Env:CF_USERNAME
         	                                                	dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
@@ -421,6 +434,8 @@ Get-ChildItem Env:CF_USERNAME
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','dispatcher' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"dispatcher-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -452,7 +467,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
@@ -460,6 +475,8 @@ Get-ChildItem Env:CF_USERNAME
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','execution' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"execution-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -490,14 +507,16 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"r4`\",\""
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -528,13 +547,15 @@ Get-ChildItem Env:CF_USERNAME
                                 	                	       	 dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound-config' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -567,13 +588,15 @@ Get-ChildItem Env:CF_USERNAME
                 	                                        	dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','scheduler' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"scheduler-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -607,7 +630,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+								        		bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"ClientSecret`\" : `\"true`\",\""
@@ -616,6 +639,8 @@ Get-ChildItem Env:CF_USERNAME
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"port\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','authenticationsvc' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"authenticationsvc-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -649,7 +674,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+								        		bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
@@ -657,8 +682,11 @@ Get-ChildItem Env:CF_USERNAME
 											powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+											powershell "Add-Content -Path env.txt -Value '                 \"ENVJS\": \" window.environment = { host: `\"ngcap-api-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}:`\", port: 80, protocol: `\"http`\", support: `\"/api/genericsupport`\"}\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"port\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\",\"\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -691,13 +719,15 @@ Get-ChildItem Env:CF_USERNAME
                                         		                dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/api/admin/status\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"http\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"tenant-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -789,10 +819,12 @@ Get-ChildItem Env:CF_USERNAME
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         dir('src') {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        bat "copy /Y templates\\sample-app.json main.tf.json"
+								        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"port\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-starter' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-starter-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
