@@ -54,6 +54,15 @@ variable "redis_service_plan" {
   type = string
 }
 
+variable "MONITORING_METRIC_PATH" {
+  type = string
+  default = "/actuator/prometheus"
+}
+variable "MONITORING_APP_PORT" {
+  type = string
+  default = "8080"
+}
+
 
 variable "DOCKER_REGISTRY_NAMESPACE" {
   type    = string

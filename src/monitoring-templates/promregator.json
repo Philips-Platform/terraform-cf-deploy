@@ -25,7 +25,7 @@
                 "CLOUD_FOUNDRY_USERNAME": "${var.CLOUD_FOUNDRY_USERNAME}",
                 "HOST_NAME":"promregator-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
                 "CF_PASSWORD": "${var.CLOUD_FOUNDRY_PASSWORD}",
-                "METRIC_PATH": "/actuator/prometheus"
+                "METRIC_PATH": "${var.MONITORING_METRIC_PATH}"
             },
             "app_stopped": "${var.stop_apps}"
         }
