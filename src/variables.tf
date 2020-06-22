@@ -7,6 +7,10 @@ variable "CLOUD_FOUNDRY_PASSWORD" {
 variable "CLOUD_FOUNDRY_API" {
   type = string 
 }
+variable "CLOUD_FOUNDRY_API_WITHOUT_PROTOCOL" {
+  type = string 
+  default = "api.cloud.pcftest.com"
+}
 variable "CLOUD_FOUNDRY_ORG" {
   type = string
 }

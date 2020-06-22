@@ -1,0 +1,20 @@
+{
+    "module": {
+        "network_policies_external_1": {
+            "source": "./modules/network-policy",
+            "first_app_name": "prometheus_external",
+            "second_app_name": "promregator",
+        "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+            "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+            "port_range": "8080"
+        },
+        "network_policies_external_2": {
+          "source": "./modules/network-policy",
+          "first_app_name": "grafana",
+          "second_app_name": "prometheus_external",
+        "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range": "9090"
+        }
+    }
+}

@@ -124,10 +124,10 @@ node('docker') {
                                 
                                 // trigger the deployment of terraform scripts
                                 if ("${PROMETHEUSINTERNAL}" == "true") {
-                                    sh "./scripts/merge-modules.sh 'prometheus_internal' 'grafana'"
+                                    sh "./scripts/merge-modules.sh 'prometheus_internal' 'grafana' 'network_policies_internal'"
                                 }
                                 else if ("${PROMETHEUSEXTERNAL}" == "true") {
-                                    sh "./scripts/merge-modules.sh 'prometheus' 'promregator' 'grafana'"
+                                    sh "./scripts/merge-modules.sh 'prometheus_external' 'promregator' 'grafana' 'network_policies_external'"
                                 }
                                 deploy("./all_modules.json", "./backend-monitoring.hcl")
                             }

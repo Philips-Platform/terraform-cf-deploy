@@ -1,14 +1,11 @@
 #!/bin/bash -e
 
+rm -rf all_modules.json
 echo "{\"module\":{" >> all_modules.json
-ITER=0
 for module in "$@"
 do
-    if [[ "$ITER" != 0 ]]; then
-        echo "," >> all_modules.json
-    fi
-    echo "\"$module\":" >> all_modules.json 
-    cat "./monitoring-templates/$module.json" | jq ".module | .$module" >> all_modules.json
-    ITER=$(expr $ITER + 1)
+    cat "./monitoring-templates/$module.json" | jq -r '.module | keys[] as $k | "\"\($k)\":\(.[$k]),"' >> all_modules.json
 done
+# remove trailing comma
+sed -i '$s/,$//' all_modules.json 
 echo "}}" >> all_modules.json
