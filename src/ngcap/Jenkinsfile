@@ -822,8 +822,8 @@ Get-ChildItem Env:CF_USERNAME
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','\"/\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','\"port\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-starter' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-starter-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
