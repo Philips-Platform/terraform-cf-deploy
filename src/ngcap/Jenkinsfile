@@ -904,7 +904,7 @@ def prepTerraForm(String service) {
 			powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','${service}' | Set-Content app-workspace.json"
 			bat "type app-workspace.json"
 			bat "if exist app-backend.hcl del app-backend.hcl"
-			powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
+			powershell "(Get-Content -Path ngcap\\backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
        		        powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
        	       		powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','${service}' | Set-Content app-backend.hcl"
 			bat "type app-backend.hcl"
