@@ -120,6 +120,7 @@ node('docker') {
 
                                 // create terraform backend workspaces in terraform cloud
                                 create_backend_workspace("monitoring")
+                                create_backend_workspace("monitoring-network_policies")
                                 update_backend_workspace("backend-monitoring.hcl", "monitoring")
                                 update_backend_workspace("backend-monitoring-network_policies.hcl", "monitoring-network_policies")
                                 // trigger the deployment of terraform scripts
@@ -131,7 +132,7 @@ node('docker') {
                                 }
                                 deploy("./all_modules.json", "./backend-monitoring.hcl")
                                 if ("${PROMETHEUSINTERNAL}" == "true") {
-                                    deploy("./monitoring-templates/network_policies_internal.json", "./backend-monitoring.hcl")
+                                    deploy("./monitoring-templates/network_policies_internal.json", "./backend-monitoring-network_policies.hcl")
                                 }
                                 else if ("${PROMETHEUSEXTERNAL}" == "true") {
                                     deploy("./monitoring-templates/network_policies_external.json", "./backend-monitoring-network_policies.hcl")
