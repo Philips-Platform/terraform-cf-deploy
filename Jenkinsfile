@@ -132,10 +132,10 @@ node('docker') {
                                 }
                                 deploy("./all_modules.json", "./backend-monitoring.hcl")
                                 if ("${PROMETHEUSINTERNAL}" == "true") {
-                                    deploy("./monitoring-templates/network_policies_internal.json", "./backend-monitoring-network_policies.hcl")
+                                    deploy("./monitoring-templates/network_policies_internal.json", "./backend-monitoring-network_policies.hcl", false)
                                 }
                                 else if ("${PROMETHEUSEXTERNAL}" == "true") {
-                                    deploy("./monitoring-templates/network_policies_external.json", "./backend-monitoring-network_policies.hcl")
+                                    deploy("./monitoring-templates/network_policies_external.json", "./backend-monitoring-network_policies.hcl", false)
                                 }
                                 
                             }
