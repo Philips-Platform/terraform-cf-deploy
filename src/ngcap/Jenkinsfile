@@ -18,6 +18,7 @@ pipeline {
 		booleanParam(name:'STOP_APPS',defaultValue: true)
 		booleanParam(name:'TIER_1',defaultValue: false)
 		booleanParam(name:'TIER_2',defaultValue: false)
+		booleanParam(name:'PROM_GRAF',defaultvalue: true)
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
 	}
 	stages {
@@ -772,6 +773,7 @@ Get-ChildItem Env:CF_USERNAME
 								}
 							}	
 						}
+
 					}
 				}
 
@@ -890,6 +892,102 @@ if %index% GTR %count% exit /b 1
 
 
 				}
+
+
+
+				stage('Deploy Prometheus and Grafana') {
+
+					when { expression { "${params.PROM_GRAF}" == "true" } }
+					stages {
+						stage('Prep Variables File For Prometheus') {
+							steps {
+								withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+									dir('src') {
+										powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
+	
+										bat "echo %USERNAME%>CF_USERNAME"
+										bat "echo %PASSWORD%>CF_PASSWORD"
+                                                       		 		powershell '''
+Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
+Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
+Get-ChildItem Env:CF_USERNAME
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+'''
+										bat "del CF_USERNAME"
+										bat "del CF_PASSWORD"
+
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_API = `\"https://api.cloud.pcftest.com`\"\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/philips-platform`\"\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"MONITORING_APP_PORT = `\"5000`\"\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"MONITORING_METRIC_PATH= `\"/metrics`\"\""
+									}
+								}
+		
+							}	
+					
+						}
+
+
+
+						stage('Deploy Prometheus') {
+
+							when { expression { "${params.TIER_2}" == "true" } }
+							steps {
+
+
+								prepTerraForm('prometheus') 
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        		dir('src') {
+
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        		bat "copy /Y monitoring-templates\\prometheus_internal.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											bat "type main.tf.json"
+									       		 bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=app-backend.hcl'
+                                        	                               		 bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                	                       		 bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+	
+										}
+									}
+								}
+							}	
+						}
+
+
+						stage('Deploy Grafana') {
+
+							when { expression { "${params.TIER_2}" == "true" } }
+							steps {
+
+
+								prepTerraForm('grafana') 
+					
+								 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
+                                                        		dir('src') {
+
+										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
+								        		bat "copy /Y monitoring-templates\\grafana.json main.tf.json"
+											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
+											bat "type main.tf.json"
+									       		 bat 'E:\\terraform_0.12.25_windows_amd64\\terraform.exe init -plugin-dir=E:\\terraform-plugins -backend-config=app-backend.hcl'
+                                        	                               		 bat "E:\\terraform_0.12.25_windows_amd64\\terraform validate"
+                                                	                       		 bat "E:\\terraform_0.12.25_windows_amd64\\terraform ${params.TERRAFORM_OP} -auto-approve"
+	
+										}
+									}
+								}
+							}	
+						}
+
+
+
+
 
 			}
 
