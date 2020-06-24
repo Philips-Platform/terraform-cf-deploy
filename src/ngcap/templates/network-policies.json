@@ -472,6 +472,120 @@
 	    "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
             "org_name": "${var.CLOUD_FOUNDRY_ORG}",
             "port_range": "9090"
-        }
+        },
+
+	"NETWORK_POLICY_59" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "fhir-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_60" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "generic-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_61" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "generic-support-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_62" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "calc-trace",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_63" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "calc-config",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_64" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "dispatcher",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+        },
+	"NETWORK_POLICY_65" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "execution",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_66" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "outbound",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_67" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "outbound-config",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_68" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "scheduler",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_69" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "tenant-config",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_70" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "ngcap",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_71" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "authenticationsvc",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+
+	}
+
+
+
+
+
+
+
+
     }
 }
