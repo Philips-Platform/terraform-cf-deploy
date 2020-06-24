@@ -692,6 +692,99 @@ Get-ChildItem Env:CF_USERNAME
 				}
 
 
+
+				stage('Deploy Prometheus and Grafana') {
+
+					when { expression { "${params.PROM_GRAF}" == "true" } }
+					stages {
+						stage('Prep Variables File For Prometheus') {
+							steps {
+								withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+									dir('src') {
+
+										bat "copy /Y default.auto.tfvars default.auto.tfvars.orig"
+										powershell "(Get-Content -Path .\\default.auto.tfvars.backup) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
+	
+										bat "echo %USERNAME%>CF_USERNAME"
+										bat "echo %PASSWORD%>CF_PASSWORD"
+                                                       		 		powershell '''
+Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
+Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
+Get-ChildItem Env:CF_USERNAME
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
+(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+'''
+										bat "del CF_USERNAME"
+										bat "del CF_PASSWORD"
+
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_API = `\"https://api.cloud.pcftest.com`\"\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/philips-platform`\"\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"MONITORING_APP_PORT = `\"5000`\"\""
+										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"MONITORING_METRIC_PATH= `\"/metrics`\"\""
+									}
+								}
+		
+							}	
+					
+						}
+
+
+
+						stage('Deploy Prometheus') {
+
+							steps {
+
+
+								prepTerraForm('prometheus') 
+					
+                                                        	dir('src') {
+
+								       	bat "copy /Y monitoring-templates\\prometheus_internal.json main.tf.json"
+								}
+
+								runTerraform()
+							}	
+						}
+
+
+						stage('Deploy Grafana') {
+
+							steps {
+
+
+								prepTerraForm('grafana') 
+					
+                                                        	dir('src') {
+
+							       		bat "copy /Y monitoring-templates\\grafana.json main.tf.json"
+
+								}
+
+								runTerraform()
+							
+							}	
+						}
+
+						stage('Return Original Vars File') {
+							steps {
+								
+								bat "copy /Y default.auto.tfvars.orig default.auto.tfvars"
+							}
+
+
+						}
+
+					}
+
+				}
+
+
+
+
 				stage('Deploy Network Routes') {
 					when {	
 						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "true"  && "${params.TERRAFORM_OP}" == "apply" } 
@@ -794,86 +887,6 @@ if %index% GTR %count% exit /b 1
 				}
 
 
-
-				stage('Deploy Prometheus and Grafana') {
-
-					when { expression { "${params.PROM_GRAF}" == "true" } }
-					stages {
-						stage('Prep Variables File For Prometheus') {
-							steps {
-								withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-									dir('src') {
-										powershell "(Get-Content -Path .\\default.auto.tfvars.backup) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
-	
-										bat "echo %USERNAME%>CF_USERNAME"
-										bat "echo %PASSWORD%>CF_PASSWORD"
-                                                       		 		powershell '''
-Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
-Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
-Get-ChildItem Env:CF_USERNAME
-(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
-(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
-(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
-(Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
-'''
-										bat "del CF_USERNAME"
-										bat "del CF_PASSWORD"
-
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_API = `\"https://api.cloud.pcftest.com`\"\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/philips-platform`\"\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"MONITORING_APP_PORT = `\"5000`\"\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"MONITORING_METRIC_PATH= `\"/metrics`\"\""
-									}
-								}
-		
-							}	
-					
-						}
-
-
-
-						stage('Deploy Prometheus') {
-
-							when { expression { "${params.TIER_2}" == "true" } }
-							steps {
-
-
-								prepTerraForm('prometheus') 
-					
-                                                        	dir('src') {
-
-								       	bat "copy /Y monitoring-templates\\prometheus_internal.json main.tf.json"
-								}
-
-								runTerraform()
-							}	
-						}
-
-
-						stage('Deploy Grafana') {
-
-							when { expression { "${params.TIER_2}" == "true" } }
-							steps {
-
-
-								prepTerraForm('grafana') 
-					
-                                                        	dir('src') {
-
-							       		bat "copy /Y monitoring-templates\\grafana.json main.tf.json"
-
-								}
-
-								runTerraform()
-							
-							}	
-						}
-
-					}
-
-				}
 
 			}
 
