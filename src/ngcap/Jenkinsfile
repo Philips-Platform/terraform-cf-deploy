@@ -15,7 +15,9 @@ pipeline {
 		string(name:'NGCAP_JS_VERSION',defaultValue: "0.2.588")
 		string(name:'NGCAP_CS_VERSION',defaultValue: "0.2.806")
 		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
-		string(name:'STOP_APPS',defaultValue: "true")
+		booleanParam(name:'STOP_APPS',defaultValue: true)
+		booleanParam(name:'TIER_1',defaultValue: false)
+		booleanParam(name:'TIER_2',defaultValue: false)
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
 	}
 	stages {
@@ -43,6 +45,7 @@ Get-ChildItem Env:CF_USERNAME
 								bat "del CF_PASSWORD"
 
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_API = `\"https://api.cloud.pcftest.com`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/\${Env:ORG_LOWER}_\${Env:SPACE_LOWER}`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
 							}
@@ -86,66 +89,31 @@ Get-ChildItem Env:CF_USERNAME
 					when { expression { "${params.MOVE_DOCKERS}" == "true" } }
 					steps {
 						bat "set"
+
 						bat "set NO_PROXY=%DockerHost% && docker login devops-nexus.dev.local:18079 -u ngcap -p ngcap"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/sysconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/fhirgw:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/genericgw:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/calcconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/dispatcher:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/execution:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/outboundconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/outbound:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/scheduler:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/calctrace:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/location:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/locationconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/tenantconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/sysconfigui:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/notificationsvc:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/authenticationsvc:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
-
-
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/sysconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/fhirgw:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/fhirgw:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/genericgw:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/genericgw:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/calcconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calcconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/dispatcher:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/dispatcher:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/execution:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/execution:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/outboundconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outboundconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/outbound:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outbound:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/scheduler:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/scheduler:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/calctrace:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calctrace:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/location:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/location:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/locationconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/locationconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/tenantconfig:${params.NGCAP_CS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/tenantconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/sysconfigui:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfigui:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/notificationsvc:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/notificationsvc:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/authenticationsvc:${params.NGCAP_JS_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/authenticationsvc:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/ngcap-starter:${params.NGCAP_STARTER_VERSION} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
 					
 						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 							bat "set NO_PROXY=%DockerHost% && docker login docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER% -u %USERNAME% -p %PASSWORD%"
 						}
 
 						
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/fhirgw:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/genericgw:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calcconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/dispatcher:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/execution:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outboundconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/outbound:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/scheduler:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/calctrace:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/location:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/locationconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/tenantconfig:${params.NGCAP_CS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/sysconfigui:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/notificationsvc:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/authenticationsvc:${params.NGCAP_JS_VERSION}"
-						bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/ngcap-starter:${params.NGCAP_STARTER_VERSION}"
+						deliverContainer("sysconfig:${params.NGCAP_CS_VERSION}")
+						deliverContainer("fhirgw:${params.NGCAP_CS_VERSION}")
+						deliverContainer("genericgw:${params.NGCAP_CS_VERSION}")
+						deliverContainer("calcconfig:${params.NGCAP_CS_VERSION}")
+						deliverContainer("dispatcher:${params.NGCAP_CS_VERSION}")
+						deliverContainer("execution:${params.NGCAP_CS_VERSION}")
+						deliverContainer("outboundconfig:${params.NGCAP_CS_VERSION}")
+						deliverContainer("outbound:${params.NGCAP_CS_VERSION}")
+						deliverContainer("scheduler:${params.NGCAP_CS_VERSION}")
+						deliverContainer("calctrace:${params.NGCAP_CS_VERSION}")
+						deliverContainer("location:${params.NGCAP_CS_VERSION}")
+						deliverContainer("locationconfig:${params.NGCAP_CS_VERSION}")
+						deliverContainer("tenantconfig:${params.NGCAP_CS_VERSION}")
+						deliverContainer("sysconfigui:${params.NGCAP_JS_VERSION}")
+						deliverContainer("notificationsvc:${params.NGCAP_JS_VERSION}")
+						deliverContainer("authenticationsvc:${params.NGCAP_JS_VERSION}")
+						deliverContainer("ngcap-starter:${params.NGCAP_STARTER_VERSION}")
 
 					}
 
@@ -159,6 +127,8 @@ Get-ChildItem Env:CF_USERNAME
 					stages {
 
 						stage('Deploy SysConfig') {
+							
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -169,7 +139,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 
 											powershell "Add-Content -Path env.txt -Value \"`\"Calcconfig`\" : `\"http://calc-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
@@ -178,6 +148,7 @@ Get-ChildItem Env:CF_USERNAME
          										powershell "Add-Content -Path env.txt -Value \"                `\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"		       `\"OutboundConfig`\" : `\"http://outbound-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"TenantConfig`\" : `\"http://tenant-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Scheduler`\" : `\"http://scheduler-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									 		powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
                         								powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",'"
@@ -200,9 +171,12 @@ Get-ChildItem Env:CF_USERNAME
                         								powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
                         								powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
                         								powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
-                        								powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000\"'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000\",'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
@@ -224,7 +198,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 						stage('Deploy Fhir Gateway') {
-
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 								prepTerraForm('fhir') 
@@ -233,16 +207,20 @@ Get-ChildItem Env:CF_USERNAME
                                 	                        	dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 
 
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\"\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"fhir-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -265,6 +243,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Generic Gateway') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -275,13 +254,17 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+								        		bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\"\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-gw' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -303,6 +286,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Generic Support Gateway') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -312,16 +296,20 @@ Get-ChildItem Env:CF_USERNAME
                                        	        	 	        dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"DbInfo`\" : `\"supportDB`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"DbInfoArchive`\" : `\"supportArchiveDB`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"pathReplace`\" : `\"api/generic,api/genericsupport`\"\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"pathReplace`\" : `\"api/generic,api/genericsupport`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-support-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -345,6 +333,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Calc Trace') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 								prepTerraForm('calctrace') 
@@ -355,12 +344,16 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-											powershell "Add-Content -Path env.txt -Value \"`\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "Add-Content -Path env.txt -Value \"`\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-trace' | Set-Content main.tf.json"
@@ -382,6 +375,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Calc Config') {
 		
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 								prepTerraForm('calcconfig') 
@@ -390,11 +384,15 @@ Get-ChildItem Env:CF_USERNAME
                                         		                dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-config' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"calc-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -416,6 +414,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Dispatcher') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -425,13 +424,17 @@ Get-ChildItem Env:CF_USERNAME
         	                                                	dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\"\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','dispatcher' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"dispatcher-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -452,6 +455,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Execution') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -462,12 +466,16 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\"\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','execution' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"execution-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -488,6 +496,7 @@ Get-ChildItem Env:CF_USERNAME
 				
 						stage('Deploy Outbound') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 								prepTerraForm('outbound') 
@@ -497,12 +506,16 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"STU3`\"\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -523,6 +536,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Outbound Config') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -532,11 +546,15 @@ Get-ChildItem Env:CF_USERNAME
                                 	                	       	 dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound-config' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -559,6 +577,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Scheduler') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -568,11 +587,15 @@ Get-ChildItem Env:CF_USERNAME
                 	                                        	dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-									        	bat "copy /Y templates\\sample-app.json main.tf.json"
+									        	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','scheduler' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"scheduler-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -595,6 +618,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Authentication') {
 
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -605,14 +629,17 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+								        		bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"ClientSecret`\" : `\"true`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\"\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','authenticationsvc' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"authenticationsvc-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -635,6 +662,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy SystemConfigUI') {
 
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
@@ -645,14 +673,19 @@ Get-ChildItem Env:CF_USERNAME
 
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        		bat "copy /Y templates\\sample-app.json main.tf.json"
+								        		bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"ClientSecret`\" : `\"true`\",\""
 											powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
-											powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\"\""
+											powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
+											powershell "Add-Content -Path env.txt -Value \"                 `\"ENVJS`\": `\"window.environment = { host: \\`\"ngcap-api-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\\`\", port: 80, protocol: \\`\"http\\`\", support: \\`\"/api/genericsupport\\`\"}`\"\""
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\",\"\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -675,6 +708,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy TenantConfig') {
 
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -684,11 +718,15 @@ Get-ChildItem Env:CF_USERNAME
                                         		                dir('src') {
 
 										 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-										        bat "copy /Y templates\\sample-app.json main.tf.json"
+										        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 											bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
+											powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+         										powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"tenant-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 											powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -710,6 +748,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy API Gateway') {
 
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -779,12 +818,12 @@ Get-ChildItem Env:CF_USERNAME
 						 withCredentials([file(credentialsId: 'terraform_creds', variable: 'TERRAFORMRC')]) {
                                                         dir('src') {
 								 withEnv(["TF_CLI_CONFIG_FILE=${TERRAFORMRC}"]) {
-								        bat "copy /Y templates\\sample-app.json main.tf.json"
+								        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"httpPort`\" : `\"80`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"force`\" : `\"true`\"\""
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
+									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-starter' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-starter-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -807,7 +846,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Run Starter Container') {
 					when {	
-						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "false" && "${params.TERRAFORM_OP}" == "apply" } 
+						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "false" && "${params.TERRAFORM_OP}" == "apply" && "${params.TIER_1}" == "true" } 
 					}
 					steps {
 
@@ -818,8 +857,33 @@ Get-ChildItem Env:CF_USERNAME
 							bat "E:\\cf.exe login -u %USERNAME% -p %PASSWORD% -o ${params.CLOUD_FOUNDRY_ORG} -s ${params.CLOUD_FOUNDRY_SPACE}"
 							bat (returnStatus: true, script: "E:\\cf.exe start ngcap-starter")
 							bat "E:\\cf.exe stop ngcap-starter"
-							bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -e start.sh\" --name run-starter"
+							bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true ENFORCE_ACCESS_TOKEN=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
+							bat '''
+@echo off
+SET /A "index = 1"
+SET /A "count = 500"
+:while
+if %index% leq %count% (
+   
+	E:\\cf.exe tasks ngcap-starter > out.txt 2>&1
+	findstr RUNNING out.txt
+	if NOT ERRORLEVEL 1 (
+		echo RUNNING
+	) else (
+		echo NOT RUNNING
+		goto :exit
+	)
+   echo The value of index is %index%
+   SET /A "index = index + 1"
+   PING localhost -n 5 >NUL
+   goto :while
+)
 
+:exit
+echo Final: %index% : %count%
+
+if %index% GTR %count% exit /b 1							
+'''
 						}
 
 					}
@@ -846,6 +910,20 @@ Get-ChildItem Env:CF_USERNAME
 }
 
 
+def deliverContainer(String container) {
+
+
+   bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/${container}"
+   bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/${container} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/${container}"
+   retry(5) {
+   	bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/${container}"
+   }
+
+
+
+}
+
+
 def prepTerraForm(String service) {
 
 	dir('src') {
@@ -858,7 +936,7 @@ def prepTerraForm(String service) {
 			powershell "(Get-Content -Path app-workspace.json) -replace '#subname#','${service}' | Set-Content app-workspace.json"
 			bat "type app-workspace.json"
 			bat "if exist app-backend.hcl del app-backend.hcl"
-			powershell "(Get-Content -Path backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
+			powershell "(Get-Content -Path ngcap\\backends\\backend-app.hcl) -replace '\"platform',\'\"ngcap' | Set-Content app-backend.hcl"
        		        powershell "(Get-Content -Path app-backend.hcl) -replace '#spacename#','${params.CLOUD_FOUNDRY_SPACE}' | Set-Content app-backend.hcl"
        	       		powershell "(Get-Content -Path app-backend.hcl) -replace '#appname#','${service}' | Set-Content app-backend.hcl"
 			bat "type app-backend.hcl"
