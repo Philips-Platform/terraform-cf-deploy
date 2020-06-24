@@ -18,7 +18,7 @@ pipeline {
 		booleanParam(name:'STOP_APPS',defaultValue: true)
 		booleanParam(name:'TIER_1',defaultValue: false)
 		booleanParam(name:'TIER_2',defaultValue: false)
-		booleanParam(name:'PROM_GRAF',defaultvalue: true)
+		booleanParam(name:'PROM_GRAF',defaultValue: true)
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
 	}
 	stages {
