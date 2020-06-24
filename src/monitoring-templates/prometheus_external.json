@@ -1,8 +1,8 @@
 {
     "module": {
-        "prometheus": {
+        "prometheus_external": {
             "source": "./modules/application",
-            "app_name": "prometheus",
+            "app_name": "prometheus_external",
             "app_docker_image": "${var.DOCKER_REGISTRY_NAMESPACE}/prometheus:latest",
             "docker_registry_username": "${var.DOCKER_REGISTRY_USERNAME}",
             "docker_registry_password": "${var.DOCKER_REGISTRY_PASSWORD}",
@@ -10,7 +10,7 @@
             "app_disk_quota": "${var.disk_quota}",
             "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
             "org_name": "${var.CLOUD_FOUNDRY_ORG}",
-            "app_hostname": "prometheus-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
+            "app_hostname": "prometheus_external-${var.CLOUD_FOUNDRY_ORG}-${var.CLOUD_FOUNDRY_SPACE}",
             "app_domain": [
                 "${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"
             ],

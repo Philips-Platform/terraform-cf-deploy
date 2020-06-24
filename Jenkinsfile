@@ -120,16 +120,24 @@ node('docker') {
 
                                 // create terraform backend workspaces in terraform cloud
                                 create_backend_workspace("monitoring")
+                                create_backend_workspace("monitoring-network_policies")
                                 update_backend_workspace("backend-monitoring.hcl", "monitoring")
-                                
+                                update_backend_workspace("backend-monitoring-network_policies.hcl", "monitoring-network_policies")
                                 // trigger the deployment of terraform scripts
                                 if ("${PROMETHEUSINTERNAL}" == "true") {
                                     sh "./scripts/merge-modules.sh 'prometheus_internal' 'grafana'"
                                 }
                                 else if ("${PROMETHEUSEXTERNAL}" == "true") {
-                                    sh "./scripts/merge-modules.sh 'prometheus' 'promregator' 'grafana'"
+                                    sh "./scripts/merge-modules.sh 'prometheus_external' 'promregator' 'grafana'"
                                 }
                                 deploy("./all_modules.json", "./backend-monitoring.hcl")
+                                if ("${PROMETHEUSINTERNAL}" == "true") {
+                                    deploy("./monitoring-templates/network_policies_internal.json", "./backend-monitoring-network_policies.hcl", false)
+                                }
+                                else if ("${PROMETHEUSEXTERNAL}" == "true") {
+                                    deploy("./monitoring-templates/network_policies_external.json", "./backend-monitoring-network_policies.hcl", false)
+                                }
+                                
                             }
                             sh './scripts/clean-up.sh'
                         }

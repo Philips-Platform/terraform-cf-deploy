@@ -7,6 +7,10 @@ variable "CLOUD_FOUNDRY_PASSWORD" {
 variable "CLOUD_FOUNDRY_API" {
   type = string 
 }
+variable "CLOUD_FOUNDRY_API_WITHOUT_PROTOCOL" {
+  type = string 
+  default = "api.cloud.pcftest.com"
+}
 variable "CLOUD_FOUNDRY_ORG" {
   type = string
 }
@@ -48,6 +52,15 @@ variable "rabbitmq_service_plan" {
 }
 variable "redis_service_plan" {
   type = string
+}
+
+variable "MONITORING_METRIC_PATH" {
+  type = string
+  default = "/actuator/prometheus"
+}
+variable "MONITORING_APP_PORT" {
+  type = string
+  default = "8080"
 }
 
 

@@ -23,7 +23,9 @@
                 "CF_USERNAME": "${var.CLOUD_FOUNDRY_USERNAME}",
                 "CF_PASSWORD": "${var.CLOUD_FOUNDRY_PASSWORD}",
                 "CF_ORG": "${var.CLOUD_FOUNDRY_ORG}",
-                "CF_SPACE": "${var.CLOUD_FOUNDRY_SPACE}"
+                "CF_SPACE": "${var.CLOUD_FOUNDRY_SPACE}",
+                "APP_PORT": "${var.MONITORING_APP_PORT}",
+                "METRIC_PATH": "${var.MONITORING_METRIC_PATH}"
             },
             "app_stopped": "${var.stop_apps}"
         }
