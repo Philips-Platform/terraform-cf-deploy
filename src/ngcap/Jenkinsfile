@@ -29,6 +29,9 @@ pipeline {
 					steps {
 						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 							dir('src') {
+
+
+								bat "copy /Y default.auto.tfvars default.auto.tfvars.backup"
 								powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
 	
 								bat "echo %USERNAME%>CF_USERNAME"
@@ -800,7 +803,7 @@ if %index% GTR %count% exit /b 1
 							steps {
 								withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 									dir('src') {
-										powershell "(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
+										powershell "(Get-Content -Path .\\default.auto.tfvars.backup) -replace 'CLOUD_FOUNDRY_ORG        = \"\"','CLOUD_FOUNDRY_ORG        = \"${params.CLOUD_FOUNDRY_ORG}\"' | Set-Content -Path .\\default.auto.tfvars"	
 	
 										bat "echo %USERNAME%>CF_USERNAME"
 										bat "echo %PASSWORD%>CF_PASSWORD"
