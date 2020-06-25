@@ -578,9 +578,16 @@
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
 
+	},
+	"NETWORK_POLICY_72" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "prometheus_internal",
+          "second_app_name" : "sys-config",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+
 	}
-
-
 
 
 
