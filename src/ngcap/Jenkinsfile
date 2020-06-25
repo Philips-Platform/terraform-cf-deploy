@@ -20,6 +20,8 @@ pipeline {
 		booleanParam(name:'TIER_2',defaultValue: false)
 		booleanParam(name:'PROM_GRAF',defaultValue: true)
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
+		booleanParam(name:'SHORT-TOKENS', defaultValue: true)
+		booleanParam(name:'MULTITENANT', defaultValue: true)
 	}
 	stages {
                 stage('Secure Agent') {
@@ -175,7 +177,12 @@ Get-ChildItem Env:CF_USERNAME
                         						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"METRICS_PROMETHEUS\": \"true\",'"
                         						powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -212,7 +219,12 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -251,7 +263,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -291,7 +307,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"DbInfoArchive`\" : `\"supportArchiveDB`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"pathReplace`\" : `\"api/generic,api/genericsupport`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -329,7 +349,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"`\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -363,7 +387,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -400,7 +428,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -435,7 +467,11 @@ Get-ChildItem Env:CF_USERNAME
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -469,7 +505,11 @@ Get-ChildItem Env:CF_USERNAME
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -504,7 +544,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -541,7 +585,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -580,7 +628,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
@@ -620,7 +672,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "Add-Content -Path env.txt -Value \"                 `\"ENVJS`\": `\"window.environment = { host: \\`\"ngcap-api-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\\`\", port: 80, protocol: \\`\"http\\`\", support: \\`\"/api/genericsupport\\`\"}`\"\""
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
@@ -658,7 +714,11 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-                        						powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+									script {	
+										if(param.SHORT-TOKENS == true) {
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
@@ -865,7 +925,17 @@ Get-ChildItem Env:CF_USERNAME
 							bat "E:\\cf.exe login -u %USERNAME% -p %PASSWORD% -o ${params.CLOUD_FOUNDRY_ORG} -s ${params.CLOUD_FOUNDRY_SPACE}"
 							bat (returnStatus: true, script: "E:\\cf.exe start ngcap-starter")
 							bat "E:\\cf.exe stop ngcap-starter"
-							bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true ENFORCE_ACCESS_TOKEN=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
+							script {
+								if (params.SHORT-TOKENS == true && params.MULTITENANT == true) {
+						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true ENFORCE_ACCESS_TOKEN=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
+								} else if (params.SHORT-TOKENS == true && params.MULTITENANT == false) {
+						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter &&  ENFORCE_ACCESS_TOKEN=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
+								} else if (params.SHORT-TOKENS == false && params.MULTITENANT == true) {
+						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
+								} else if (params.SHORT-TOKENS == false && params.MULTITENANT == false) {
+						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
+								{
+							}
 							bat '''
 @echo off
 SET /A "index = 1"
