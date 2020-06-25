@@ -869,6 +869,7 @@ Get-ChildItem Env:CF_USERNAME
 				stage('Deploy Network Routes') {
 					when {	
 						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "true"  && "${params.TERRAFORM_OP}" == "apply" } 
+
 					}
 
 					steps {
@@ -889,9 +890,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Deploy Starter Container') {
 
-					when { 
-						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "true" }
-					}
+					when { expression { "${params.TIER_1}" == "true" } }
 
 					steps {
 
