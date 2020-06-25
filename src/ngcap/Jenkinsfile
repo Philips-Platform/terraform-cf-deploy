@@ -934,7 +934,7 @@ Get-ChildItem Env:CF_USERNAME
 						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
 								} else if (params.SHORT-TOKENS == false && params.MULTITENANT == false) {
 						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
-								{
+							 	}	
 							}
 							bat '''
 @echo off
