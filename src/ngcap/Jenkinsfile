@@ -20,7 +20,7 @@ pipeline {
 		booleanParam(name:'TIER_2',defaultValue: false)
 		booleanParam(name:'PROM_GRAF',defaultValue: true)
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
-		booleanParam(name:'SHORT-TOKENS', defaultValue: true)
+		booleanParam(name:'SHORTTOKENS', defaultValue: true)
 		booleanParam(name:'MULTITENANT', defaultValue: true)
 	}
 	stages {
@@ -179,7 +179,7 @@ Get-ChildItem Env:CF_USERNAME
                         						powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000\",'"
 
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -221,7 +221,7 @@ Get-ChildItem Env:CF_USERNAME
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -264,7 +264,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -308,7 +308,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"pathReplace`\" : `\"api/generic,api/genericsupport`\",\""
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -350,7 +350,7 @@ Get-ChildItem Env:CF_USERNAME
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -388,7 +388,7 @@ Get-ChildItem Env:CF_USERNAME
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -429,7 +429,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -468,7 +468,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -506,7 +506,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -545,7 +545,7 @@ Get-ChildItem Env:CF_USERNAME
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -586,7 +586,7 @@ Get-ChildItem Env:CF_USERNAME
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -629,7 +629,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -673,7 +673,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -715,7 +715,7 @@ Get-ChildItem Env:CF_USERNAME
          								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									script {	
-										if(params.SHORT-TOKENS == true) {
+										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
 										}
 									}
@@ -926,13 +926,13 @@ Get-ChildItem Env:CF_USERNAME
 							bat (returnStatus: true, script: "E:\\cf.exe start ngcap-starter")
 							bat "E:\\cf.exe stop ngcap-starter"
 							script {
-								if (params.SHORT-TOKENS == true && params.MULTITENANT == true) {
+								if (params.SHORTTOKENS == true && params.MULTITENANT == true) {
 						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true ENFORCE_ACCESS_TOKEN=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
-								} else if (params.SHORT-TOKENS == true && params.MULTITENANT == false) {
+								} else if (params.SHORTTOKENS == true && params.MULTITENANT == false) {
 						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter &&  ENFORCE_ACCESS_TOKEN=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
-								} else if (params.SHORT-TOKENS == false && params.MULTITENANT == true) {
+								} else if (params.SHORTTOKENS == false && params.MULTITENANT == true) {
 						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
-								} else if (params.SHORT-TOKENS == false && params.MULTITENANT == false) {
+								} else if (params.SHORTTOKENS == false && params.MULTITENANT == false) {
 						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
 							 	}	
 							}
