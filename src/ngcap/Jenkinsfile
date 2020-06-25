@@ -674,7 +674,7 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
 									script {	
 										if(params.SHORTTOKENS == true) {
-                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\"'"
+                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
 									powershell "Add-Content -Path env.txt -Value \"                 `\"ENVJS`\": `\"window.environment = { host: \\`\"ngcap-api-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\\`\", port: 80, protocol: \\`\"http\\`\", support: \\`\"/api/genericsupport\\`\"}`\"\""
