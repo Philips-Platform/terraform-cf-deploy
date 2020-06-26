@@ -50,6 +50,7 @@ Get-ChildItem Env:CF_USERNAME
 								bat "del CF_USERNAME"
 								bat "del CF_PASSWORD"
 
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE_USERS = `\"8b3ca926-d4cf-4d55-8dbd-4f8ede964e6b`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_API = `\"https://api.cloud.pcftest.com`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/\${Env:ORG_LOWER}_\${Env:SPACE_LOWER}`\"\""
