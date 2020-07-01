@@ -53,7 +53,7 @@ Get-ChildItem Env:CF_USERNAME
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE_USERS = [`\"8b3ca926-d4cf-4d55-8dbd-4f8ede964e6b`\"]\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_API = `\"https://api.cloud.pcftest.com`\"\""
-								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/\${Env:ORG_LOWER}_\${Env:SPACE_LOWER}`\"\""
+								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/philips-platform-ngcap\"\""
 								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
 							}
 						}
@@ -100,7 +100,7 @@ Get-ChildItem Env:CF_USERNAME
 						bat "set NO_PROXY=%DockerHost% && docker login devops-nexus.dev.local:18079 -u ngcap -p ngcap"
 					
 						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-							bat "set NO_PROXY=%DockerHost% && docker login docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER% -u %USERNAME% -p %PASSWORD%"
+							bat "set NO_PROXY=%DockerHost% && docker login docker.na1.hsdp.io/philips-platform-ngcap -u %USERNAME% -p %PASSWORD%"
 						}
 
 						
@@ -1018,9 +1018,9 @@ def deliverContainer(String container) {
 
 
    bat "set NO_PROXY=%DockerHost% && docker pull devops-nexus.dev.local:18079/ngcap/${container}"
-   bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/${container} docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/${container}"
+   bat "set NO_PROXY=%DockerHost% && docker tag devops-nexus.dev.local:18079/ngcap/${container} docker.na1.hsdp.io/philips-platform-ngcap/${container}"
    retry(5) {
-   	bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/%ORG_LOWER%_%SPACE_LOWER%/${container}"
+   	bat "set NO_PROXY=%DockerHost% && docker push docker.na1.hsdp.io/philips-platform-ngcap/${container}"
    }
 
 
