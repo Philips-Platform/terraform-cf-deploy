@@ -49,11 +49,15 @@ node('docker') {
     }
     stage('App Deployment'){
         if ("${APPS}" == "true") {
-            step('download artifacts'){
+            stage('test'){
+                echo "${APPS}"
+                echo "${UpstreamJobBuildNumber}"
+            }
+            stage('download artifacts'){
                 copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/cf-auto-deploy", selector: specific("${UpstreamJobBuildNumber}")
                 unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
             }
-            step('Apps deployment') {
+            stage('Apps deployment') {
                 withVault([vaultSecrets: secrets]) {
                     try{
                         docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
