@@ -51,7 +51,7 @@ node('docker') {
         if ("${APPS}" == "true") {
             step('download artifacts'){
                 copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, 
-                projectName: "Philips-Platform/${MicroserviceName}/master", 
+                projectName: "philips-internal-cci-platform/${MicroserviceName}/cf-auto-deploy", 
                 selector: specific("${UpstreamJobBuildNumber}")
                 unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
             }
