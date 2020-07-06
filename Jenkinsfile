@@ -55,7 +55,7 @@ node('docker') {
             }
             stage('download artifacts'){
                 copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/cf-auto-deploy", selector: specific("${UpstreamJobBuildNumber}")
-                unzip -o zipFile: './terraform-cf-manifest.zip', dir: 'src'
+                unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
             }
             stage('Apps deployment') {
                 withVault([vaultSecrets: secrets]) {
@@ -84,7 +84,7 @@ node('docker') {
                                     sh './scripts/get-cf-users.sh'
                                     
                                     // trigger the deployment of terraform scripts 
-                                    sh 'unzip ../plugins/linux_amd64/terraform-provider-aws_v2.62.zip -d ../plugins/linux_amd64/'
+                                    unzip zipFile: './terraform-provider-aws_v2.62.zip', dir: '../plugins/linux_amd64/'
                                     withEnv(["TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
                                         echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
                                         deploy("./templates/services.json", "./backend-services.hcl", false)
