@@ -938,23 +938,27 @@ Get-ChildItem Env:CF_USERNAME
 							bat "E:\\cf.exe stop ngcap-starter"
 							script {
 
-								def shortTokensVar = ''
-								def multiTenantVar = ''
-								def forceTrueVar = ''
-								if(params.SHORTTOKENS == true) {
+								shortTokensVar = ''
+								multiTenantVar = ''
+								forceTrueVar = ''
+								if (params.SHORTTOKENS == true) {
 									shortTokensVar = 'ENFORCE_ACCESS_TOKEN=true'
 								}
 		
-								if(params.MULTITENANT == true) {
+								if (params.MULTITENANT == true) {
 									multiTenantVar = 'multiTenant=true'
 								}
 
-								íf(params.FORCE_TRUE == true) {
+								íf (params.FORCE_TRUE == true) {
 									forceTrueVar = 'force=true'
 								}
-
-						 		bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && ${multiTeanantVar} ${shortTokensVar} ${forceTrueVar} port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
 							}
+
+							echo "SHORT = ${shortTokensVar}"
+							echo "MULTITENANT = ${multiTenantVar}"
+							echo "FORCE TRUE = ${forceTrueVar}"
+
+						 	bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && ${multiTeanantVar} ${shortTokensVar} ${forceTrueVar} port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
 							bat '''
 @echo off
 SET /A "index = 1"
