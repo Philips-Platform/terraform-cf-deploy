@@ -84,8 +84,7 @@ node('docker') {
                                     sh './scripts/get-cf-users.sh'
                                     
                                     // trigger the deployment of terraform scripts 
-                                    unzip zipFile: './terraform-provider-aws_v2.62.zip', dir: '../plugins/linux_amd64/'
-                                    sh 'cp -rf ./terraform-provider-aws_v2.62.0_x4 ../plugins/linux_amd64/terraform-provider-aws_v2.62.0_x4'
+                                    unzip zipFile: '../plugins/linux_amd64/terraform-provider-aws_v2.62.zip', dir: '../plugins/linux_amd64/'
                                     withEnv(["TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
                                         echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
                                         deploy("./templates/services.json", "./backend-services.hcl", false)
