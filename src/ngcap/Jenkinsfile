@@ -938,19 +938,20 @@ Get-ChildItem Env:CF_USERNAME
 							bat "E:\\cf.exe stop ngcap-starter"
 							script {
 
-								shortTokensVar = ''
-								multiTenantVar = ''
-								forceTrueVar = ''
+								shortTokensVar = ""
+								multiTenantVar = ""
+								forceTrueVar = ""
+
 								if (params.SHORTTOKENS == true) {
-									shortTokensVar = 'ENFORCE_ACCESS_TOKEN=true'
+									shortTokensVar = "ENFORCE_ACCESS_TOKEN=true"
 								}
 		
 								if (params.MULTITENANT == true) {
-									multiTenantVar = 'multiTenant=true'
+									multiTenantVar ="'multiTenant=true"
 								}
 
 								íf (params.FORCE_TRUE == true) {
-									forceTrueVar = 'force=true'
+									forceTrueVar = "force=true"
 								}
 							}
 
