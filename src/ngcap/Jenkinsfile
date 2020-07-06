@@ -1011,18 +1011,12 @@ def generateStarterRun() {
 		multiTenantVar ="multiTenant=true"
 	}
 
-
-	if (params.MULTITENANT == true) {
-		multiTenantVar ="'multiTenant=true"
-	}
-
 	if (params.FORCE_TRUE == true) {
 		forceTrueVar = "force=true"
 	}
 
 	echo "SHORT = ${shortTokensVar}"
 	echo "MULTITENANT = ${multiTenantVar}"
-
 	echo "FORCE TRUE = ${forceTrueVar}"
 
  	bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && ${multiTenantVar} ${shortTokensVar} ${forceTrueVar} port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
