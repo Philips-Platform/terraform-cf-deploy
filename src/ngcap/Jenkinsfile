@@ -296,7 +296,7 @@ Get-ChildItem Env:CF_USERNAME
 
 						stage('Deploy Generic Support Gateway') {
 
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
