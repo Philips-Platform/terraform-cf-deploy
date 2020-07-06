@@ -22,6 +22,7 @@ pipeline {
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
 		booleanParam(name:'SHORTTOKENS', defaultValue: true)
 		booleanParam(name:'MULTITENANT', defaultValue: true)
+		booleanParam(name:'FORCE_TRUE', defaultValue: true)
 	}
 	stages {
                 stage('Secure Agent') {
@@ -680,13 +681,15 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "Add-Content -Path env.txt -Value \"                `\"ClientSecret`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
 									powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
+									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
+
 									script {	
 										if(params.SHORTTOKENS == true) {
-                        								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
+											powershell "Add-Content -Path env.txt -Value \"                 `\"ENVJS`\": `\"window.environment = { host: \\`\"ngcap-api-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\\`\", port: 80, ENFORCE_ACCESS_TOKEN: \\`\"true\\`\", protocol: \\`\"http\\`\", support: \\`\"/api/genericsupport\\`\"}`\"\""
+										} else {
+											powershell "Add-Content -Path env.txt -Value \"                 `\"ENVJS`\": `\"window.environment = { host: \\`\"ngcap-api-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\\`\", port: 80, protocol: \\`\"http\\`\", support: \\`\"/api/genericsupport\\`\"}`\"\""
 										}
 									}
-									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                 `\"ENVJS`\": `\"window.environment = { host: \\`\"ngcap-api-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\\`\", port: 80, protocol: \\`\"http\\`\", support: \\`\"/api/genericsupport\\`\"}`\"\""
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
@@ -934,15 +937,23 @@ Get-ChildItem Env:CF_USERNAME
 							bat (returnStatus: true, script: "E:\\cf.exe start ngcap-starter")
 							bat "E:\\cf.exe stop ngcap-starter"
 							script {
-								if (params.SHORTTOKENS == true && params.MULTITENANT == true) {
-						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true ENFORCE_ACCESS_TOKEN=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
-								} else if (params.SHORTTOKENS == true && params.MULTITENANT == false) {
-						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter &&  ENFORCE_ACCESS_TOKEN=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
-								} else if (params.SHORTTOKENS == false && params.MULTITENANT == true) {
-						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && multiTenant=true force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
-								} else if (params.SHORTTOKENS == false && params.MULTITENANT == false) {
-						 			bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && force=true port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
-							 	}	
+
+								def shortTokensVar = ''
+								def multiTenantVar = ''
+								def forceTrueVar = ''
+								if(params.SHORTTOKENS == true) {
+									shortTokensVar = 'ENFORCE_ACCESS_TOKEN=true'
+								}
+		
+								if(params.MULTITENANT == true) {
+									multiTenantVar = 'multiTenant=true'
+								}
+
+								íf(params.FORCE_TRUE == true) {
+									forceTrueVar = 'force=true'
+								}
+
+						 		bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && ${multiTeanantVar} ${shortTokensVar} ${forceTrueVar} port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
 							}
 							bat '''
 @echo off
@@ -970,6 +981,9 @@ echo Final: %index% : %count%
 
 if %index% GTR %count% exit /b 1							
 '''
+
+							bat "E:\\cf.exe logs ngcap-starter --recent"
+
 						}
 
 					}
