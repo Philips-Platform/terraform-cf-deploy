@@ -1016,7 +1016,7 @@ def generateStarterRun() {
 		multiTenantVar ="'multiTenant=true"
 	}
 
-	íf (params.FORCE_TRUE == true) {
+	if (params.FORCE_TRUE == true) {
 		forceTrueVar = "force=true"
 	}
 
