@@ -55,7 +55,7 @@ node('docker') {
             }
             stage('download artifacts'){
                 copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/cf-auto-deploy", selector: specific("${UpstreamJobBuildNumber}")
-                unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
+                unzip -o zipFile: './terraform-cf-manifest.zip', dir: 'src'
             }
             stage('Apps deployment') {
                 withVault([vaultSecrets: secrets]) {
