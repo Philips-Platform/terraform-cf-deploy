@@ -1008,7 +1008,7 @@ def generateStarterRun() {
 	}
 		
 	if (params.MULTITENANT == true) {
-		multiTenantVar ="'multiTenant=true"
+		multiTenantVar ="multiTenant=true"
 	}
 
 
