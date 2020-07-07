@@ -1013,7 +1013,6 @@ if %index% GTR %count% exit /b 1
 
 def addVariableConf() {
 
-	dir('src') {
 
         	if(params.HTTP_HEALTH == true) {
                 	powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
@@ -1022,7 +1021,6 @@ def addVariableConf() {
               		 powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
                		 powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
        		}
-	}
 }
 
 
