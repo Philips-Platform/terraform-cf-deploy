@@ -24,6 +24,7 @@ pipeline {
 		booleanParam(name:'MULTITENANT', defaultValue: true)
 		booleanParam(name:'FORCE_TRUE', defaultValue: true)
 		booleanParam(name:'HTTP_HEALTH', defaultValue: true)
+		booleanParam(name:'STARTER',defaultValue: false)
 	}
 	stages {
                 stage('Secure Agent') {
@@ -1021,7 +1022,7 @@ Get-ChildItem Env:CF_USERNAME
 
 				stage('Run Starter Container') {
 					when {	
-						expression { "${params.APPS}" == "true" && "${params.STOP_APPS}" == "false" && "${params.TERRAFORM_OP}" == "apply" && "${params.TIER_1}" == "true" } 
+						expression { "${params.APPS}" == "true" && "${params.STARTER}" == "true" } 
 					}
 					steps {
 
