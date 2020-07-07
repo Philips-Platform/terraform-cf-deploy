@@ -587,7 +587,51 @@
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
 
+	},
+	"NETWORK_POLICY_73" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "scheduler",
+          "second_app_name" : "generic-support-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+
+	},
+	"NETWORK_POLICY_74" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "fhir-gw",
+          "second_app_name" : "generic-support-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+
+	},
+	"NETWORK_POLICY_74" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "generic-gw",
+          "second_app_name" : "generic-support-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+
+	},
+	"NETWORK_POLICY_75" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "execution",
+          "second_app_name" : "generic-support-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
+	},
+	"NETWORK_POLICY_76" : {
+          "source": "./modules/network-policy",
+          "first_app_name" : "scheduler",
+          "second_app_name" : "generic-gw",
+          "space_name": "${var.CLOUD_FOUNDRY_SPACE}",
+          "org_name": "${var.CLOUD_FOUNDRY_ORG}",
+          "port_range" : "5000"
 	}
+
 
 
 

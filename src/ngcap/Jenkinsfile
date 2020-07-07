@@ -23,6 +23,7 @@ pipeline {
 		booleanParam(name:'SHORTTOKENS', defaultValue: true)
 		booleanParam(name:'MULTITENANT', defaultValue: true)
 		booleanParam(name:'FORCE_TRUE', defaultValue: true)
+		booleanParam(name:'HTTP_HEALTH', defaultValue: false)
 	}
 	stages {
                 stage('Secure Agent') {
@@ -190,7 +191,14 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
@@ -209,7 +217,7 @@ Get-ChildItem Env:CF_USERNAME
 
 
 						stage('Deploy Fhir Gateway') {
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 								prepTerraForm('fhir') 
@@ -277,7 +285,14 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-gw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -321,7 +336,16 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
+
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-support-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -363,7 +387,16 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
+
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-trace' | Set-Content main.tf.json"
@@ -402,7 +435,15 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
+
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-config' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"calc-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -443,7 +484,17 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
+
+
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','dispatcher' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"dispatcher-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -483,7 +534,17 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
+
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','execution' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"execution-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -522,7 +583,17 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
+
+
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -562,7 +633,16 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
+
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound-config' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -603,7 +683,16 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
+
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','scheduler' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"scheduler-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
@@ -734,7 +823,14 @@ Get-ChildItem Env:CF_USERNAME
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/api/admin/status' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+
+									script {
+										if(params.HTTP_HEALTH == true) {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','http' | Set-Content main.tf.json"
+										} else {
+											powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
+										}
+									}
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"tenant-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
