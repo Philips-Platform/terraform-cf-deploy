@@ -23,7 +23,7 @@ pipeline {
 		booleanParam(name:'SHORTTOKENS', defaultValue: true)
 		booleanParam(name:'MULTITENANT', defaultValue: true)
 		booleanParam(name:'FORCE_TRUE', defaultValue: true)
-		booleanParam(name:'HTTP_HEALTH', defaultValue: false)
+		booleanParam(name:'HTTP_HEALTH', defaultValue: true)
 	}
 	stages {
                 stage('Secure Agent') {
