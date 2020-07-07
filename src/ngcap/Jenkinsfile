@@ -1019,7 +1019,7 @@ def generateStarterRun() {
 	echo "MULTITENANT = ${multiTenantVar}"
 	echo "FORCE TRUE = ${forceTrueVar}"
 
- 	bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && ${multiTenantVar} ${shortTokensVar} ${forceTrueVar} port=5000 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.apps.internal sh -c ./start.sh\" --name run-starter"
+ 	bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && ${multiTenantVar} ${shortTokensVar} ${forceTrueVar} port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
 
 
 }
