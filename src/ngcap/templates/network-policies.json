@@ -606,7 +606,7 @@
           "port_range" : "5000"
 
 	},
-	"NETWORK_POLICY_74" : {
+	"NETWORK_POLICY_75" : {
           "source": "./modules/network-policy",
           "first_app_name" : "generic-gw",
           "second_app_name" : "generic-support-gw",
@@ -615,7 +615,7 @@
           "port_range" : "5000"
 
 	},
-	"NETWORK_POLICY_75" : {
+	"NETWORK_POLICY_76" : {
           "source": "./modules/network-policy",
           "first_app_name" : "execution",
           "second_app_name" : "generic-support-gw",
@@ -623,7 +623,7 @@
           "org_name": "${var.CLOUD_FOUNDRY_ORG}",
           "port_range" : "5000"
 	},
-	"NETWORK_POLICY_76" : {
+	"NETWORK_POLICY_77" : {
           "source": "./modules/network-policy",
           "first_app_name" : "scheduler",
           "second_app_name" : "generic-gw",
