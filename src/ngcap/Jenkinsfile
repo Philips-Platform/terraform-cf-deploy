@@ -41,23 +41,29 @@ pipeline {
 	
 								bat "echo %USERNAME%>CF_USERNAME"
 								bat "echo %PASSWORD%>CF_PASSWORD"
+								bat "echo ${params.CLOUD_FOUNDRY_SPACE} > CF_SPACE"
+								bat "echo ${params.STOP_APPS} > STOP_APPS"
                                                        		 powershell '''
 Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
 Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
+Get-Content CF_SPACE | Set-Item -Path Env:CF_SPACE
+Get-Content STOP_APPS | Set-Item -Path Env:STOP_APPS
 Get-ChildItem Env:CF_USERNAME
 (Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+del CF_USERNAME
+del CF_PASSWORD
+Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_SPACE_USERS = [`"8b3ca926-d4cf-4d55-8dbd-4f8ede964e6b`"]"
+Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_SPACE = `"$Env:CF_SPACE`""
+Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_API = `"https://api.cloud.pcftest.com`""
+Add-Content -Path .\\default.auto.tfvars -Value "DOCKER_REGISTRY_NAMESPACE = `"docker.na1.hsdp.io/philips-platform-ngcap`""
+Add-Content -Path .\\default.auto.tfvars -Value "stop_apps = $Env:STOP_APPS"
+del STOP_APPS
+del CF_SPACE
 '''
-								bat "del CF_USERNAME"
-								bat "del CF_PASSWORD"
 
-								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE_USERS = [`\"8b3ca926-d4cf-4d55-8dbd-4f8ede964e6b`\"]\""
-								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
-								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_API = `\"https://api.cloud.pcftest.com`\"\""
-								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/philips-platform-ngcap`\"\""
-								powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
 							}
 						}
 		
@@ -150,36 +156,38 @@ Get-ChildItem Env:CF_USERNAME
 								       	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
 									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
 
-									powershell "Add-Content -Path env.txt -Value \"`\"Calcconfig`\" : `\"http://calc-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"Fhir`\" : `\"http://fhir-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Generic`\" : `\"http://generic-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\"" 
-         								powershell "Add-Content -Path env.txt -Value \"                `\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"		       `\"OutboundConfig`\" : `\"http://outbound-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"TenantConfig`\" : `\"http://tenant-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Scheduler`\" : `\"http://scheduler-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-							 		powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Hostname\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Username\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}\",'"
-                       							powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Password\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.VirtualHost\": \"vhost\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"rabbitmq.Port\": \"\${module.#APP-NAME#.service_key_credentials.rabbitmqkey.port}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"postgres.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
-                       					 		powershell "Add-Content -Path env.txt -Value '                \"supportDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"supportArchiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.DbHost\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Username\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.username}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Password\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.password}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"archiveDB.Port\": \"\${module.#APP-NAME#.service_key_credentials.postgreskey.port}\",'"
-                        						powershell "Add-Content -Path env.txt -Value '                \"METRICS_PROMETHEUS\": \"true\",'"
+									powershell '''
+Add-Content -Path env.txt -Value "`"Calcconfig`" : `"http://calc-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Fhir`" : `"http://fhir-gw-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Generic`" : `"http://generic-gw-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`"," 
+Add-Content -Path env.txt -Value "                `"GenericSupport`" : `"http://generic-support-gw-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "		  `"OutboundConfig`" : `"http://outbound-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"TenantConfig`" : `"http://tenant-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Scheduler`" : `"http://scheduler-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value '                "rabbitmq.Hostname": "${module.#APP-NAME#.service_key_credentials.rabbitmqkey.hostname}",'
+Add-Content -Path env.txt -Value '                "rabbitmq.Username": "${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_username}",'
+Add-Content -Path env.txt -Value '                "rabbitmq.Password": "${module.#APP-NAME#.service_key_credentials.rabbitmqkey.admin_password}",'
+Add-Content -Path env.txt -Value '                "rabbitmq.VirtualHost": "vhost",'
+Add-Content -Path env.txt -Value '                "rabbitmq.Port": "${module.#APP-NAME#.service_key_credentials.rabbitmqkey.port}",'
+Add-Content -Path env.txt -Value '                "postgres.DbHost": "${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}",'
+Add-Content -Path env.txt -Value '                "postgres.Username": "${module.#APP-NAME#.service_key_credentials.postgreskey.username}",'
+Add-Content -Path env.txt -Value '                "postgres.Password": "${module.#APP-NAME#.service_key_credentials.postgreskey.password}",'
+Add-Content -Path env.txt -Value '                "postgres.Port": "${module.#APP-NAME#.service_key_credentials.postgreskey.port}",'
+Add-Content -Path env.txt -Value '                "supportDB.DbHost": "${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}",'
+Add-Content -Path env.txt -Value '                "supportDB.Username": "${module.#APP-NAME#.service_key_credentials.postgreskey.username}",'
+Add-Content -Path env.txt -Value '                "supportDB.Password": "${module.#APP-NAME#.service_key_credentials.postgreskey.password}",'
+Add-Content -Path env.txt -Value '                "supportDB.Port": "${module.#APP-NAME#.service_key_credentials.postgreskey.port}",'
+Add-Content -Path env.txt -Value '                "supportArchiveDB.DbHost": "${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}",'
+Add-Content -Path env.txt -Value '                "supportArchiveDB.Username": "${module.#APP-NAME#.service_key_credentials.postgreskey.username}",'
+Add-Content -Path env.txt -Value '                "supportArchiveDB.Password": "${module.#APP-NAME#.service_key_credentials.postgreskey.password}",'
+Add-Content -Path env.txt -Value '                "supportArchiveDB.Port": "${module.#APP-NAME#.service_key_credentials.postgreskey.port}",'
+Add-Content -Path env.txt -Value '                "archiveDB.DbHost": "${module.#APP-NAME#.service_key_credentials.postgreskey.hostname}",'
+Add-Content -Path env.txt -Value '                "archiveDB.Username": "${module.#APP-NAME#.service_key_credentials.postgreskey.username}",'
+Add-Content -Path env.txt -Value '                "archiveDB.Password": "${module.#APP-NAME#.service_key_credentials.postgreskey.password}",'
+Add-Content -Path env.txt -Value '                "archiveDB.Port": "${module.#APP-NAME#.service_key_credentials.postgreskey.port}",'
+Add-Content -Path env.txt -Value '                "METRICS_PROMETHEUS": "true",'
+'''
 
 									script {	
 										if(params.SHORTTOKENS == true) {
@@ -187,18 +195,21 @@ Get-ChildItem Env:CF_USERNAME
 										}
 									}
 
-
-                        						powershell "Add-Content -Path env.txt -Value '                \"redis.RedisConfigString\": \"\${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=\${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000\"'"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell '''
+Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000"'
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+'''
 
 									addVariableConf()
-
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"sys-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json"
+									
+									powershell '''
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"sys-config-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json
+'''
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 								}
 
@@ -870,6 +881,39 @@ Get-ChildItem Env:CF_USERNAME
 							when { expression { "${params.STOP_APPS}" == "false" } }
 							steps {
 
+
+
+							bat '''
+@echo off
+SET /A "index = 1"
+SET /A "count = 500"
+:while
+if %index% leq %count% (
+   
+	E:\\cf.exe app grafana > out.txt 2>&1
+	findstr running out.txt
+	if NOT ERRORLEVEL 1 (
+		echo RUNNING
+	) else (
+		echo NOT RUNNING
+		goto :exit
+	)
+
+   echo The value of index is %index%
+   SET /A "index = index + 1"
+   PING localhost -n 5 >NUL
+   goto :while
+)
+
+:exit
+echo Final: %index% : %count%
+
+if %index% GTR %count% exit /b 1							
+'''
+
+
+
+
 								dir('src/ngcap/dashboards') {
 
 									powershell "(Get-Content -Path source.json) -replace '#PROME_URL#',\"prometheus_internal-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}.apps.internal\" | Set-Content source.json"
@@ -984,6 +1028,7 @@ if %index% leq %count% (
 	findstr RUNNING out.txt
 	if NOT ERRORLEVEL 1 (
 		echo RUNNING
+		type out.txt
 	) else (
 		echo NOT RUNNING
 		goto :exit
