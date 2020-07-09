@@ -894,7 +894,7 @@ del CF_PASSWORD
 Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_SPACE = `"$Env:CF_ORG`""
 Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_API = `"https://api.cloud.pcftest.com`""
 Add-Content -Path .\\default.auto.tfvars -Value "DOCKER_REGISTRY_NAMESPACE = `"docker.na1.hsdp.io/philips-platform`""
-Add-Content -Path .\\default.auto.tfvars -Value "stop_apps = $Env:STOP_APPS}"
+Add-Content -Path .\\default.auto.tfvars -Value "stop_apps = $Env:STOP_APPS"
 Add-Content -Path .\\default.auto.tfvars -Value "MONITORING_APP_PORT = `"5000`""
 Add-Content -Path .\\default.auto.tfvars -Value "MONITORING_METRIC_PATH= `"/metrics`""
 '''
