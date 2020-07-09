@@ -867,11 +867,11 @@ Get-ChildItem Env:CF_USERNAME
 
 									powershell "(Get-Content -Path source.json) -replace '#PROME_URL#',\"prometheus_internal-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}.apps.internal\" | Set-Content source.json"
 
-									bat "curl -u admin:admin --header "Content-Type: application/json" --request POST -d @source.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
-									bat "curl -u admin:admin --header "Content-Type: application/json" --request POST -d @CalcDashboard.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
-									bat "curl -u admin:admin --header "Content-Type: application/json" --request POST -d @CalcTrace.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
-									bat "curl -u admin:admin --header "Content-Type: application/json" --request POST -d @DataInterface.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
-									bat "curl -u admin:admin --header "Content-Type: application/json" --request POST -d @DistributedLocks.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
+									bat "curl -u admin:admin --header \"Content-Type: application/json\" --request POST -d @source.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
+									bat "curl -u admin:admin --header \"Content-Type: application/json\" --request POST -d @CalcDashboard.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
+									bat "curl -u admin:admin --header \"Content-Type: application/json\" --request POST -d @CalcTrace.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
+									bat "curl -u admin:admin --header \"Content-Type: application/json\" --request POST -d @DataInterface.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
+									bat "curl -u admin:admin --header \"Content-Type: application/json\" --request POST -d @DistributedLocks.json http://grafana-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/datasources"
 
 								}
 
