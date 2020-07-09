@@ -885,13 +885,14 @@ Get-Content CF_SPACE | Set-Item -Path Env:CF_SPACE
 Get-Content CF_ORG | Set-Item -Path Env:CF_ORG
 Get-Content STOP_APPS | Set-Item -Path Env:STOP_APPS
 Get-ChildItem Env:CF_USERNAME
+(Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_ORG        = ""',"CLOUD_FOUNDRY_ORG        = `"$Env:CF_ORG`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
 del CF_USERNAME
 del CF_PASSWORD
-Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_SPACE = `"$Env:CF_ORG`""
+Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_SPACE = `"$Env:CF_SPACE`""
 Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_API = `"https://api.cloud.pcftest.com`""
 Add-Content -Path .\\default.auto.tfvars -Value "DOCKER_REGISTRY_NAMESPACE = `"docker.na1.hsdp.io/philips-platform`""
 Add-Content -Path .\\default.auto.tfvars -Value "stop_apps = $Env:STOP_APPS"
