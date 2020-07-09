@@ -154,11 +154,9 @@ del CF_ORG
 
                                         	               	dir('src') {
 
-
-								       	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-
 									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
 Add-Content -Path env.txt -Value "`"Calcconfig`" : `"http://calc-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
 Add-Content -Path env.txt -Value "                `"Fhir`" : `"http://fhir-gw-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
 Add-Content -Path env.txt -Value "                `"Generic`" : `"http://generic-gw-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`"," 
@@ -201,17 +199,13 @@ Add-Content -Path env.txt -Value '                "METRICS_PROMETHEUS": "true",'
 Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${module.#APP-NAME#.service_key_credentials.rediskey.host},abortConnect=false,password=${module.#APP-NAME#.service_key_credentials.rediskey.password},connectTimeout=60000,syncTimeout=60000"'
 (Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
-'''
-
-									addVariableConf()
-									
-									powershell '''
 (Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#APP-NAME#','sys-config' | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"sys-config-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfig' | Set-Content main.tf.json
 '''
+									addVariableConf()
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 								}
 
@@ -229,15 +223,17 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 							steps {
 
 								prepTerraForm('fhir') 
-                                	                        dir('src') {
+                                	                        
+								dir('src') {
 
-								      	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\",\""
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`","
+Add-Content -Path env.txt -Value "                `"USE_MONGO`" : `"false`","
+Add-Content -Path env.txt -Value "                `"FHIR_VERSION`" : `"R4`","
+'''
 
 									script {	
 										if(params.SHORTTOKENS == true) {
@@ -245,19 +241,21 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 										}
 									}
 
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
-
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell '''
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"fhir-gw-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json"
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','fhirgw' | Set-Content main.tf.json
+'''
 
 									addVariableConf()
 
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"fhir-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','fhirgw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+
 
 								}
 
@@ -279,29 +277,33 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 								prepTerraForm('generic') 
 						
                                                         	dir('src') {
-
-								       	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
+									
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`","
+Add-Content -Path env.txt -Value "                `"USE_MONGO`" : `"false`","
+'''
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 
-									addVariableConf()
+									powershell '''
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-gw' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"generic-gw-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json
+'''
 
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-gw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									addVariableConf()
 
 								}
 
@@ -322,31 +324,35 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 					
                                        	        	 	dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"USE_MONGO`\" : `\"false`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"DbInfo`\" : `\"supportDB`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"DbInfoArchive`\" : `\"supportArchiveDB`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"pathReplace`\" : `\"api/generic,api/genericsupport`\",\""
+									powershell '''	
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-\$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`","
+Add-Content -Path env.txt -Value "                `"USE_MONGO`" : `"false`","
+Add-Content -Path env.txt -Value "                `"DbInfo`" : `"supportDB`","
+Add-Content -Path env.txt -Value "                `"DbInfoArchive`" : `"supportArchiveDB`","
+Add-Content -Path env.txt -Value "                `"pathReplace`" : `"api/generic,api/genericsupport`","
+'''
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 
-									addVariableConf()
+									powershell '''
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"generic-support-gw-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json
+'''
 
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','generic-support-gw' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"generic-support-gw-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','genericgw' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									addVariableConf()
 	
 								}
 
@@ -368,28 +374,32 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 
                                 	                	dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"`\"GenericSupport`\" : `\"http://generic-support-gw-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "`"GenericSupport`" : `"http://generic-support-gw-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+'''
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 
-									addVariableConf()
+									powershell '''
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-trace' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"calc-trace-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calctrace' | Set-Content main.tf.json
+'''
 
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-trace' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"calc-trace-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calctrace' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									addVariableConf()
 								}
 
 
@@ -408,28 +418,30 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
                                         		        
 								dir('src') {
 
-								       	bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+'''
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
 
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-
-									addVariableConf()
-
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"calc-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calcconfig' | Set-Content main.tf.json"
+									powershell '''
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','calc-config' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"calc-config-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','calcconfig' | Set-Content main.tf.json
+'''
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									addVariableConf()
 
 								}
 
@@ -449,29 +461,34 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 								prepTerraForm('dispatcher') 
 					
         	                                                dir('src') {
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
+
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"LOG_PUB_MSG`" : `"true`","
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`","
+'''
+
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
-									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 
-									addVariableConf()
-
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','dispatcher' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"dispatcher-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','dispatcher' | Set-Content main.tf.json"
+									powershell '''
+Add-Content -Path env.txt -Value "                `"FHIR_VERSION`" : `"R4`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','dispatcher' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"dispatcher-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','dispatcher' | Set-Content main.tf.json
+'''
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									addVariableConf()
 								}
 
 
@@ -490,30 +507,33 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 					
                                         	                dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`","
+'''
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
 
-									powershell "Add-Content -Path env.txt -Value \"                `\"LOG_PUB_MSG`\" : `\"true`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-
-									addVariableConf()
-
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','execution' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"execution-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '\\\${var.memory}','1024' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','execution' | Set-Content main.tf.json"
+									powershell '''
+Add-Content -Path env.txt -Value "                `"LOG_PUB_MSG`" : `"true`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','execution' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"execution-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '${var.memory}','1024' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','execution' | Set-Content main.tf.json
+'''
+									
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									addVariableConf()
 
 								}
 
@@ -530,28 +550,35 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 					
                                                 	        dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
+
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`","
+'''
+
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
 
-									powershell "Add-Content -Path env.txt -Value \"                `\"FHIR_VERSION`\" : `\"R4`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+									powershell '''
+Add-Content -Path env.txt -Value "                `"FHIR_VERSION`" : `"R4`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"outbound-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outbound' | Set-Content main.tf.json
+'''
+
 
 									addVariableConf()
 
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outbound' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 
 								}	
@@ -572,28 +599,34 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 						
                                 	                	dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+'''
+
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
+									
+									powershell '''
 
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound-config' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"outbound-config-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service\"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outboundconfig' | Set-Content main.tf.json
+'''
 
-									addVariableConf()
-
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','outbound-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"outbound-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','outboundconfig' | Set-Content main.tf.json"
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									addVariableConf()
 
 								}
 
@@ -615,27 +648,32 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 					
                 	                                       	dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+'''
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 
-									addVariableConf()
-
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','scheduler' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"scheduler-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','scheduler' | Set-Content main.tf.json"
+									powershell '''
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','scheduler' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"scheduler-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','scheduler' | Set-Content main.tf.json
+'''
+									
+									
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
+									addVariableConf()
 
 								}
 
@@ -657,27 +695,33 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 						
                                                         	dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"ClientSecret`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
+
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"ClientSecret`" : `"true`","
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`","
+Add-Content -Path env.txt -Value "                `"LDAP`" : `"false`","
+'''
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
-									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','authenticationsvc' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"authenticationsvc-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','authenticationsvc' | Set-Content main.tf.json"
+
+									powershell '''										
+Add-Content -Path env.txt -Value "                `"Debug`" : `"true`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','authenticationsvc' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"authenticationsvc-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','authenticationsvc' | Set-Content main.tf.json
+'''
 									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
 
 								}
@@ -700,14 +744,17 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 					
                                                         	dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"ClientSecret`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"LDAP`\" : `\"false`\",\""
-									powershell "Add-Content -Path env.txt -Value \"                `\"Debug`\" : `\"true`\",\""
+
+									powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"ClientSecret`" : `"true`","
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`","
+Add-Content -Path env.txt -Value "                `"LDAP`" : `"false`","
+Add-Content -Path env.txt -Value "                `"Debug`" : `"true`","
+'''
 
 									script {	
 										if(params.SHORTTOKENS == true) {
@@ -716,17 +763,20 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 											powershell "Add-Content -Path env.txt -Value \"                 `\"ENVJS`\": `\"window.environment = { host: \\`\"ngcap-api-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\\`\", port: 80, protocol: \\`\"http\\`\", support: \\`\"/api/genericsupport\\`\"}`\"\""
 										}
 									}
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"8080\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\",\"\${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfigui' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
 
+
+									powershell '''
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"8080"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"ngcap-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}","${var.CLOUD_FOUNDRY_EXTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','sysconfigui' | Set-Content main.tf.json
+'''
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_JS_VERSION}' | Set-Content main.tf.json"
 								}
 
 
@@ -747,27 +797,32 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 						
                                         		         dir('src') {
 
-									bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-									bat 'if exist env.txt ( del /q env.txt ) else ( echo no env.txt )'
-									powershell "Add-Content -Path env.txt -Value \"`\"SystemConfigBaseUrl`\" : `\"http://sys-config-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
-         								powershell "Add-Content -Path env.txt -Value \"                `\"Authentication`\" : `\"http://authenticationsvc-\$Env:ORG_LOWER-\$Env:SPACE_LOWER.`\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`\",\""
+									powershell '''					
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+if (Test-Path env.txt) { Remove-Item env.txt } else { echo "no env.txt" }
+Add-Content -Path env.txt -Value "`"SystemConfigBaseUrl`" : `"http://sys-config-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://authenticationsvc-$Env:ORG_LOWER-$Env:SPACE_LOWER.`${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}:5000`","
+'''
 									script {	
 										if(params.SHORTTOKENS == true) {
                         								powershell "Add-Content -Path env.txt -Value '                \"ENFORCE_ACCESS_TOKEN\": \"true\",'"
 										}
 									}
-									powershell "Add-Content -Path env.txt -Value \"                `\"METRICS_PROMETHEUS`\" : `\"true`\"\""
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
 
+									powershell '''
+Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"true`""
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#',(Get-Content -Path env.txt -Raw) | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"tenant-config-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','tenantconfig' | Set-Content main.tf.json
+'''
+
+									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 									addVariableConf()
 
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','tenant-config' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"tenant-config-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','tenantconfig' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_CS_VERSION}' | Set-Content main.tf.json"
 								}
 
 
@@ -787,9 +842,11 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 					
                                                         	dir('src') {
 
-							    		bat "copy /Y ngcap\\templates\\api-gateway.json main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-api' | Set-Content main.tf.json"
-									powershell "(Get-Content -Path main.tf.json) -replace '#HOSTBASE#',\"\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
+									powershell '''
+Copy-Item "ngcap\\templates\\api-gateway.json" -Destination main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-api' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#HOSTBASE#',"${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+'''
 	
 								}
 
@@ -817,24 +874,30 @@ Add-Content -Path env.txt -Value '                "redis.RedisConfigString": "${
 	
 										bat "echo %USERNAME%>CF_USERNAME"
 										bat "echo %PASSWORD%>CF_PASSWORD"
-                                                       		 		powershell '''
+										bat "echo ${params.CLOUD_FOUNDRY_SPACE} > CF_SPACE"
+										bat "echo ${params.CLOUD_FOUNDRY_ORG} > CF_ORG"
+										bat "echo ${params.STOP_APPS} > STOP_APPS"
+
+                                                       		powershell '''
 Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
 Get-Content CF_PASSWORD | Set-Item -Path Env:CF_PASSWORD
+Get-Content CF_SPACE | Set-Item -Path Env:CF_SPACE
+Get-Content CF_ORG | Set-Item -Path Env:CF_ORG
+Get-Content STOP_APPS | Set-Item -Path Env:STOP_APPS
 Get-ChildItem Env:CF_USERNAME
 (Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_USERNAME   = ""',"CLOUD_FOUNDRY_USERNAME   = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'CLOUD_FOUNDRY_PASSWORD   = ""',"CLOUD_FOUNDRY_PASSWORD   = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_USERNAME = ""',"DOCKER_REGISTRY_USERNAME = `"$Env:CF_USERNAME`"" | Set-Content -Path .\\default.auto.tfvars
 (Get-Content -Path .\\default.auto.tfvars) -replace 'DOCKER_REGISTRY_PASSWORD = ""',"DOCKER_REGISTRY_PASSWORD = `"$Env:CF_PASSWORD`"" | Set-Content -Path .\\default.auto.tfvars
+del CF_USERNAME
+del CF_PASSWORD
+Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_SPACE = `"$Env:CF_ORG`""
+Add-Content -Path .\\default.auto.tfvars -Value "CLOUD_FOUNDRY_API = `"https://api.cloud.pcftest.com`""
+Add-Content -Path .\\default.auto.tfvars -Value "DOCKER_REGISTRY_NAMESPACE = `"docker.na1.hsdp.io/philips-platform`""
+Add-Content -Path .\\default.auto.tfvars -Value "stop_apps = $Env:STOP_APPS}"
+Add-Content -Path .\\default.auto.tfvars -Value "MONITORING_APP_PORT = `"5000`""
+Add-Content -Path .\\default.auto.tfvars -Value "MONITORING_METRIC_PATH= `"/metrics`""
 '''
-										bat "del CF_USERNAME"
-										bat "del CF_PASSWORD"
-
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_SPACE = `\"${params.CLOUD_FOUNDRY_SPACE}`\"\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"CLOUD_FOUNDRY_API = `\"https://api.cloud.pcftest.com`\"\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"DOCKER_REGISTRY_NAMESPACE = `\"docker.na1.hsdp.io/philips-platform`\"\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"stop_apps = ${params.STOP_APPS}\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"MONITORING_APP_PORT = `\"5000`\"\""
-										powershell "Add-Content -Path .\\default.auto.tfvars -Value \"MONITORING_METRIC_PATH= `\"/metrics`\"\""
 									}
 								}
 		
@@ -918,7 +981,7 @@ if %index% GTR %count% exit /b 1
 
 								dir('src/ngcap/dashboards') {
 
-									powershell "(Get-Content -Path source.json) -replace '#PROME_URL#',\"prometheus_internal-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}.apps.internal\" | Set-Content source.json"
+									powershell "(Get-Content -Path source.json) -replace '#PROME_URL#',\"prometheus_internal-${params.CLOUD_FOUNDRY_ORG}-${params.CLOUD_FOUNDRY_SPACE}.apps.internal\" | Set-Content source.json"
 
 									bat "curl -u admin:admin --header \"Content-Type: application/json\" --request POST -d @source.json http://grafana-${params.CLOUD_FOUNDRY_ORG}-${params.CLOUD_FOUNDRY_SPACE}.us-east.philips-healthsuite.com/api/datasources"
 									bat "curl -u admin:admin --header \"Content-Type: application/json\" --request POST -d @CalcDashboard.json http://grafana-${params.CLOUD_FOUNDRY_ORG}-${params.CLOUD_FOUNDRY_SPACE}.us-east.philips-healthsuite.com/api/dashboards/db"
@@ -982,16 +1045,19 @@ if %index% GTR %count% exit /b 1
 
 					
                                                  dir('src') {
-						        bat "copy /Y ngcap\\templates\\ngcap-app.json main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','\"5000\"' | Set-Content main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-starter' | Set-Content main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',\"ngcap-starter-\${Env:ORG_LOWER}-\${Env:SPACE_LOWER}\" | Set-Content main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','\"\${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}\"' | Set-Content main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','\"log_drainer_service\"' | Set-Content main.tf.json"
-							powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','ngcap-starter' | Set-Content main.tf.json"
+							
+							powershell '''
+Copy-Item "ngcap\\templates\\ngcap-app.json" -Destination main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_ENV#','' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_ENDPOINT#','/' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#HEALTH_CHECK_TYPE#','port' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-NAME#','ngcap-starter' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"ngcap-starter-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
+(Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','ngcap-starter' | Set-Content main.tf.json
+'''
 							powershell "(Get-Content -Path main.tf.json) -replace '#IMAGE-TAG#','${params.NGCAP_STARTER_VERSION}' | Set-Content main.tf.json"
 						}
 
