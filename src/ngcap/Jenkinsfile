@@ -38,9 +38,9 @@ pipeline {
 								bat "copy /Y default.auto.tfvars default.auto.tfvars.backup"
 								bat "echo %USERNAME%>CF_USERNAME"
 								bat "echo %PASSWORD%>CF_PASSWORD"
-								bat "echo ${params.CLOUD_FOUNDRY_SPACE} > CF_SPACE"
-								bat "echo ${params.CLOUD_FOUNDRY_ORG} > CF_ORG"
-								bat "echo ${params.STOP_APPS} > STOP_APPS"
+								bat "echo ${params.CLOUD_FOUNDRY_SPACE}>CF_SPACE"
+								bat "echo ${params.CLOUD_FOUNDRY_ORG}>CF_ORG"
+								bat "echo ${params.STOP_APPS}>STOP_APPS"
 
                                                        		powershell '''
 Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
@@ -874,9 +874,9 @@ Copy-Item "ngcap\\templates\\api-gateway.json" -Destination main.tf.json
 	
 										bat "echo %USERNAME%>CF_USERNAME"
 										bat "echo %PASSWORD%>CF_PASSWORD"
-										bat "echo ${params.CLOUD_FOUNDRY_SPACE} > CF_SPACE"
-										bat "echo ${params.CLOUD_FOUNDRY_ORG} > CF_ORG"
-										bat "echo ${params.STOP_APPS} > STOP_APPS"
+										bat "echo ${params.CLOUD_FOUNDRY_SPACE}>CF_SPACE"
+										bat "echo ${params.CLOUD_FOUNDRY_ORG}>CF_ORG"
+										bat "echo ${params.STOP_APPS}>STOP_APPS"
 
                                                        		powershell '''
 Get-Content CF_USERNAME | Set-Item -Path Env:CF_USERNAME
