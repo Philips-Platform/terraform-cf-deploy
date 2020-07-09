@@ -247,7 +247,7 @@ Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://
 (Get-Content -Path main.tf.json) -replace '#APP_PORTS#','"5000"' | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#APP-NAME#','fhir-gw' | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#APP-HOSTNAME#',"fhir-gw-${Env:ORG_LOWER}-${Env:SPACE_LOWER}" | Set-Content main.tf.json
-(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json"
+(Get-Content -Path main.tf.json) -replace '#APP_DOMAIN#','"${var.CLOUD_FOUNDRY_INTERNAL_DOMAIN}"' | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#APP_CUPS#','"log_drainer_service"' | Set-Content main.tf.json
 (Get-Content -Path main.tf.json) -replace '#IMAGE-NAME#','fhirgw' | Set-Content main.tf.json
 '''
