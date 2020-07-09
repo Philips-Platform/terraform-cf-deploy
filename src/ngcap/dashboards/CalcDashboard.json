@@ -1,0 +1,1174 @@
+{
+    "dashboard": {
+            "annotations": {
+                    "list": [
+                            {
+                                    "builtIn": 1,
+                                    "datasource": "-- Grafana --",
+                                    "enable": true,
+                                    "hide": true,
+                                    "iconColor": "rgba(0, 211, 255, 1)",
+                                    "name": "Annotations & Alerts",
+                                    "type": "dashboard"
+                            }
+                    ]
+            },
+            "editable": true,
+            "gnetId": null,
+            "graphTooltip": 0,
+            "id": null,
+            "iteration": 1594220714464,
+            "links": [],
+            "panels": [
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": null,
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 11,
+                                    "w": 12,
+                                    "x": 0,
+                                    "y": 0
+                            },
+                            "hiddenSeries": false,
+                            "id": 16,
+                            "legend": {
+                                    "alignAsTable": false,
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_Execution_count{TenantId=~\"$tenant_id\",instance=~\"$instance_exe\"}[1m])) by (CalcName,State)",
+                                            "format": "time_series",
+                                            "hide": false,
+                                            "interval": "",
+                                            "intervalFactor": 1,
+                                            "legendFormat": "",
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "Calc Execution Rate (Execution)",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 2,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": "Prometheus",
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 11,
+                                    "w": 12,
+                                    "x": 12,
+                                    "y": 0
+                            },
+                            "hiddenSeries": false,
+                            "id": 2,
+                            "legend": {
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_LoadAllInputs_sum{TenantId=~\"$tenant_id\",instance=~\"$instance_dispatcher\"}[5m])/rate(ngcap_LoadAllInputs_count{instance=~\"$instance_dispatcher\"}[5m])) by (CalcName)",
+                                            "format": "time_series",
+                                            "hide": false,
+                                            "interval": "",
+                                            "intervalFactor": 1,
+                                            "legendFormat": "",
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "Load All Inputs for Calc",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 0,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": "Prometheus",
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 11,
+                                    "w": 12,
+                                    "x": 0,
+                                    "y": 11
+                            },
+                            "hiddenSeries": false,
+                            "id": 14,
+                            "legend": {
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_Execution_sum{TenantId=~\"$tenant_id\",State=\"Completed\",instance=~\"$instance_exe\"}[1m])/rate(ngcap_Execution_count{State=\"Completed\",instance=~\"$instance_exe\"}[1m])) by (CalcName,Runtime)\n\n",
+                                            "format": "time_series",
+                                            "hide": false,
+                                            "interval": "",
+                                            "intervalFactor": 1,
+                                            "legendFormat": "",
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "C# Calc Execution Duration",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 0,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": null,
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 11,
+                                    "w": 12,
+                                    "x": 12,
+                                    "y": 11
+                            },
+                            "hiddenSeries": false,
+                            "id": 6,
+                            "legend": {
+                                    "alignAsTable": false,
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_RequestForExecution{TenantId=~\"$tenant_id\",instance=~\"$instance_dispatcher\"}[5m])) by (CalcName)",
+                                            "format": "time_series",
+                                            "hide": false,
+                                            "interval": "",
+                                            "intervalFactor": 1,
+                                            "legendFormat": "",
+                                            "refId": "A"
+                                    },
+                                    {
+                                            "refId": "B"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "Calc Execution Rate (publish CEB)",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 2,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": "Prometheus",
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 11,
+                                    "w": 12,
+                                    "x": 0,
+                                    "y": 22
+                            },
+                            "hiddenSeries": false,
+                            "id": 15,
+                            "legend": {
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(ngcap_Execution_count{TenantId=~\"$tenant_id\",State!=\"Completed\",instance=~\"$instance_exe\"}) by (CalcName,Runtime,State)\n\n",
+                                            "format": "time_series",
+                                            "hide": false,
+                                            "interval": "",
+                                            "intervalFactor": 1,
+                                            "legendFormat": "",
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "C# Calc Execution Failures",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 0,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": null,
+                            "description": "Ignored Calc Requests because the execution of the calculation is already scheduled.",
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 9,
+                                    "w": 12,
+                                    "x": 12,
+                                    "y": 22
+                            },
+                            "hiddenSeries": false,
+                            "id": 8,
+                            "legend": {
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_ExecutionDebounced{TenantId=~\"$tenant_id\",instance=~\"$instance_dispatcher\"}[5m])) by (CalcName)",
+                                            "format": "time_series",
+                                            "hide": false,
+                                            "instant": false,
+                                            "interval": "",
+                                            "intervalFactor": 1,
+                                            "legendFormat": "",
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "Debounced Calc Requests",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 0,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": "Left",
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": "Right",
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": null,
+                            "description": "After loading the inputs, required values are missing and execution is aboarded",
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 9,
+                                    "w": 12,
+                                    "x": 12,
+                                    "y": 31
+                            },
+                            "hiddenSeries": false,
+                            "id": 13,
+                            "legend": {
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_NotPublished[5m])) by (CalcName)",
+                                            "format": "time_series",
+                                            "hide": false,
+                                            "instant": false,
+                                            "interval": "",
+                                            "intervalFactor": 1,
+                                            "legendFormat": "",
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "Calculation Evaluated No Execute",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 0,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": "Left",
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": "Right",
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": null,
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 9,
+                                    "w": 12,
+                                    "x": 12,
+                                    "y": 40
+                            },
+                            "hiddenSeries": false,
+                            "id": 12,
+                            "legend": {
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_LockNotAvail[5m])) by (CalcName)",
+                                            "format": "time_series",
+                                            "hide": true,
+                                            "intervalFactor": 1,
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "Locks not available by calc",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 0,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": null,
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 9,
+                                    "w": 12,
+                                    "x": 12,
+                                    "y": 49
+                            },
+                            "hiddenSeries": false,
+                            "id": 4,
+                            "legend": {
+                                    "alignAsTable": true,
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_LockNotAvail[5m])) by (CalcName)",
+                                            "format": "time_series",
+                                            "hide": false,
+                                            "intervalFactor": 1,
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "Concurrency Lock",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 0,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    },
+                    {
+                            "aliasColors": {},
+                            "bars": false,
+                            "dashLength": 10,
+                            "dashes": false,
+                            "datasource": null,
+                            "description": "Ignored Calc Requests because the execution of the calculation has not completed yet",
+                            "fieldConfig": {
+                                    "defaults": {
+                                            "custom": {}
+                                    },
+                                    "overrides": []
+                            },
+                            "fill": 1,
+                            "fillGradient": 0,
+                            "gridPos": {
+                                    "h": 9,
+                                    "w": 12,
+                                    "x": 12,
+                                    "y": 58
+                            },
+                            "hiddenSeries": false,
+                            "id": 10,
+                            "legend": {
+                                    "avg": false,
+                                    "current": false,
+                                    "max": false,
+                                    "min": false,
+                                    "rightSide": true,
+                                    "show": true,
+                                    "total": false,
+                                    "values": false
+                            },
+                            "lines": true,
+                            "linewidth": 1,
+                            "links": [],
+                            "nullPointMode": "null",
+                            "options": {
+                                    "dataLinks": []
+                            },
+                            "percentage": false,
+                            "pointradius": 5,
+                            "points": false,
+                            "renderer": "flot",
+                            "seriesOverrides": [],
+                            "spaceLength": 10,
+                            "stack": false,
+                            "steppedLine": false,
+                            "targets": [
+                                    {
+                                            "expr": "sum(rate(ngcap_ExecutionDebouncedL2[5m])) by (CalcName)",
+                                            "format": "time_series",
+                                            "intervalFactor": 1,
+                                            "refId": "A"
+                                    }
+                            ],
+                            "thresholds": [],
+                            "timeFrom": null,
+                            "timeRegions": [],
+                            "timeShift": null,
+                            "title": "Debounce L2",
+                            "tooltip": {
+                                    "shared": true,
+                                    "sort": 0,
+                                    "value_type": "individual"
+                            },
+                            "type": "graph",
+                            "xaxis": {
+                                    "buckets": null,
+                                    "mode": "time",
+                                    "name": null,
+                                    "show": true,
+                                    "values": []
+                            },
+                            "yaxes": [
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    },
+                                    {
+                                            "format": "short",
+                                            "label": null,
+                                            "logBase": 1,
+                                            "max": null,
+                                            "min": null,
+                                            "show": true
+                                    }
+                            ],
+                            "yaxis": {
+                                    "align": false,
+                                    "alignLevel": null
+                            }
+                    }
+            ],
+            "refresh": false,
+            "schemaVersion": 25,
+            "style": "dark",
+            "tags": [],
+            "templating": {
+                    "list": [
+                            {
+                                    "allValue": null,
+                                    "current": {
+                                            "selected": true,
+                                            "text": "All",
+                                            "value": "$__all"
+                                    },
+                                    "datasource": "Prometheus",
+                                    "definition": "label_values({application=\"execution\"},instance)",
+                                    "hide": 0,
+                                    "includeAll": true,
+                                    "label": "instance_exe",
+                                    "multi": false,
+                                    "name": "instance_exe",
+                                    "options": [
+                                            {
+                                                    "selected": true,
+                                                    "text": "All",
+                                                    "value": "$__all"
+                                            },
+                                            {
+                                                    "selected": false,
+                                                    "text": "10.254.58.134",
+                                                    "value": "10.254.58.134"
+                                            }
+                                    ],
+                                    "query": "label_values({application=\"execution\"},instance)",
+                                    "refresh": 0,
+                                    "regex": "",
+                                    "skipUrlSync": false,
+                                    "sort": 0,
+                                    "tagValuesQuery": "",
+                                    "tags": [],
+                                    "tagsQuery": "",
+                                    "type": "query",
+                                    "useTags": false
+                            },
+                            {
+                                    "allValue": null,
+                                    "current": {
+                                            "selected": false,
+                                            "text": "All",
+                                            "value": "$__all"
+                                    },
+                                    "datasource": "Prometheus",
+                                    "definition": "label_values({TenantId=~\"$tenant_id\",application=\"dispatcher\"},instance)",
+                                    "hide": 0,
+                                    "includeAll": true,
+                                    "label": "instance_dispatcher",
+                                    "multi": false,
+                                    "name": "instance_dispatcher",
+                                    "options": [
+                                            {
+                                                    "selected": true,
+                                                    "text": "All",
+                                                    "value": "$__all"
+                                            },
+                                            {
+                                                    "selected": false,
+                                                    "text": "10.254.159.164",
+                                                    "value": "10.254.159.164"
+                                            }
+                                    ],
+                                    "query": "label_values({TenantId=~\"$tenant_id\",application=\"dispatcher\"},instance)",
+                                    "refresh": 0,
+                                    "regex": "",
+                                    "skipUrlSync": false,
+                                    "sort": 0,
+                                    "tagValuesQuery": "",
+                                    "tags": [],
+                                    "tagsQuery": "",
+                                    "type": "query",
+                                    "useTags": false
+                            },
+                            {
+                                    "allValue": null,
+                                    "current": {
+                                            "selected": true,
+                                            "text": "All",
+                                            "value": "$__all"
+                                    },
+                                    "datasource": "Prometheus",
+                                    "definition": "label_values(TenantId)",
+                                    "hide": 0,
+                                    "includeAll": true,
+                                    "label": null,
+                                    "multi": false,
+                                    "name": "tenant_id",
+                                    "options": [
+                                            {
+                                                    "selected": true,
+                                                    "text": "All",
+                                                    "value": "$__all"
+                                            },
+                                            {
+                                                    "selected": false,
+                                                    "text": "316b9bd7c27e441b85044a08c5a8d698",
+                                                    "value": "316b9bd7c27e441b85044a08c5a8d698"
+                                            },
+                                            {
+                                                    "selected": false,
+                                                    "text": "d936f1e9aee841b4a871dca428e0908d",
+                                                    "value": "d936f1e9aee841b4a871dca428e0908d"
+                                            }
+                                    ],
+                                    "query": "label_values(TenantId)",
+                                    "refresh": 0,
+                                    "regex": "",
+                                    "skipUrlSync": false,
+                                    "sort": 0,
+                                    "tagValuesQuery": "",
+                                    "tags": [],
+                                    "tagsQuery": "",
+                                    "type": "query",
+                                    "useTags": false
+                            }
+                    ]
+            },
+            "time": {
+                    "from": "now-15m",
+                    "to": "now"
+            },
+            "timepicker": {
+                    "refresh_intervals": [
+                            "10s",
+                            "30s",
+                            "1m",
+                            "5m",
+                            "15m",
+                            "30m",
+                            "1h",
+                            "2h",
+                            "1d"
+                    ],
+                    "time_options": [
+                            "5m",
+                            "15m",
+                            "1h",
+                            "6h",
+                            "12h",
+                            "24h",
+                            "2d",
+                            "7d",
+                            "30d"
+                    ]
+            },
+            "timezone": "",
+            "title": "Calc Execution Dashboard",
+            "uid": "3bQ21yUmz",
+            "version": 8
+    }
+}
