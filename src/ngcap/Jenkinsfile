@@ -862,6 +862,13 @@ Get-ChildItem Env:CF_USERNAME
 								}
 
 								runTerraform()
+							}
+						}
+
+						stage('Configure Grafana') {
+								
+							when { expression { "${params.STOP_APPS}" == "false" } }
+							steps {
 
 								dir('src/ngcap/dashboards') {
 
