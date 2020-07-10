@@ -30,6 +30,24 @@ pipeline {
                 stage('Secure Agent') {
                         agent { node ( "${env.NODE_NAME}-work" ) }
                        	stages {
+
+
+				stage('Cleanup Containers') {
+                                        steps {
+                                                powershell '''
+docker kill (docker ps -q)
+docker rm (docker ps -aq) -f
+docker rmi (docker images -q) -f
+docker system prune -f
+docker volume prune -f
+exit 0
+'''
+                                        }
+
+                                }
+
+
+
 				stage('Init Variables File') {
 					steps {
 						withCredentials([usernamePassword(credentialsId: 'CLOUDFOUNDRY', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
