@@ -85,3 +85,17 @@ variable "build_tag" {
   type    = string
   default = "latest"
 }
+variable "TASY_DB_URL" {
+  type    = string
+  default = ""
+}
+
+variable "TASY_DB_USERNAME" {
+  type    = string
+  default = ""
+}
+
+variable "TASY_DB_PASSWORD" {
+  type    = string
+  default = ""
+}
