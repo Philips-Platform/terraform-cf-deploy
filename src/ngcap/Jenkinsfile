@@ -563,7 +563,7 @@ Add-Content -Path env.txt -Value "                `"LOG_PUB_MSG`" : `"true`""
 				
 						stage('Deploy Outbound') {
 
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 								prepTerraForm('outbound') 
@@ -611,7 +611,7 @@ Add-Content -Path env.txt -Value "                `"FHIR_VERSION`" : `"R4`""
 
 						stage('Deploy Outbound Config') {
 
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
