@@ -18,7 +18,7 @@ pipeline {
 		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
 		booleanParam(name:'STOP_APPS',defaultValue: true)
 		booleanParam(name:'TIER_1',defaultValue: false)
-		booleanParam(name:'TIER_2',defaultValue: false)
+		booleanParam(name:'TIER_1',defaultValue: false)
 		booleanParam(name:'PROM_GRAF',defaultValue: true)
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
 		booleanParam(name:'SHORTTOKENS', defaultValue: true)
@@ -387,7 +387,7 @@ Add-Content -Path env.txt -Value "                `"Authentication`" : `"http://
 
 						stage('Deploy Calc Trace') {
 
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 								prepTerraForm('calctrace') 
@@ -431,7 +431,7 @@ Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"tru
 
 						stage('Deploy Calc Config') {
 		
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 								prepTerraForm('calcconfig') 
@@ -474,7 +474,7 @@ Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"tru
 
 						stage('Deploy Dispatcher') {
 
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -519,7 +519,7 @@ Add-Content -Path env.txt -Value "                `"FHIR_VERSION`" : `"R4`""
 
 						stage('Deploy Execution') {
 
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -660,7 +660,7 @@ Add-Content -Path env.txt -Value "                `"METRICS_PROMETHEUS`" : `"tru
 
 						stage('Deploy Scheduler') {
 
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
@@ -756,7 +756,7 @@ Add-Content -Path env.txt -Value "                `"Debug`" : `"true`""
 
 						stage('Deploy SystemConfigUI') {
 
-							when { expression { "${params.TIER_2}" == "true" } }
+							when { expression { "${params.TIER_1}" == "true" } }
 							steps {
 
 
