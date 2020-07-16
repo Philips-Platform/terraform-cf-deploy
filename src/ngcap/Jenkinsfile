@@ -18,7 +18,7 @@ pipeline {
 		string(name:'NGCAP_STARTER_VERSION',defaultValue: "0.2.779")
 		booleanParam(name:'STOP_APPS',defaultValue: true)
 		booleanParam(name:'TIER_1',defaultValue: false)
-		booleanParam(name:'TIER_1',defaultValue: false)
+		booleanParam(name:'TIER_2',defaultValue: false)
 		booleanParam(name:'PROM_GRAF',defaultValue: true)
 		string(name:'TERRAFORM_OP',defaultValue: "apply")
 		booleanParam(name:'SHORTTOKENS', defaultValue: true)
@@ -756,7 +756,7 @@ Add-Content -Path env.txt -Value "                `"Debug`" : `"true`""
 
 						stage('Deploy SystemConfigUI') {
 
-							when { expression { "${params.TIER_1}" == "true" } }
+							when { expression { "${params.TIER_2}" == "true" } }
 							steps {
 
 
