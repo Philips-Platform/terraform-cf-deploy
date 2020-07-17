@@ -2,6 +2,12 @@ data "cloudfoundry_space" "space" {
   name = lower(var.space_name)
   org  = data.cloudfoundry_org.org.id
 }
+data "cloudfoundry_space" "service_spaces" {
+  for_each   =      { for key, value in var.app_services : key => value }
+  name       = lower(each.value.space_name)
+  org        = data.cloudfoundry_org.org.id
+}
+
 data "cloudfoundry_org" "org" {
   name = var.org_name
 }
@@ -12,12 +18,12 @@ data "cloudfoundry_domain" "domain" {
 data "cloudfoundry_service_instance" "service_instance" {
   for_each   = { for key, value in var.app_services : key => value }
   name_or_id = each.key
-  space      = data.cloudfoundry_space.space.id
+  space      = data.cloudfoundry_space.service_spaces[each.key].id
 }
 
 data "cloudfoundry_service_key" "service_instance_key" {
   for_each         = { for key, value in var.app_services : key => value }
-  name             = each.value
+  name             = each.value.service_key
   service_instance = data.cloudfoundry_service_instance.service_instance[each.key].id
 }
 
@@ -43,15 +49,6 @@ resource "cloudfoundry_app" "instance" {
   docker_image = var.app_docker_image
   environment  = var.app_environment
   ports        = toset(var.app_ports)
-
-  dynamic "service_binding" {
-    for_each = [for s in data.cloudfoundry_service_instance.service_instance : {
-      service_instance = s.id
-    }]
-    content {
-      service_instance = service_binding.value.service_instance
-    }
-  }
 
   dynamic "service_binding" {
     for_each = [for s in data.cloudfoundry_user_provided_service.cups_instance : {
