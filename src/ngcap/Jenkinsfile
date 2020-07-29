@@ -1209,6 +1209,8 @@ def generateStarterRun() {
 	echo "MULTITENANT = ${multiTenantVar}"
 	echo "FORCE TRUE = ${forceTrueVar}"
 
+	bat "curl -X DELETE \"http://ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com/api/system-config/admin/snapshot/DropAllTenants\" -H \"accept: application/json\" -H \"Authorization: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbklkIjoiNjU3NDNmMTAtNzI4Ny0xMWVhLWJhZDQtNTNkM2RiM2UwYThiIiwidG9rZW5UeXBlIjoiUmVmcmVzaFRva2VuIiwiY3JlYXRlZEJ5IjoiYWRtaW4iLCJwcm92aWRlciI6Ik5HQ0FQIiwic2VydmljZUlkIjoibmdjYXBzZXJ2aWNlIiwicm9sZSI6WyJuZ2NhcHNlcnZpY2UiXSwiYWNscm9sZSI6Im5nY2Fwc2VydmljZSIsImlhdCI6MTU4NTU3MzY0M30.MLuSxKNrxVCO-1_isfjDBZ7mwGHwJxmxmhDzQoK134G9-wC29fGfra0fGY95xq8mwjshhvTzidoq0-tv2ChJKGZbmkvfItDjYlO9cQgnUstkq3qfuckn0FlUC9G6Sq6lHKXXtP1Pt6ORsqswaygtN5LMBFiB5XHsQxdZwo_AZoBGNrSCRGOnsxG8uYUo3Ggx6AZ0pNku7fUih3Jjea7RIvsSz6KSAFhEzutYIR6Lht2vkLBTkhPTTv6ds90b9Gb7G3279WzLl0ebgXhI6rmlEw_s-wB6fivyCYaI02vyEKtZ63wMT6HLoTmUA_PSYDwqjfYPLZoUImiNgAyJHYDj0g\""
+
  	bat "E:\\cf.exe run-task ngcap-starter \"cd /starter && ${multiTenantVar} ${shortTokensVar} ${forceTrueVar} port=80 host=ngcap-api-%ORG_LOWER%-%SPACE_LOWER%.us-east.philips-healthsuite.com sh -c ./start.sh\" --name run-starter"
 
 
