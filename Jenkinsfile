@@ -28,7 +28,7 @@ def secrets = [
     [path: 'cf/fb56e376-14c1-42bf-961a-3e716e863933/secret/terraform-cloud', secretValues: [
             [envVar: 'TERRAFORM_API_TOKEN', vaultKey: 'api-token']]]
 ]
-node('docker') {
+node('code1_docker') {
     properties([
             parameters
             ([
