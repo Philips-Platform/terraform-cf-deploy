@@ -41,7 +41,8 @@ node('code1_docker') {
                 string(defaultValue: 'patient-registration', description: 'Docker Repo name', name: 'DockerImageRepoName', trim: true),
                 string(defaultValue: 'sandbox5', description: 'CF Space name', name: 'CFSpaceName', trim: true),
                 string(defaultValue: 'pca-acs-cicd-svc', description: 'Comma separated CF Space user list', name: 'CFSpaceUsers', trim: true)
-            ])
+            ]),
+            disableConcurrentBuilds()
         ])
     /* Requires the Docker Pipeline plugin to be installed */
     stage('checkout'){
