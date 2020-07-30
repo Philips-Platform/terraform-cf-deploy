@@ -62,7 +62,7 @@ node('code1_docker') {
             stage('Apps deployment') {
                 withVault([vaultSecrets: secrets]) {
                     try{
-                        def terraform = docker.build("terraform")
+                        def terraform = docker.build("terraform", "--file=./Docker/Dockerfile .")
                         terraform.inside('--entrypoint=""') {
                             dir("${env.WORKSPACE}/src"){
                                 sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
