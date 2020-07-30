@@ -63,7 +63,7 @@ node('code1_docker') {
                 withVault([vaultSecrets: secrets]) {
                     try{
                         def terraform = docker.build("terraform", "--file=./Docker/Dockerfile .")
-                        terraform.inside('--entrypoint=""') {
+                        terraform.inside('--entrypoint="" user=root') {
                             dir("${env.WORKSPACE}/src"){
                                 sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
                                 def pwds = readJSON file: "terraform-input-secret.json"
