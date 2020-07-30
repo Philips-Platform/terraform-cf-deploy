@@ -40,8 +40,10 @@ node('docker') {
                 string(defaultValue: 'patient-registration', description: 'Deployment candidate microservice', name: 'MicroserviceName', trim: true),
                 string(defaultValue: 'patient-registration', description: 'Docker Repo name', name: 'DockerImageRepoName', trim: true),
                 string(defaultValue: 'sandbox5', description: 'CF Space name', name: 'CFSpaceName', trim: true),
-                string(defaultValue: 'pca-acs-cicd-svc', description: 'Comma separated CF Space user list', name: 'CFSpaceUsers', trim: true)
-            ])
+                string(defaultValue: 'pca-acs-cicd-svc', description: 'Comma separated CF Space user list', name: 'CFSpaceUsers', trim: true),
+                string(defaultValue: 'master', description: 'Upstream job branch', name: 'MicroserviceBranchName', trim: true)
+            ]),
+            disableConcurrentBuilds()
         ])
     /* Requires the Docker Pipeline plugin to be installed */
     stage('checkout'){
@@ -54,16 +56,15 @@ node('docker') {
                 echo "${UpstreamJobBuildNumber}"
             }
             stage('download artifacts'){
-                copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/master", selector: specific("${UpstreamJobBuildNumber}")
+                copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/${MicroserviceBranchName}", selector: specific("${UpstreamJobBuildNumber}")
                 unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
             }
             stage('Apps deployment') {
                 withVault([vaultSecrets: secrets]) {
                     try{
-                        docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
+                        def terraform = docker.build("terraform", "--file=./Docker/Dockerfile .")
+                        terraform.inside('--entrypoint=""') {
                             dir("${env.WORKSPACE}/src"){
-                                // add curl, jq and bash
-                                sh 'apk add --update curl jq bash'
                                 sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
                                 def pwds = readJSON file: "terraform-input-secret.json"
                                 withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
@@ -79,7 +80,6 @@ node('docker') {
                                     update_backend_workspace('backend-services.hcl', 'infra')
                                     update_backend_workspace('backend-app.hcl', "$MicroserviceName")
 
-                                    sh './scripts/install-cf-cli.sh'
                                     sh './scripts/cf-login.sh'
                                     sh './scripts/get-cf-users.sh'
                                     
@@ -96,7 +96,7 @@ node('docker') {
                         }
                     }
                     finally{
-                        sh 'sudo chown $USER -R ./src/.terraform'
+                        //sh 'sudo chown $USER -R ./src/.terraform'
                     }
                 }
             }
@@ -107,7 +107,8 @@ node('docker') {
         if ("${MONITORING}" == "true") {
             withVault([vaultSecrets: secrets]) {
                 try{
-                    docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
+                    def terraform = docker.build("terraform", "--file=./Docker/Dockerfile .")
+                    terraform.inside('--entrypoint=""') {
                         dir("${env.WORKSPACE}/src"){
                             // add curl, jq and bash
                             sh 'apk add --update curl jq bash'
@@ -146,7 +147,7 @@ node('docker') {
                     }
                 }
                 finally{
-                    sh 'sudo chown $USER -R ./src/.terraform'
+                    //sh 'sudo chown $USER -R ./src/.terraform'
                 }
             }
         }
