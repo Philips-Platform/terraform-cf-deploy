@@ -40,7 +40,8 @@ node('code1_docker') {
                 string(defaultValue: 'patient-registration', description: 'Deployment candidate microservice', name: 'MicroserviceName', trim: true),
                 string(defaultValue: 'patient-registration', description: 'Docker Repo name', name: 'DockerImageRepoName', trim: true),
                 string(defaultValue: 'sandbox5', description: 'CF Space name', name: 'CFSpaceName', trim: true),
-                string(defaultValue: 'pca-acs-cicd-svc', description: 'Comma separated CF Space user list', name: 'CFSpaceUsers', trim: true)
+                string(defaultValue: 'pca-acs-cicd-svc', description: 'Comma separated CF Space user list', name: 'CFSpaceUsers', trim: true),
+                string(defaultValue: 'master', description: 'Upstream job branch', name: 'MicroserviceBranchName', trim: true)
             ]),
             disableConcurrentBuilds()
         ])
@@ -55,7 +56,7 @@ node('code1_docker') {
                 echo "${UpstreamJobBuildNumber}"
             }
             stage('download artifacts'){
-                copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/master", selector: specific("${UpstreamJobBuildNumber}")
+                copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/${MicroserviceBranchName}", selector: specific("${UpstreamJobBuildNumber}")
                 unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
             }
             stage('Apps deployment') {
