@@ -62,10 +62,9 @@ node('code1_docker') {
             stage('Apps deployment') {
                 withVault([vaultSecrets: secrets]) {
                     try{
-                        docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
+                        def terraform = docker.build("terraform")
+                        terraform.inside('--entrypoint=""') {
                             dir("${env.WORKSPACE}/src"){
-                                // add curl, jq and bash
-                                sh 'apk add --update curl jq bash'
                                 sh "./scripts/store-file.sh terraform-secret.rc terraform-input-secret.json"
                                 def pwds = readJSON file: "terraform-input-secret.json"
                                 withEnv(["TF_CLI_CONFIG_FILE=./terraform-secret.rc",
@@ -98,7 +97,7 @@ node('code1_docker') {
                         }
                     }
                     finally{
-                        sh 'sudo chown $USER -R ./src/.terraform'
+                        //sh 'sudo chown $USER -R ./src/.terraform'
                     }
                 }
             }
