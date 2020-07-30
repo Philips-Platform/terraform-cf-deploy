@@ -28,7 +28,7 @@ def secrets = [
     [path: 'cf/fb56e376-14c1-42bf-961a-3e716e863933/secret/terraform-cloud', secretValues: [
             [envVar: 'TERRAFORM_API_TOKEN', vaultKey: 'api-token']]]
 ]
-node('code1_docker') {
+node('docker') {
     properties([
             parameters
             ([
@@ -54,7 +54,6 @@ node('code1_docker') {
             stage('test'){
                 echo "${APPS}"
                 echo "${UpstreamJobBuildNumber}"
-                echo "${CF_HOME}"
             }
             stage('download artifacts'){
                 copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/${MicroserviceBranchName}", selector: specific("${UpstreamJobBuildNumber}")
@@ -108,7 +107,8 @@ node('code1_docker') {
         if ("${MONITORING}" == "true") {
             withVault([vaultSecrets: secrets]) {
                 try{
-                    docker.image('hashicorp/terraform:latest').inside('--entrypoint="" --user=root') {
+                    def terraform = docker.build("terraform", "--file=./Docker/Dockerfile .")
+                    terraform.inside('--entrypoint=""') {
                         dir("${env.WORKSPACE}/src"){
                             // add curl, jq and bash
                             sh 'apk add --update curl jq bash'
@@ -147,7 +147,7 @@ node('code1_docker') {
                     }
                 }
                 finally{
-                    sh 'sudo chown $USER -R ./src/.terraform'
+                    //sh 'sudo chown $USER -R ./src/.terraform'
                 }
             }
         }
