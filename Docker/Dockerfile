@@ -1,5 +1,7 @@
 FROM hashicorp/terraform:latest
 
+RUN useradd -u 1004 -ms /bin/bash ubuntu
+
 # Install required packages
 RUN apk add --update curl jq bash
 
