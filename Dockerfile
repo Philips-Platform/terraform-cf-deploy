@@ -1,4 +1,4 @@
-FROM terraform:latest
+FROM hashicorp/terraform:latest
 
 # Install required packages
 RUN apk add --update curl jq bash
