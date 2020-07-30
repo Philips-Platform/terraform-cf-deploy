@@ -80,7 +80,6 @@ node('code1_docker') {
                                     update_backend_workspace('backend-services.hcl', 'infra')
                                     update_backend_workspace('backend-app.hcl', "$MicroserviceName")
 
-                                    sh './scripts/install-cf-cli.sh'
                                     sh './scripts/cf-login.sh'
                                     sh './scripts/get-cf-users.sh'
                                     
