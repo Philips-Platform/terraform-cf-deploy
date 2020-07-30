@@ -54,6 +54,7 @@ node('code1_docker') {
             stage('test'){
                 echo "${APPS}"
                 echo "${UpstreamJobBuildNumber}"
+                echo "${CF_HOME}"
             }
             stage('download artifacts'){
                 copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/${MicroserviceBranchName}", selector: specific("${UpstreamJobBuildNumber}")
