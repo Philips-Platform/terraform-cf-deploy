@@ -144,8 +144,6 @@ del CF_ORG
 						deliverContainer("outbound:${params.NGCAP_CS_VERSION}")
 						deliverContainer("scheduler:${params.NGCAP_CS_VERSION}")
 						deliverContainer("calctrace:${params.NGCAP_CS_VERSION}")
-						deliverContainer("location:${params.NGCAP_CS_VERSION}")
-						deliverContainer("locationconfig:${params.NGCAP_CS_VERSION}")
 						deliverContainer("tenantconfig:${params.NGCAP_CS_VERSION}")
 						deliverContainer("rediscachemanagertool:${params.NGCAP_TOOLS_VERSION}")
 						deliverContainer("sysconfigui:${params.NGCAP_JS_VERSION}")
