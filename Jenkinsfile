@@ -41,7 +41,8 @@ node('docker') {
                 string(defaultValue: 'patient-registration', description: 'Docker Repo name', name: 'DockerImageRepoName', trim: true),
                 string(defaultValue: 'sandbox5', description: 'CF Space name', name: 'CFSpaceName', trim: true),
                 string(defaultValue: 'pca-acs-cicd-svc', description: 'Comma separated CF Space user list', name: 'CFSpaceUsers', trim: true),
-                string(defaultValue: 'master', description: 'Upstream job branch', name: 'MicroserviceBranchName', trim: true)
+                string(defaultValue: 'master', description: 'Upstream job branch', name: 'MicroserviceBranchName', trim: true),
+                choice(name: 'DeployTarget', choices: ['dev', 'intg', 'ver'], description: 'Pick deploy target')
             ]),
             disableConcurrentBuilds()
         ])
@@ -56,8 +57,8 @@ node('docker') {
                 echo "${UpstreamJobBuildNumber}"
             }
             stage('download artifacts'){
-                copyArtifacts filter: 'terraform-cf-manifest.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/${MicroserviceBranchName}", selector: specific("${UpstreamJobBuildNumber}")
-                unzip zipFile: './terraform-cf-manifest.zip', dir: 'src'
+                copyArtifacts filter: 'cf-manifests.zip', fingerprintArtifacts: true, projectName: "philips-internal-cci-platform/${MicroserviceName}/${MicroserviceBranchName}", selector: specific("${UpstreamJobBuildNumber}")
+                unzip zipFile: './cf-manifests.zip', dir: 'src'
             }
             stage('Apps deployment') {
                 withVault([vaultSecrets: secrets]) {
@@ -88,7 +89,7 @@ node('docker') {
                                     withEnv(["TF_VAR_CLOUD_FOUNDRY_SPACE_USERS=${sh(returnStdout: true, script: "bash ${env.WORKSPACE}/src/scripts/get-cf-user-guids.sh")}"]){
                                         echo "${TF_VAR_CLOUD_FOUNDRY_SPACE_USERS}"
                                         deploy("./templates/services.json", "./backend-services.hcl", false)
-                                        deploy("./terraform-cf-manifest.json", "./backend-app.hcl")
+                                        deploy("./${DeployTarget}-cf-manifest.json", "./backend-app.hcl")
                                     }
                                 }
                                 sh './scripts/clean-up.sh'
