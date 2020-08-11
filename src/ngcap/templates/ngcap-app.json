@@ -20,9 +20,18 @@
                 #APP_PORTS#
             ],
             "app_services": {
-                "postgres": "postgreskey",
-                "rabbitmq": "rabbitmqkey",
-                "redis": "rediskey"
+                "postgres": {
+			"service_key":"postgreskey",
+			"space_name":"${var.CLOUD_FOUNDRY_SPACE}"
+		},
+                "rabbitmq": {
+			"service_key":"rabbitmqkey",
+			"space_name":"${var.CLOUD_FOUNDRY_SPACE}"
+		},
+                "redis": {
+			"service_key":"rediskey",
+			"space_name":"${var.CLOUD_FOUNDRY_SPACE}"
+		}
             },
             "cups_services": [
                #APP_CUPS# 
